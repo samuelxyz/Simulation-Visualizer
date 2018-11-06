@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2036
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Simulation-Visualizer", "PATH-cpp\PATH-cpp.vcxproj", "{94F9FE1B-ADFE-4BA0-95A2-521958076107}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Simulation-Visualizer", "Simulation-Visualizer\Simulation-Visualizer.vcxproj", "{94F9FE1B-ADFE-4BA0-95A2-521958076107}"
 	ProjectSection(ProjectDependencies) = postProject
 		{6F6451F3-3812-41CC-9040-14CF5032F6C9} = {6F6451F3-3812-41CC-9040-14CF5032F6C9}
 	EndProjectSection

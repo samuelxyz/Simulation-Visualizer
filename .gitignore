@@ -260,3 +260,4 @@ paket-files/
 __pycache__/
 *.pyc
 /PATH-cpp/Dependencies
+/Simulation-Visualizer/Dependencies

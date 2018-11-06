@@ -152,7 +152,6 @@
   <ItemGroup>
     <ClInclude Include="src\entity\Entity.h" />
     <ClInclude Include="src\entity\Box.h" />
-    <ClInclude Include="Dependencies\GLEW\include\GL\glew.h" />
     <ClInclude Include="src\graphics\Definitions.h" />
     <ClInclude Include="src\graphics\IndexBuffer.h" />
     <ClInclude Include="src\graphics\Renderable.h" />
