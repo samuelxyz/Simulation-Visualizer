@@ -1,11 +1,12 @@
 #include "graphics/Window.h"
+#include "graphics/Definitions.h"
 
 #include <cassert>
 #include <iostream>
 
 namespace graphics {
 
-	Window::Window()
+	Window::Initializer::Initializer()
 	{
 		glfwSetErrorCallback(printGLFWError);
 
@@ -20,7 +21,7 @@ namespace graphics {
 
 		/* Create a windowed mode window and its OpenGL context */
 		glfwWindow = glfwCreateWindow(
-			800, 600,
+			graphics::WINDOW_WIDTH, graphics::WINDOW_HEIGHT,
 			"Simulation-Visualizer", nullptr, nullptr);
 
 		if (!glfwWindow)
@@ -60,7 +61,14 @@ namespace graphics {
 
 		glEnable(GL_MULTISAMPLE);
 
+		glEnable(GL_DEPTH_TEST);
+
 		glClearColor(0.2f, 0.4f, 0.3f, 1.0f);
+	}
+
+	Window::Window()
+		: initializer(), glfwWindow(initializer.glfwWindow), renderer()
+	{
 	}
 
 	Window::~Window()
@@ -73,18 +81,25 @@ namespace graphics {
 		return glfwWindowShouldClose(glfwWindow);
 	}
 
-	void Window::render() const
+	void Window::render()
 	{
-		// temporary debug triangle using immediate mode
-		glClear(GL_COLOR_BUFFER_BIT);
-		glBegin(GL_TRIANGLES);
-		glVertex2f(-0.5f, -0.5f);
-		glVertex2f( 0.0f,  0.5f);
-		glVertex2f( 0.5f, -0.5f);
-		glEnd();
+		//// temporary debug triangle using immediate mode
+		//glClear(GL_COLOR_BUFFER_BIT);
+		//glBegin(GL_TRIANGLES);
+		//glVertex2f(-0.5f, -0.5f);
+		//glVertex2f( 0.0f,  0.5f);
+		//glVertex2f( 0.5f, -0.5f);
+		//glEnd();
+
+		renderer.renderAndClearAll();
 	}
 
-	void Window::swapBuffers() const
+	void Window::quickRender(Renderable & renderable)
+	{
+		renderable.render(renderer);
+	}
+
+	void Window::swapBuffers()
 	{
 		glfwSwapBuffers(glfwWindow);
 	}

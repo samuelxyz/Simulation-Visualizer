@@ -9,9 +9,9 @@ int pathTest()
 	int n_nonzeros = 4;
 	int status;
 
-	double z[2];
+	double z[2]{0, 0};
 	double F_on_z[2];
-	double lower_bounds[2]{ 0, 20 };
+	double lower_bounds[2]{0, 0 };
 	double upper_bounds[2]{ 1e20, 1e20 };
 
 	pathMain(n_dimensions, n_nonzeros, &status, z, F_on_z, lower_bounds, upper_bounds);
