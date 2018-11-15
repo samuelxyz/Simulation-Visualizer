@@ -29,11 +29,8 @@ namespace graphics
 		 // -3.0f, 3.0f,
 		 // -2.0f, 2.0f,
 		 // -2.0f, 2.0f);
-	  glm::mat4 viewMatrix = glm::lookAt(glm::vec3(0.0f, 0.0f, -10.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	  glm::mat4 projMatrix = glm::perspective(glm::radians(45.0f), WINDOW_WIDTH/WINDOW_HEIGHT, 0.1f, 100.0f);
 
     shaderProgram.bind();
-    shaderProgram.setUniformMat4f("u_projMatrix", projMatrix * viewMatrix); // @suppress("Invalid arguments")
   }
 
   Renderer::~Renderer()
@@ -52,6 +49,11 @@ namespace graphics
     ib.bind();
     sp.bind();
     glDrawElements(mode, ib.getNumIndices(), GL_UNSIGNED_INT, nullptr);
+  }
+
+  void Renderer::updateCamera(glm::mat4 VPMatrix)
+  {
+	  shaderProgram.setUniformMat4f("u_VPMatrix", VPMatrix);
   }
 
   void Renderer::renderAndClearAll()

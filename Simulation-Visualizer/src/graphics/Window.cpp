@@ -21,7 +21,7 @@ namespace graphics {
 
 		/* Create a windowed mode window and its OpenGL context */
 		glfwWindow = glfwCreateWindow(
-			graphics::WINDOW_WIDTH, graphics::WINDOW_HEIGHT,
+			static_cast<int>(graphics::WINDOW_WIDTH), static_cast<int>(graphics::WINDOW_HEIGHT),
 			"Simulation-Visualizer", nullptr, nullptr);
 
 		if (!glfwWindow)
@@ -30,10 +30,10 @@ namespace graphics {
 			assert(false && "GLFW window creation failed");
 		}
 
-		glfwSetWindowUserPointer(glfwWindow, this);
-
 		glfwSetKeyCallback(glfwWindow, handleKey);
+		glfwSetCursorPosCallback(glfwWindow, handleMouseMotion);
 		glfwSetMouseButtonCallback(glfwWindow, handleMouseButton);
+		glfwSetScrollCallback(glfwWindow, handleScroll);
 
 		glfwSetWindowPos(glfwWindow, 50, 50);
 		glfwShowWindow(glfwWindow);
@@ -67,8 +67,13 @@ namespace graphics {
 	}
 
 	Window::Window()
-		: initializer(), glfwWindow(initializer.glfwWindow), renderer()
+		: initialized(false), initializer(), glfwWindow(initializer.glfwWindow), renderer(),
+		//camera(glm::vec3(-10.0f, 0.0f, 0.0f), glm::angleAxis(0.0f, glm::vec3(1.0f, 0.0f, 0.0f))),
+		camera(glm::vec3(-5.0f, 10.0f, -2.0f), -1.2f, 0.16f),
+		mouseTracker { 0.0f, 0.0f, false }
 	{
+		glfwSetWindowUserPointer(glfwWindow, this);
+		initialized = true;
 	}
 
 	Window::~Window()
@@ -79,6 +84,12 @@ namespace graphics {
 	bool Window::shouldClose() const
 	{
 		return glfwWindowShouldClose(glfwWindow);
+	}
+
+	void Window::update()
+	{
+		camera.pollKeys(glfwWindow);
+		renderer.updateCamera(camera.getVPMatrix());
 	}
 
 	void Window::render()
@@ -94,9 +105,24 @@ namespace graphics {
 		renderer.renderAndClearAll();
 	}
 
-	void Window::quickRender(Renderable & renderable)
+	void Window::directRender(Renderable & renderable)
 	{
 		renderable.render(renderer);
+	}
+
+	void Window::directRender(const graphics::Triangle & tri)
+	{
+		renderer.submit(tri);
+	}
+
+	void Window::directRender(const graphics::Quad & quad)
+	{
+		renderer.submit(quad);
+	}
+
+	void Window::directRender(const graphics::CenteredPoly & cp)
+	{
+		renderer.submit(cp);
 	}
 
 	void Window::swapBuffers()
@@ -106,7 +132,7 @@ namespace graphics {
 
 	void Window::printGLFWError(int error, const char* description)
 	{
-		std::cerr << "[GLFW Error]" << description << std::endl;
+		std::cerr << "[GLFW Error] " << description << std::endl;
 	}
 
 	void APIENTRY Window::printGLDebug(GLenum source,
@@ -116,23 +142,69 @@ namespace graphics {
 		std::cout << "[GL] " << message << std::endl;
 	}
 
-	void Window::handleKey(GLFWwindow*, int key, int scancode, int action,
+	void Window::handleKey(GLFWwindow* glfwWindow, int key, int scancode, int action,
 		int mods)
 	{
-		if (action == GLFW_PRESS)
-			std::cout << "Key pressed! " << "(" << key << ")" << std::endl;
-		else if (action == GLFW_REPEAT)
-			std::cout << "Key repeated! " << "(" << key << ")" << std::endl;
-		else if (action == GLFW_RELEASE)
-			std::cout << "Key released! " << "(" << key << ")" << std::endl;
+		Window* window = getWindow(glfwWindow);
+		//if (window != nullptr && window->initialized)
+		//	window->camera.handleKey(key, action);
+	}
+
+	void Window::handleMouseMotion(GLFWwindow* glfwWindow, double xpos, double ypos)
+	{
+		Window* window = getWindow(glfwWindow);
+
+		if (window != nullptr && window->initialized && window->mouseTracker.dragging && 
+			glfwGetMouseButton(glfwWindow, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+		{
+
+			float x = static_cast<float>(xpos);
+			float y = graphics::WINDOW_HEIGHT - static_cast<float>(ypos);
+
+			float dx = x - window->mouseTracker.prevX;
+			float dy = y - window->mouseTracker.prevY;
+
+			//std::cout << "dx: " << dx << ", dy: " << dy << std::endl;
+
+			window->camera.handleMouseMotion(dx, dy);
+
+			window->mouseTracker.prevX = x;
+			window->mouseTracker.prevY = y;
+		}
 	}
 
 	void Window::handleMouseButton(GLFWwindow* glfwWindow, int button, int action,
 		int mods)
 	{
-		Window* window = getWindow(glfwWindow);
+		if (button == GLFW_MOUSE_BUTTON_LEFT)
+		{
+			Window* window = getWindow(glfwWindow);
 
-		// TODO
+			if (window == nullptr || !(window->initialized))
+				return;
+
+			if (action == GLFW_PRESS)
+			{
+				double xd, yd;
+				glfwGetCursorPos(glfwWindow, &xd, &yd);
+				window->mouseTracker.prevY = graphics::WINDOW_HEIGHT - static_cast<float>(yd);
+				window->mouseTracker.prevX = static_cast<float>(xd);
+
+				//std::cout << "Left mouse click detected" << std::endl;
+				window->mouseTracker.dragging = true;
+			}
+			else // action == GLFW_RELEASE
+			{
+				window->mouseTracker.dragging = false;
+			}
+		}
+	}
+
+	void Window::handleScroll(GLFWwindow* glfwWindow, double xoffset, double yoffset)
+	{
+		Window* window = getWindow(glfwWindow);
+		if (window != nullptr && window->initialized)
+			window->camera.handleScroll(static_cast<float>(yoffset));
 	}
 
 	Window* Window::getWindow(GLFWwindow* glfwWindow)

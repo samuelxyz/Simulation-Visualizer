@@ -78,7 +78,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)Dependencies\pathlib\include\;$(SolutionDir)GLFW\include\;$(ProjectDir)Dependencies\glm\;$(ProjectDir)Dependencies\GLEW\include\;$(ProjectDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_STATIC;GLM_ENABLE_EXPERIMENTAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -133,6 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\graphics\Camera.cpp" />
     <ClCompile Include="src\entity\Entity.cpp" />
     <ClCompile Include="src\entity\Box.cpp" />
     <ClCompile Include="src\graphics\IndexBuffer.cpp" />
@@ -150,6 +151,8 @@
     <ClCompile Include="src\math\Vec3.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\graphics\Camera.h" />
+    <ClInclude Include="src\core\Definitions.h" />
     <ClInclude Include="src\entity\Entity.h" />
     <ClInclude Include="src\entity\Box.h" />
     <ClInclude Include="src\graphics\Definitions.h" />

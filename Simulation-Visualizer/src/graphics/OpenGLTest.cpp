@@ -9,11 +9,6 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "../graphics/IndexBuffer.h"
-#include "../graphics/Renderer.h"
-#include "../graphics/ShaderProgram.h"
-#include "../graphics/VertexArray.h"
-#include "../graphics/VertexBuffer.h"
 #include "../graphics/Window.h"
 
 void renderBasic()

@@ -1,4 +1,5 @@
-#include "Entity.h"
+#include "Entity.h" 
+#include "core/Definitions.h"
 
 namespace entity {
 
@@ -17,14 +18,20 @@ namespace entity {
 
 	glm::vec3 Entity::toWorldFrame(glm::vec3 localVec) const
 	{
-		glm::mat3 R = glm::mat3_cast(orientation);
-		return R * localVec + position;
+		//return glm::rotate(orientation, localVec) + position;
+		return glm::toMat3(orientation) * localVec + position;
 	}
 
 	void Entity::update()
 	{
-		position += velocity;
-		orientation = glm::normalize(angVelocity * orientation);
+		//velocity += glm::vec3(0.0f, -core::GRAVITY * core::TIME_STEP, 0.0f);
+		position += velocity * core::TIME_STEP;
+		orientation = glm::normalize(
+			glm::angleAxis(
+				glm::angle(angVelocity) * core::TIME_STEP, 
+				glm::axis(angVelocity)
+			) * orientation
+		);
 
 	}
 

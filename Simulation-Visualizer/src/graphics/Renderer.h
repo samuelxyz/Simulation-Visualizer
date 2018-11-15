@@ -31,6 +31,8 @@ namespace graphics
       static void draw(GLenum mode, const VertexArray& va,
           const IndexBuffer& ib, const ShaderProgram& sp);
 
+	  void updateCamera(glm::mat4 VPMatrix);
+
       void renderAndClearAll();
 
       void submit(const graphics::Triangle&);

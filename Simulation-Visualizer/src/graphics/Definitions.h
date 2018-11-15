@@ -8,7 +8,7 @@
 
 namespace graphics {
 
-	static float WINDOW_WIDTH = 1200.0f,
+	static const float WINDOW_WIDTH = 1200.0f,
 		WINDOW_HEIGHT = 800.0f;
 
 	struct ColoredVertex
@@ -19,5 +19,5 @@ namespace graphics {
 
 	typedef std::array<ColoredVertex, 3> Triangle;
 	typedef std::array<ColoredVertex, 4> Quad;
-	typedef std::vector<ColoredVertex> CenteredPoly;
+	typedef std::vector<ColoredVertex> CenteredPoly; // first vertex is center
 }

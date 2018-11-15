@@ -2,26 +2,6 @@
 
 namespace entity {
 
-	Box::Box()
-		: Box(glm::vec3(0.0f), glm::angleAxis(0.0f, glm::vec3(1.0f, 0.0f, 0.0f)))
-	{
-	}
-
-	Box::Box(glm::vec3 position, glm::quat orientation)
-		: Box(position, orientation, glm::vec3(0.0f), glm::angleAxis(0.0f, glm::vec3(1.0f, 0.0f, 0.0f)))
-	{
-	}
-
-	Box::Box(glm::vec3 position, glm::quat orientation, glm::vec3 velocity, glm::quat angVel)
-		: Box(position, orientation, velocity, angVel, 1.0f, glm::mat3(1.0f))
-	{
-	}
-
-	Box::Box(glm::vec3 position, glm::quat orientation, glm::vec3 velocity, glm::quat angVel, float mass, glm::mat3 rotInertia)
-		: Box(position, orientation, velocity, angVel, mass, rotInertia, -1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f)
-	{
-	}
-
 	Box::Box(glm::vec3 position, glm::quat orientation, glm::vec3 velocity, glm::quat angVel,
 		float mass, glm::mat3 rotInertia,
 		float xMin, float xMax, float yMin, float yMax, float zMin, float zMax)
@@ -48,12 +28,12 @@ namespace entity {
 			toWorldFrame(glm::vec3{ xMax, yMax, zMax }), // 7
 		};
 
-		glm::vec4 white { 1.0f, 1.0f, 1.0f, 1.0f },
-			red		{ 1.0f, 0.0f, 0.0f, 1.0f },
-			green	{ 0.0f, 1.0f, 0.0f, 1.0f },
-			blue	{ 0.0f, 0.0f, 1.0f, 1.0f },
-			yellow	{ 1.0f, 1.0f, 0.0f, 1.0f },
-			black	{ 0.0f, 0.0f, 0.0f, 1.0f };
+		glm::vec4 white { 1.0f, 1.0f, 1.0f, 1.0f }, // -x
+			red		{ 1.0f, 0.0f, 0.0f, 1.0f }, // +x
+			green	{ 0.0f, 1.0f, 0.0f, 1.0f }, // -y
+			blue	{ 0.0f, 0.0f, 1.0f, 1.0f }, // +y
+			yellow	{ 1.0f, 1.0f, 0.0f, 1.0f }, // -z
+			black	{ 0.0f, 0.0f, 0.0f, 1.0f }; // +z
 
 		graphics::Quad sides[]
 		{
