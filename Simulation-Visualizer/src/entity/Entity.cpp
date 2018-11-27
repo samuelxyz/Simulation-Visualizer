@@ -16,6 +16,11 @@ namespace entity {
 	{
 	}
 
+	glm::vec3 Entity::toLocalFrame(glm::vec3 worldVec) const
+	{
+		return glm::inverse(glm::toMat3(orientation)) * (worldVec - position);
+	}
+
 	glm::vec3 Entity::toWorldFrame(glm::vec3 localVec) const
 	{
 		//return glm::rotate(orientation, localVec) + position;
@@ -33,6 +38,25 @@ namespace entity {
 			) * orientation
 		);
 
+	}
+
+	void Entity::applyLinearImpulse(glm::vec3 impulse)
+	{
+		velocity += impulse/mass;
+	}
+
+	void Entity::applyAngularImpulse(glm::vec3 impulse)
+	{
+		glm::vec3 delta_omega = toWorldFrame(glm::inverse(rotInertia) * toLocalFrame(impulse));
+		float angle = static_cast<float>(delta_omega.length());
+
+		angVelocity = glm::angleAxis(angle, delta_omega) * angVelocity;
+	}
+
+	void Entity::applyWrenchImpulse(glm::vec3 worldPos, glm::vec3 impulse)
+	{
+		applyLinearImpulse(impulse);
+		applyAngularImpulse(glm::cross(worldPos - position, impulse));
 	}
 
 }
