@@ -13,7 +13,7 @@ int window()
 	graphics::Window window;
 
 	entity::Box box(glm::vec3(0.0f), glm::angleAxis(0.0f, glm::vec3(1.0f, 0.0f, 0.0f)), 
-					glm::vec3(0.0f), glm::angleAxis(0.1f, glm::vec3(1.0f, 1.0f, 1.0f)));
+					glm::vec3(0.0f), glm::angleAxis(0.0f, glm::vec3(1.0f, 1.0f, 1.0f)));
 
 	glm::vec4 colorWhite(1.0f);
 	glm::vec4 colorGray(0.8f, 0.8f, 0.8f, 1.0f);
@@ -26,11 +26,16 @@ int window()
 
 	while (!window.shouldClose())
 	{
+		window.startGUI();
+
+		// simulation stuff
 		box.update();
 		window.directRender(box);
 		window.directRender(floor);
+
 		window.update();
 		window.render();
+
 		window.swapBuffers();
 		glfwPollEvents();
 	}

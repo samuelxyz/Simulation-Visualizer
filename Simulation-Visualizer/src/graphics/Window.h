@@ -15,6 +15,7 @@ namespace graphics {
 		virtual ~Window();
 
 		bool shouldClose() const;
+		void startGUI();
 		void update();
 		void render();
 		void directRender(Renderable& renderable);

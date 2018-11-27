@@ -1,3 +1,5 @@
+#include <imgui/imgui.h>
+
 #include "graphics/Camera.h"
 #include "graphics/Definitions.h"
 #include <iostream>
@@ -17,7 +19,7 @@ namespace graphics {
 	//}
 
 	Camera::Camera(glm::vec3 position, float pitch, float yaw)
-		: position(position), pitch(pitch), yaw(yaw), fov(45.0f)
+		: position(position), pitch(pitch), yaw(yaw), fov(glm::radians(45.0f))
 	{
 	}
 
@@ -29,6 +31,17 @@ namespace graphics {
 		glm::mat4 view = glm::lookAt(position, position + lookVec, glm::vec3(0.0f, 1.0f, 0.0f));
 		
 		return projection * view;
+	}
+
+	void Camera::renderGUI()
+	{
+		ImGui::Begin("Camera");
+
+		ImGui::Text("Position: (%.3f, %.3f, %.3f)", position.x, position.y, position.z);
+		ImGui::Text("Pitch: %.3f, Yaw: %.3f", pitch, yaw);
+		ImGui::SliderFloat("FOV", &fov, fovMin, fovMax);
+
+		ImGui::End();
 	}
 
 	void Camera::pollKeys(GLFWwindow* window)
@@ -102,7 +115,7 @@ namespace graphics {
 
 	void Camera::handleMouseMotion(float xoffset, float yoffset, bool constrainPitch)
 	{
-		float sensitivity = mouseSensitivity * (fov*fov)/2025.0f;
+		float sensitivity = mouseSensitivity * (fov / core::QUARTER_PI);
 
 		xoffset *= sensitivity /* * std::cos(pitch) */; // at high pitches it's less sensitive
 		yoffset *= sensitivity;
@@ -150,8 +163,12 @@ namespace graphics {
 
 	void Camera::handleScroll(float yoffset)
 	{
-		if (fov >= 1.0f && fov <= 89.0f)
-			fov -= scrollSensitivity * yoffset;
+		fov -= scrollSensitivity * yoffset;
+
+		if (fov < fovMin)
+			fov = fovMin;
+		if (fov > fovMax)
+			fov = fovMax;
 	}
 
 	//glm::quat Camera::lookAt(glm::vec3 camPos, glm::vec3 target)

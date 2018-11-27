@@ -1,6 +1,10 @@
 #include "graphics/Window.h"
 #include "graphics/Definitions.h"
 
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_opengl3.h>
+
 #include <cassert>
 #include <iostream>
 
@@ -73,11 +77,29 @@ namespace graphics {
 		mouseTracker { 0.0f, 0.0f, false }
 	{
 		glfwSetWindowUserPointer(glfwWindow, this);
+
+		// Setup Dear ImGui context
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+
+		// Setup Platform/Renderer bindings
+		ImGui_ImplGlfw_InitForOpenGL(glfwWindow, true);
+		ImGui_ImplOpenGL3_Init();
+
+		// Setup Style
+		ImGui::StyleColorsDark();
+		//ImGui::StyleColorsClassic();
+
 		initialized = true;
 	}
 
 	Window::~Window()
 	{
+		ImGui_ImplOpenGL3_Shutdown();
+		ImGui_ImplGlfw_Shutdown();
+		ImGui::DestroyContext();
+
+		glfwDestroyWindow(glfwWindow);
 		glfwTerminate();
 	}
 
@@ -86,10 +108,19 @@ namespace graphics {
 		return glfwWindowShouldClose(glfwWindow);
 	}
 
+	void Window::startGUI()
+	{
+		// Dear ImGui frame
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+	}
+
 	void Window::update()
 	{
 		camera.pollKeys(glfwWindow);
 		renderer.updateCamera(camera.getVPMatrix());
+		camera.renderGUI();
 	}
 
 	void Window::render()
@@ -103,6 +134,9 @@ namespace graphics {
 		//glEnd();
 
 		renderer.renderAndClearAll();
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}
 
 	void Window::directRender(Renderable & renderable)
@@ -145,6 +179,9 @@ namespace graphics {
 	void Window::handleKey(GLFWwindow* glfwWindow, int key, int scancode, int action,
 		int mods)
 	{
+		if (ImGui::GetIO().WantCaptureKeyboard)
+			return;
+
 		Window* window = getWindow(glfwWindow);
 		//if (window != nullptr && window->initialized)
 		//	window->camera.handleKey(key, action);
@@ -152,6 +189,9 @@ namespace graphics {
 
 	void Window::handleMouseMotion(GLFWwindow* glfwWindow, double xpos, double ypos)
 	{
+		if (ImGui::GetIO().WantCaptureMouse)
+			return;
+
 		Window* window = getWindow(glfwWindow);
 
 		if (window != nullptr && window->initialized && window->mouseTracker.dragging && 
@@ -176,6 +216,9 @@ namespace graphics {
 	void Window::handleMouseButton(GLFWwindow* glfwWindow, int button, int action,
 		int mods)
 	{
+		if (ImGui::GetIO().WantCaptureMouse)
+			return;
+
 		if (button == GLFW_MOUSE_BUTTON_LEFT)
 		{
 			Window* window = getWindow(glfwWindow);
@@ -202,6 +245,9 @@ namespace graphics {
 
 	void Window::handleScroll(GLFWwindow* glfwWindow, double xoffset, double yoffset)
 	{
+		if (ImGui::GetIO().WantCaptureMouse)
+			return;
+
 		Window* window = getWindow(glfwWindow);
 		if (window != nullptr && window->initialized)
 			window->camera.handleScroll(static_cast<float>(yoffset));

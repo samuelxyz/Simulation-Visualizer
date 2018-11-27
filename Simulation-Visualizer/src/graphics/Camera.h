@@ -13,14 +13,16 @@ namespace graphics {
 		// Camera Attributes
 		glm::vec3 position;
 		float pitch, yaw; // radians, yaw is from +x toward -z (counterclockwise for player)
-		float fov; // degrees
+		float fov; // also radians
 
 		// Camera options
-		static constexpr float 
-			movementSpeed		= 0.1f,
-			mouseSensitivity	= 1e-3f,
-			scrollSensitivity	= 0.1f,
-			ctrlSpeedModifier	= 3.0f;
+		static constexpr float
+			movementSpeed = 0.1f,
+			mouseSensitivity = 1e-3f,
+			scrollSensitivity = 0.1f,
+			ctrlSpeedModifier = 3.0f,
+			fovMin = 1.0f * core::PI/180.0f,
+			fovMax = 89.0f * core::PI/180.0f;
 	
 
 	public:
@@ -29,6 +31,8 @@ namespace graphics {
 		//Camera(glm::vec3 position, glm::vec3 target);
 
 		glm::mat4 getVPMatrix();
+
+		void renderGUI();
 
 		void pollKeys(GLFWwindow* window);
 		void handleKey(int key, int action);
