@@ -12,7 +12,8 @@ int window()
 
 	graphics::Window window;
 
-	entity::Box box(glm::vec3(0.0f), glm::angleAxis(0.0f, glm::vec3(1.0f, 0.0f, 0.0f)), 
+	entity::Box box("Box1",
+					glm::vec3(0.0f), glm::angleAxis(0.0f, glm::vec3(1.0f, 0.0f, 0.0f)), 
 					glm::vec3(0.0f), glm::angleAxis(0.0f, glm::vec3(1.0f, 1.0f, 1.0f)));
 
 	glm::vec4 colorWhite(1.0f);
@@ -30,6 +31,7 @@ int window()
 
 		// simulation stuff
 		box.update();
+		box.renderGUI();
 		window.directRender(box);
 		window.directRender(floor);
 

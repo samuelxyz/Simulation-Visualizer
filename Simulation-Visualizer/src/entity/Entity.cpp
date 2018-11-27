@@ -1,14 +1,16 @@
+#include <imgui/imgui.h>
+
 #include "Entity.h" 
 #include "core/Definitions.h"
 
 namespace entity {
 
-	Entity::Entity(glm::vec3 position, glm::quat orientation,
+	Entity::Entity(std::string entityName, glm::vec3 position, glm::quat orientation,
 		glm::vec3 velocity, glm::quat angVel,
-		float mass, glm::mat3 rotInertia)
-		: position(position), orientation(orientation),
+		float mass, glm::mat3 rotInertia, std::string typeName)
+		: entityName(entityName), position(position), orientation(orientation),
 		velocity(velocity), angVelocity(angVel),
-		mass(mass), rotInertia(rotInertia)
+		mass(mass), rotInertia(rotInertia), typeName(typeName)
 	{
 	}
 
@@ -25,6 +27,17 @@ namespace entity {
 	{
 		//return glm::rotate(orientation, localVec) + position;
 		return glm::toMat3(orientation) * localVec + position;
+	}
+
+	void Entity::renderGUI()
+	{
+		ImGui::Begin((typeName + ": " + entityName).c_str());
+
+		ImGui::Text("Mass: %.3f kg", mass);
+		ImGui::Text("Position: (%.3f, %.3f, %.3f)", position.x, position.y, position.z);
+		ImGui::Text("Velocity: (%.3f, %.3f, %.3f)", velocity.x, velocity.y, velocity.z);
+
+		ImGui::End();
 	}
 
 	void Entity::update()

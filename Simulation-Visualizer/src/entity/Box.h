@@ -7,7 +7,8 @@ namespace entity {
 	class Box : public Entity
 	{
 	public:
-		Box(glm::vec3 position = glm::vec3(0.0f), glm::quat orientation = glm::angleAxis(0.0f, glm::vec3(1.0f, 0.0f, 0.0f)), 
+		Box(std::string entityName, 
+			glm::vec3 position = glm::vec3(0.0f), glm::quat orientation = glm::angleAxis(0.0f, glm::vec3(1.0f, 0.0f, 0.0f)),
 			glm::vec3 velocity = glm::vec3(0.0f), glm::quat angVel = glm::angleAxis(0.0f, glm::vec3(1.0f, 0.0f, 0.0f)), 
 			float mass = 1.0f, glm::mat3 rotInertia = glm::mat3(1.0f),
 			float xMin = -1.0f, float xMax = 1.0f, float yMin = -1.0f, float yMax = 1.0f, float zMin = -1.0f, float zMax = 1.0f);
