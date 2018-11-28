@@ -139,6 +139,7 @@
     <ClCompile Include="Dependencies\imgui\imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="Dependencies\imgui\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="Dependencies\imgui\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="src\core\Simulation.cpp" />
     <ClCompile Include="src\graphics\Camera.cpp" />
     <ClCompile Include="src\entity\Entity.cpp" />
     <ClCompile Include="src\entity\Box.cpp" />
@@ -165,6 +166,7 @@
     <ClInclude Include="Dependencies\imgui\imgui\imstb_rectpack.h" />
     <ClInclude Include="Dependencies\imgui\imgui\imstb_textedit.h" />
     <ClInclude Include="Dependencies\imgui\imgui\imstb_truetype.h" />
+    <ClInclude Include="src\core\Simulation.h" />
     <ClInclude Include="src\graphics\Camera.h" />
     <ClInclude Include="src\core\Definitions.h" />
     <ClInclude Include="src\entity\Entity.h" />

@@ -10,7 +10,8 @@ namespace entity {
 		float mass, glm::mat3 rotInertia, std::string typeName)
 		: entityName(entityName), position(position), orientation(orientation),
 		velocity(velocity), angVelocity(angVel),
-		mass(mass), rotInertia(rotInertia), typeName(typeName)
+		mass(mass), rotInertia(rotInertia), typeName(typeName),
+		showGUI(false)
 	{
 	}
 
@@ -40,9 +41,11 @@ namespace entity {
 		ImGui::End();
 	}
 
-	void Entity::update()
+	void Entity::update(core::Simulation::Parameters& parameters)
 	{
-		//velocity += glm::vec3(0.0f, -core::GRAVITY * core::TIME_STEP, 0.0f);
+		if (parameters.gravityEnabled)
+			velocity += glm::vec3(0.0f, -core::GRAVITY * core::TIME_STEP, 0.0f);
+
 		position += velocity * core::TIME_STEP;
 		orientation = glm::normalize(
 			glm::angleAxis(

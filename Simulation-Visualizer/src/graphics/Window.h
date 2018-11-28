@@ -2,6 +2,7 @@
 
 #include <GL/glew.h>
 
+#include "core/Simulation.h"
 #include "graphics/Renderable.h"
 #include "graphics/Camera.h"
 
@@ -14,14 +15,20 @@ namespace graphics {
 		Window();
 		virtual ~Window();
 
+		void setSimulation(core::Simulation*);
+
 		bool shouldClose() const;
+
 		void startGUI();
 		void update();
 		void render();
+		void renderGUI();
+
 		void directRender(Renderable& renderable);
 		void directRender(const graphics::Triangle& tri);
 		void directRender(const graphics::Quad& quad);
 		void directRender(const graphics::CenteredPoly& cp);
+
 		void swapBuffers();
 
 		static void printGLFWError(int error, const char* description);
@@ -45,6 +52,7 @@ namespace graphics {
 		GLFWwindow* glfwWindow;
 		Renderer renderer;
 		Camera camera;
+		core::Simulation* simulation;
 
 		struct MouseTracker
 		{

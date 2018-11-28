@@ -74,6 +74,7 @@ namespace graphics {
 		: initialized(false), initializer(), glfwWindow(initializer.glfwWindow), renderer(),
 		//camera(glm::vec3(-10.0f, 0.0f, 0.0f), glm::angleAxis(0.0f, glm::vec3(1.0f, 0.0f, 0.0f))),
 		camera(glm::vec3(-5.0f, 10.0f, -2.0f), -1.2f, 0.16f),
+		simulation(nullptr),
 		mouseTracker { 0.0f, 0.0f, false }
 	{
 		glfwSetWindowUserPointer(glfwWindow, this);
@@ -103,6 +104,11 @@ namespace graphics {
 		glfwTerminate();
 	}
 
+	void Window::setSimulation(core::Simulation* sim)
+	{
+		simulation = sim;
+	}
+
 	bool Window::shouldClose() const
 	{
 		return glfwWindowShouldClose(glfwWindow);
@@ -119,6 +125,8 @@ namespace graphics {
 	void Window::update()
 	{
 		camera.pollKeys(glfwWindow);
+		if (simulation != nullptr)
+			simulation->update();
 		renderer.updateCamera(camera.getVPMatrix());
 		camera.renderGUI();
 	}
@@ -132,9 +140,15 @@ namespace graphics {
 		//glVertex2f( 0.0f,  0.5f);
 		//glVertex2f( 0.5f, -0.5f);
 		//glEnd();
-
+		if (simulation != nullptr)
+			simulation->render(renderer);
 		renderer.renderAndClearAll();
+	}
 
+	void Window::renderGUI()
+	{
+		if (simulation != nullptr)
+			simulation->renderGUI();
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}

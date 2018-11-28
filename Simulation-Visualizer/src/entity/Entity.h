@@ -3,6 +3,7 @@
 #include <glm/gtx/quaternion.hpp>
 
 #include "graphics/Renderable.h"
+#include "core/Simulation.h"
 
 #include <string>
 
@@ -22,12 +23,17 @@ namespace entity {
 
 		virtual void render(graphics::Renderer& renderer) const = 0;
 		virtual void renderGUI();
-		virtual void update();
+		virtual void update(core::Simulation::Parameters&);
+
+		std::string getName() const { return entityName; }
 
 		// world frame
 		void applyLinearImpulse(glm::vec3);
 		void applyAngularImpulse(glm::vec3);
 		void applyWrenchImpulse(glm::vec3 worldPos, glm::vec3 impulse);
+
+	public:
+		mutable bool showGUI;
 
 	private:
 		std::string typeName;
