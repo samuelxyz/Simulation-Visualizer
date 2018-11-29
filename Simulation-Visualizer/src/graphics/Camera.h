@@ -1,7 +1,6 @@
 #pragma once
 
 #include <glm/gtx/quaternion.hpp>
-#include <GLFW/glfw3.h>
 
 #include "core/Definitions.h"
 

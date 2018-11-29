@@ -8,8 +8,6 @@
 #ifndef INDEXBUFFER_H_
 #define INDEXBUFFER_H_
 
-#include <GL/glew.h>
-
 namespace graphics
 {
 

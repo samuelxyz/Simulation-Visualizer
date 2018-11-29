@@ -1,7 +1,5 @@
 #pragma once
 
-#include <GL/glew.h>
-
 #include "core/Simulation.h"
 #include "graphics/Renderable.h"
 #include "graphics/Camera.h"

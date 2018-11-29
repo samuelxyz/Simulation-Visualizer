@@ -8,7 +8,6 @@
 #ifndef RENDERER_H_
 #define RENDERER_H_
 
-#include <GL/glew.h>
 #include "graphics/ShaderProgram.h"
 #include "graphics/TriangleBatch.h"
 

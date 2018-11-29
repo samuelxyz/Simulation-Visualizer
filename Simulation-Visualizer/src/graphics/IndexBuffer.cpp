@@ -5,6 +5,7 @@
  *      Author: Samuel Tan
  */
 
+#include <GL/glew.h>
 #include "../graphics/IndexBuffer.h"
 
 namespace graphics
