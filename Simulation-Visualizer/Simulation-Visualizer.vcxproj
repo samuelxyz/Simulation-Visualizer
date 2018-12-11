@@ -229,6 +229,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\graphics\content\GUIOverlay.cpp" />
     <ClCompile Include="src\core\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -267,6 +268,8 @@
       </ForcedIncludeFiles>
     </ClCompile>
     <ClCompile Include="src\math\Vec3.cpp" />
+    <ClCompile Include="src\graphics\content\VisualBox.cpp" />
+    <ClCompile Include="src\graphics\content\VisualEntity.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Dependencies\imgui\imgui\imconfig.h" />
@@ -277,6 +280,7 @@
     <ClInclude Include="Dependencies\imgui\imgui\imstb_rectpack.h" />
     <ClInclude Include="Dependencies\imgui\imgui\imstb_textedit.h" />
     <ClInclude Include="Dependencies\imgui\imgui\imstb_truetype.h" />
+    <ClInclude Include="src\graphics\content\GUIOverlay.h" />
     <ClInclude Include="src\core\stdafx.h" />
     <ClInclude Include="src\core\Simulation.h" />
     <ClInclude Include="src\graphics\Camera.h" />
@@ -294,6 +298,8 @@
     <ClInclude Include="src\graphics\Window.h" />
     <ClInclude Include="src\math\Vec2.h" />
     <ClInclude Include="src\math\Vec3.h" />
+    <ClInclude Include="src\graphics\content\VisualBox.h" />
+    <ClInclude Include="src\graphics\content\VisualEntity.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

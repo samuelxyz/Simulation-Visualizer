@@ -1,7 +1,12 @@
+#include "core/stdafx.h"
+
 #include <imgui/imgui.h>
+
+#include "GLFW/glfw3.h"
 
 #include "graphics/Camera.h"
 #include "graphics/Definitions.h"
+
 #include <iostream>
 
 namespace graphics {
@@ -19,18 +24,27 @@ namespace graphics {
 	//}
 
 	Camera::Camera(glm::vec3 position, float pitch, float yaw)
-		: position(position), pitch(pitch), yaw(yaw), fov(glm::radians(45.0f))
+		: position(position), pitch(pitch), yaw(yaw), fov(glm::radians(45.0f)),
+		showAxes(false)
 	{
 	}
 
-	glm::mat4 Camera::getVPMatrix()
+	glm::mat4 Camera::getVPMatrix() const
 	{
 		glm::mat4 projection = glm::perspective(fov, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1f, 100.0f);
-		//glm::vec3 lookVec = glm::toMat3(orientation) * glm::vec3(1.0f, 0.0f, 0.0f);
-		glm::vec3 lookVec(std::cos(yaw)*std::cos(pitch), std::sin(pitch), -std::sin(yaw)*std::cos(pitch));
-		glm::mat4 view = glm::lookAt(position, position + lookVec, glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 view = glm::lookAt(position, position + getLookVec(), glm::vec3(0.0f, 1.0f, 0.0f));
 		
 		return projection * view;
+	}
+
+	glm::vec3 Camera::getPosition() const
+	{
+		return position;
+	}
+
+	glm::vec3 Camera::getLookVec() const
+	{
+		return glm::vec3(std::cos(yaw)*std::cos(pitch), std::sin(pitch), -std::sin(yaw)*std::cos(pitch));
 	}
 
 	void Camera::renderGUI()
@@ -40,6 +54,7 @@ namespace graphics {
 		ImGui::Text("Position: (%.3f, %.3f, %.3f)", position.x, position.y, position.z);
 		ImGui::Text("Pitch: %.3f, Yaw: %.3f", pitch, yaw);
 		ImGui::SliderFloat("FOV", &fov, fovMin, fovMax);
+		ImGui::Checkbox("Show Axes", &showAxes);
 
 		ImGui::End();
 	}

@@ -1,8 +1,12 @@
 #pragma once
 
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
 #include "core/Simulation.h"
 #include "graphics/Renderable.h"
 #include "graphics/Camera.h"
+#include "graphics/content/GUIOverlay.h"
 
 namespace graphics {
 
@@ -19,8 +23,8 @@ namespace graphics {
 
 		void startGUI();
 		void update();
-		void render();
-		void renderGUI();
+		void render(); // includes our GUI
+		void renderGUI(); // ImGUI
 
 		void directRender(Renderable& renderable);
 		void directRender(const graphics::Triangle& tri);
@@ -50,6 +54,8 @@ namespace graphics {
 		GLFWwindow* glfwWindow;
 		Renderer renderer;
 		Camera camera;
+		core::GUIOverlay guiOverlay;
+		glm::mat4 guiVPMatrix;
 		core::Simulation* simulation;
 
 		struct MouseTracker

@@ -35,8 +35,8 @@ namespace graphics
   // make sure a VAO is bound first
   void IndexBuffer::updateData(const GLuint* data, GLuint numIndices)
   {
-    bind();
-//    forceBind();
+    //bind();
+    forceBind();
 
     if (numIndices > this->numIndices || !bufferMade)
     {

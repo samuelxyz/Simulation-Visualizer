@@ -27,6 +27,7 @@ namespace graphics
       ~Renderer();
 
       static void clearScreen();
+	  static void clearDepth();
       static void draw(GLenum mode, const VertexArray& va,
           const IndexBuffer& ib, const ShaderProgram& sp);
 

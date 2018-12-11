@@ -25,7 +25,10 @@ namespace graphics
     vertexArray.addAttribute("position", GL_FLOAT, 3);
     vertexArray.applyAttributesWithBuffer(vertexBuffer, shaderProgram);
 
-    indexBuffer.forceBind();
+    //indexBuffer.forceBind(); // ???????? idk how but it's needed
+	// Nvm it's not needed now, i changed Renderer::draw() to use ib.forceBind()
+	// hmm also works if i change IndexBuffer::updateData to use forceBind()
+	// idk why it doesn't work to just use bind()
   }
 
   TriangleBatch::~TriangleBatch()

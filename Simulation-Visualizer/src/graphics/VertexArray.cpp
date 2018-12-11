@@ -35,8 +35,8 @@ namespace graphics
 
   void VertexArray::applyAttributesWithBuffer(const VertexBuffer& vb, const ShaderProgram& sp)
   {
-    vb.bind();
     bind();
+    vb.bind();
 
     unsigned int offset = 0;
     for (auto& attribute : attributes)
@@ -47,6 +47,15 @@ namespace graphics
           attribute.dataType, GL_FALSE, stride, (const void*)offset);
       offset += attribute.numComponents * getSizeOfType(attribute.dataType);
     }
+
+	//unbind();
+	//vb.unbind();
+
+	//for (auto& attribute : attributes)
+	//{
+	//	GLuint varPos = glGetAttribLocation(sp.getID(), attribute.varName.c_str());
+	//	glDisableVertexAttribArray(varPos);
+	//}
   }
 
   void VertexArray::bind() const
@@ -79,7 +88,7 @@ namespace graphics
         return sizeof(GLbyte);
     }
     // should be done before here
-    assert(false);
+    assert(false && "VertexArray::GetSizeOfType() switch statement failed");
     return 0;
   }
 

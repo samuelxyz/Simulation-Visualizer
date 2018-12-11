@@ -71,12 +71,19 @@ namespace graphics {
 	}
 
 	Window::Window()
-		: initialized(false), initializer(), glfwWindow(initializer.glfwWindow), renderer(),
-		//camera(glm::vec3(-10.0f, 0.0f, 0.0f), glm::angleAxis(0.0f, glm::vec3(1.0f, 0.0f, 0.0f))),
+		: initialized(false), initializer(), glfwWindow(initializer.glfwWindow),
+		renderer(),
 		camera(glm::vec3(-5.0f, 10.0f, -2.0f), -1.2f, 0.16f),
+		guiOverlay(camera),
+		guiVPMatrix(glm::ortho(
+			0.0f, graphics::WINDOW_WIDTH,
+			0.0f, graphics::WINDOW_HEIGHT,
+			-1.0f, 1.0f
+		)),
 		simulation(nullptr),
 		mouseTracker { 0.0f, 0.0f, false }
 	{
+
 		glfwSetWindowUserPointer(glfwWindow, this);
 
 		// Setup Dear ImGui context
@@ -127,28 +134,46 @@ namespace graphics {
 		camera.pollKeys(glfwWindow);
 		if (simulation != nullptr)
 			simulation->update();
-		renderer.updateCamera(camera.getVPMatrix());
-		camera.renderGUI();
 	}
 
 	void Window::render()
 	{
-		//// temporary debug triangle using immediate mode
-		//glClear(GL_COLOR_BUFFER_BIT);
-		//glBegin(GL_TRIANGLES);
-		//glVertex2f(-0.5f, -0.5f);
-		//glVertex2f( 0.0f,  0.5f);
-		//glVertex2f( 0.5f, -0.5f);
-		//glEnd();
+		Renderer::clearScreen();
+
+		renderer.updateCamera(camera.getVPMatrix());
+
 		if (simulation != nullptr)
 			simulation->render(renderer);
 		renderer.renderAndClearAll();
+
+		// GUI WIP code
+		
+		glDisable(GL_DEPTH_TEST);
+
+		guiOverlay.render(renderer);
+
+		//glm::vec4 testColor(1.0f, 0.0f, 1.0f, 1.0f);
+		//graphics::Triangle testGuiTriangle { {
+		//		graphics::ColoredVertex {testColor, glm::vec3(2.0f, 2.0f, 0.0f)},
+		//		graphics::ColoredVertex {testColor, glm::vec3(20.0f, 2.0f, 0.0f)},
+		//		graphics::ColoredVertex {testColor, glm::vec3(2.0f, 20.0f, 0.0f)},
+		//} };
+		//renderer.submit(testGuiTriangle);
+		renderer.renderAndClearAll();
+
+		glEnable(GL_DEPTH_TEST);
+
+		// TODO: I think the problem with multiple Renderers is in the bind() calls in Renderer::draw()
+
 	}
 
 	void Window::renderGUI()
 	{
+		camera.renderGUI();
+
 		if (simulation != nullptr)
 			simulation->renderGUI();
+
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}

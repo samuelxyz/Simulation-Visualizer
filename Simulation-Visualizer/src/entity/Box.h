@@ -1,11 +1,16 @@
 #pragma once
 
 #include "entity/Entity.h"
+#include "graphics/content/VisualBox.h"
 
 namespace entity {
 
 	class Box : public Entity
 	{
+	protected:
+		float xMin, xMax, yMin, yMax, zMin, zMax;
+		mutable graphics::VisualBox visualBox;
+
 	public:
 		Box(std::string entityName, 
 			glm::vec3 position = glm::vec3(0.0f), glm::quat orientation = glm::angleAxis(0.0f, glm::vec3(1.0f, 0.0f, 0.0f)),
@@ -15,9 +20,6 @@ namespace entity {
 		virtual ~Box();
 
 		virtual void render(graphics::Renderer& renderer) const;
-
-	private:
-		float xMin, xMax, yMin, yMax, zMin, zMax;
 	};
 
 }

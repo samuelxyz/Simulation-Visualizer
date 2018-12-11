@@ -35,7 +35,7 @@ namespace entity {
 	public:
 		mutable bool showGUI;
 
-	private:
+	protected:
 		std::string typeName;
 		std::string entityName;
 

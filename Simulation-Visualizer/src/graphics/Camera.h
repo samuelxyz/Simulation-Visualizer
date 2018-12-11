@@ -13,6 +13,7 @@ namespace graphics {
 		glm::vec3 position;
 		float pitch, yaw; // radians, yaw is from +x toward -z (counterclockwise for player)
 		float fov; // also radians
+		bool showAxes;
 
 		// Camera options
 		static constexpr float
@@ -29,7 +30,10 @@ namespace graphics {
 
 		//Camera(glm::vec3 position, glm::vec3 target);
 
-		glm::mat4 getVPMatrix();
+		glm::mat4 getVPMatrix() const;
+		glm::vec3 getPosition() const;
+		glm::vec3 getLookVec() const;
+		bool shouldShowAxes() const { return showAxes; }
 
 		void renderGUI();
 
