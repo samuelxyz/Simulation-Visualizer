@@ -18,6 +18,7 @@ namespace core {
 		static constexpr float axisLength = 0.05f;
 		static constexpr float axisThickness = 0.001f;
 		mutable std::array<graphics::VisualBox, 3> axes;
+		mutable graphics::VisualBox cursorDot;
 	};
 
 }

@@ -49,13 +49,20 @@ namespace graphics {
 
 	void Camera::renderGUI()
 	{
-		ImGui::Begin("Camera");
+		if (ImGui::Begin("Camera"))
+		{
+			ImGui::Text("Position: (%.3f, %.3f, %.3f)", position.x, position.y, position.z);
+			ImGui::Text("Pitch: %.3f (%.1f deg), Yaw: %.3f (%.1f deg)", 
+				pitch, glm::degrees(pitch), yaw, glm::degrees(yaw));
 
-		ImGui::Text("Position: (%.3f, %.3f, %.3f)", position.x, position.y, position.z);
-		ImGui::Text("Pitch: %.3f, Yaw: %.3f", pitch, yaw);
-		ImGui::SliderFloat("FOV", &fov, fovMin, fovMax);
-		ImGui::Checkbox("Show Axes", &showAxes);
+			{
+				ImGui::SliderFloat("", &fov, fovMin, fovMax, "FOV: %.3f");
+				ImGui::SameLine();
+				ImGui::Text("(%.1f deg)", glm::degrees(fov));
+			}
 
+			ImGui::Checkbox("Show Axes", &showAxes);
+		}
 		ImGui::End();
 	}
 

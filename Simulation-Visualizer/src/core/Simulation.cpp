@@ -52,28 +52,34 @@ namespace core {
 		renderEntities(renderer);
 	}
 
-	void Simulation::renderGUI()
+	void Simulation::renderGUI(glm::mat4& vpMatrix, int windowWidth, int windowHeight)
 	{
-		ImGui::Begin("Simulation");
-
-		ImGui::Checkbox("Enable Gravity", &(parameters.gravityEnabled));
-		ImGui::Checkbox("Pause Time", &(parameters.timePaused));
-		ImGui::Text("Elapsed Time: %.3f s", parameters.elapsedTime);
-
-		ImGui::Text("Entities:");
+		if (ImGui::Begin("Simulation"))
 		{
-			ImGui::BeginChild("Entity Scroll Pane");
-			for (entity::Entity* e : entities)
+			ImGui::Checkbox("Enable Gravity", &(parameters.gravityEnabled));
+			ImGui::Checkbox("Pause Time", &(parameters.timePaused));
+			ImGui::Text("Elapsed Time: %.3f s", parameters.elapsedTime);
+
+			ImGui::Text("Show Entity Information:");
 			{
-				ImGui::Checkbox(e->getName().c_str(), &(e->showGUI));
+				ImGui::BeginChild("Entity Scroll Pane");
+				for (entity::Entity* e : entities)
+				{
+					ImGui::Checkbox(e->getName().c_str(), &(e->showGUI));
+				}
+				ImGui::EndChild();
 			}
-			ImGui::EndChild();
 		}
 		ImGui::End();
 
 		for (entity::Entity* e : entities)
+		{
 			if (e->showGUI)
+			{
 				e->renderGUI();
+				e->renderLabel(vpMatrix, windowWidth, windowHeight);
+			}
+		}
 	}
 
 	void Simulation::add(entity::Entity* e)

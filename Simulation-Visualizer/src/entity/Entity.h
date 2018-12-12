@@ -23,6 +23,7 @@ namespace entity {
 
 		virtual void render(graphics::Renderer& renderer) const = 0;
 		virtual void renderGUI();
+		void renderLabel(glm::mat4& vpMatrix, int windowWidth, int windowHeight) const;
 		virtual void update(core::Simulation::Parameters&);
 
 		std::string getName() const { return entityName; }

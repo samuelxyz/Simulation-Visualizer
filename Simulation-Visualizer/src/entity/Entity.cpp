@@ -32,12 +32,34 @@ namespace entity {
 
 	void Entity::renderGUI()
 	{
-		ImGui::Begin((typeName + ": " + entityName).c_str());
+		if (ImGui::Begin((typeName + ": " + entityName).c_str()))
+		{
+			ImGui::Text("Mass: %.3f kg", mass);
+			ImGui::Text("Position: (%.3f, %.3f, %.3f)", position.x, position.y, position.z);
+			ImGui::Text("Velocity: (%.3f, %.3f, %.3f)", velocity.x, velocity.y, velocity.z);
+		}
+		ImGui::End();
 
-		ImGui::Text("Mass: %.3f kg", mass);
-		ImGui::Text("Position: (%.3f, %.3f, %.3f)", position.x, position.y, position.z);
-		ImGui::Text("Velocity: (%.3f, %.3f, %.3f)", velocity.x, velocity.y, velocity.z);
 
+	}
+
+	void Entity::renderLabel(glm::mat4& vpMatrix, int windowWidth, int windowHeight) const
+	{
+		glm::vec4 pos4 = glm::vec4(position, 1.0f);
+		//glm::vec4 pos4 = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		glm::vec4 screenPos = vpMatrix * pos4;
+
+		float labelX = (screenPos.x + 10.0f) * (windowWidth/20.0f);
+		float labelY = (-screenPos.y + 10.0f) * (windowHeight/20.0f);
+
+		ImGui::SetNextWindowPos(ImVec2(labelX, labelY), 0, ImVec2(0.5f, 0.5f));
+		if (ImGui::Begin(("##label_" + typeName + entityName).c_str(), nullptr,
+			ImGuiWindowFlags_NoDecoration |
+			ImGuiWindowFlags_NoInputs |
+			ImGuiWindowFlags_AlwaysAutoResize))
+		{
+			ImGui::Text((typeName + ": " + entityName).c_str());
+		}
 		ImGui::End();
 	}
 

@@ -36,8 +36,8 @@ namespace core {
 		~Simulation();
 
 		void update();
-		void render(graphics::Renderer&) const;
-		void renderGUI();
+		void render(graphics::Renderer& renderer) const;
+		void renderGUI(glm::mat4& vpMatrix, int windowWidth, int windowHeight);
 
 		void add(entity::Entity*);
 

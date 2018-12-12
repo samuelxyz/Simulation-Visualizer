@@ -150,8 +150,8 @@ namespace graphics {
 
 		// GUI WIP code
 		
-		glDisable(GL_DEPTH_TEST);
-
+		//glDisable(GL_DEPTH_TEST);
+		renderer.clearDepth();
 		guiOverlay.render(renderer);
 
 		//glm::vec4 testColor(1.0f, 0.0f, 1.0f, 1.0f);
@@ -163,7 +163,7 @@ namespace graphics {
 		//renderer.submit(testGuiTriangle);
 		renderer.renderAndClearAll();
 
-		glEnable(GL_DEPTH_TEST);
+		//glEnable(GL_DEPTH_TEST);
 
 		// TODO: I think the problem with multiple Renderers is in the bind() calls in Renderer::draw()
 
@@ -171,10 +171,14 @@ namespace graphics {
 
 	void Window::renderGUI()
 	{
+		int width, height;
+		getDimensions(&width, &height);
+		glm::mat4 vpMatrix = camera.getVPMatrix(width, height);
+
 		camera.renderGUI();
 
 		if (simulation != nullptr)
-			simulation->renderGUI();
+			simulation->renderGUI(vpMatrix, width, height);
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -222,7 +226,7 @@ namespace graphics {
 		std::cout << "[GL] " << message << std::endl;
 	}
 
-	void Window::handleResize(GLFWwindow *, int width, int height)
+	void Window::handleResize(GLFWwindow* glfwWindow, int width, int height)
 	{
 		glViewport(0, 0, width, height);
 	}
@@ -230,10 +234,10 @@ namespace graphics {
 	void Window::handleKey(GLFWwindow* glfwWindow, int key, int scancode, int action,
 		int mods)
 	{
-		if (ImGui::GetIO().WantCaptureKeyboard)
-			return;
+		//if (ImGui::GetIO().WantCaptureKeyboard)
+		//	return;
 
-		Window* window = getWindow(glfwWindow);
+		//Window* window = getWindow(glfwWindow);
 		//if (window != nullptr && window->initialized)
 		//	window->camera.handleKey(key, action);
 	}
