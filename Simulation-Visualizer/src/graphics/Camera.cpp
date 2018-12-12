@@ -29,9 +29,9 @@ namespace graphics {
 	{
 	}
 
-	glm::mat4 Camera::getVPMatrix() const
+	glm::mat4 Camera::getVPMatrix(int windowWidth, int windowHeight) const
 	{
-		glm::mat4 projection = glm::perspective(fov, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1f, 100.0f);
+		glm::mat4 projection = glm::perspective(fov, static_cast<float>(windowWidth)/windowHeight, 0.1f, 100.0f);
 		glm::mat4 view = glm::lookAt(position, position + getLookVec(), glm::vec3(0.0f, 1.0f, 0.0f));
 		
 		return projection * view;

@@ -8,9 +8,6 @@
 
 namespace graphics {
 
-	static constexpr float WINDOW_WIDTH = 1200.0f,
-		WINDOW_HEIGHT = 800.0f;
-
 	struct ColoredVertex
 	{
 		glm::vec4 color;

@@ -21,11 +21,10 @@ namespace graphics {
 
 		glfwWindowHint(GLFW_SAMPLES, 4);
 		glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
-		glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+		//glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
 		/* Create a windowed mode window and its OpenGL context */
-		glfwWindow = glfwCreateWindow(
-			static_cast<int>(graphics::WINDOW_WIDTH), static_cast<int>(graphics::WINDOW_HEIGHT),
+		glfwWindow = glfwCreateWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT,
 			"Simulation-Visualizer", nullptr, nullptr);
 
 		if (!glfwWindow)
@@ -34,6 +33,7 @@ namespace graphics {
 			assert(false && "GLFW window creation failed");
 		}
 
+		glfwSetFramebufferSizeCallback(glfwWindow, handleResize);
 		glfwSetKeyCallback(glfwWindow, handleKey);
 		glfwSetCursorPosCallback(glfwWindow, handleMouseMotion);
 		glfwSetMouseButtonCallback(glfwWindow, handleMouseButton);
@@ -75,11 +75,11 @@ namespace graphics {
 		renderer(),
 		camera(glm::vec3(-5.0f, 10.0f, -2.0f), -1.2f, 0.16f),
 		guiOverlay(camera),
-		guiVPMatrix(glm::ortho(
-			0.0f, graphics::WINDOW_WIDTH,
-			0.0f, graphics::WINDOW_HEIGHT,
-			-1.0f, 1.0f
-		)),
+		//guiVPMatrix(glm::ortho(
+		//	0.0f, graphics::WINDOW_WIDTH,
+		//	0.0f, graphics::WINDOW_HEIGHT,
+		//	-1.0f, 1.0f
+		//)),
 		simulation(nullptr),
 		mouseTracker { 0.0f, 0.0f, false }
 	{
@@ -140,7 +140,9 @@ namespace graphics {
 	{
 		Renderer::clearScreen();
 
-		renderer.updateCamera(camera.getVPMatrix());
+		int width, height;
+		getDimensions(&width, &height);
+		renderer.updateCamera(camera.getVPMatrix(width, height));
 
 		if (simulation != nullptr)
 			simulation->render(renderer);
@@ -203,6 +205,11 @@ namespace graphics {
 		glfwSwapBuffers(glfwWindow);
 	}
 
+	void Window::getDimensions(int* widthOut, int* heightOut)
+	{
+		glfwGetFramebufferSize(glfwWindow, widthOut, heightOut);
+	}
+
 	void Window::printGLFWError(int error, const char* description)
 	{
 		std::cerr << "[GLFW Error] " << description << std::endl;
@@ -213,6 +220,11 @@ namespace graphics {
 		const GLchar* message, const void* userParam)
 	{
 		std::cout << "[GL] " << message << std::endl;
+	}
+
+	void Window::handleResize(GLFWwindow *, int width, int height)
+	{
+		glViewport(0, 0, width, height);
 	}
 
 	void Window::handleKey(GLFWwindow* glfwWindow, int key, int scancode, int action,
@@ -236,9 +248,11 @@ namespace graphics {
 		if (window != nullptr && window->initialized && window->mouseTracker.dragging && 
 			glfwGetMouseButton(glfwWindow, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 		{
+			int windowHeight;
+			window->getDimensions(nullptr, &windowHeight);
 
 			float x = static_cast<float>(xpos);
-			float y = graphics::WINDOW_HEIGHT - static_cast<float>(ypos);
+			float y = windowHeight - static_cast<float>(ypos);
 
 			float dx = x - window->mouseTracker.prevX;
 			float dy = y - window->mouseTracker.prevY;
@@ -269,7 +283,9 @@ namespace graphics {
 			{
 				double xd, yd;
 				glfwGetCursorPos(glfwWindow, &xd, &yd);
-				window->mouseTracker.prevY = graphics::WINDOW_HEIGHT - static_cast<float>(yd);
+				int windowHeight;
+				window->getDimensions(nullptr, &windowHeight);
+				window->mouseTracker.prevY = windowHeight - static_cast<float>(yd);
 				window->mouseTracker.prevX = static_cast<float>(xd);
 
 				//std::cout << "Left mouse click detected" << std::endl;

@@ -30,7 +30,7 @@ namespace graphics {
 
 		//Camera(glm::vec3 position, glm::vec3 target);
 
-		glm::mat4 getVPMatrix() const;
+		glm::mat4 getVPMatrix(int windowWidth, int windowHeight) const;
 		glm::vec3 getPosition() const;
 		glm::vec3 getLookVec() const;
 		bool shouldShowAxes() const { return showAxes; }
