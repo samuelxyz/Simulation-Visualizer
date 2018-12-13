@@ -1,12 +1,22 @@
 #include "core/stdafx.h"
 #include "VisualBox.h"
+#include "math/MathUtils.h"
 
 namespace graphics {
 
 	VisualBox::VisualBox(glm::vec3 position, glm::quat orientation, 
-		float xMin, float xMax, float yMin, float yMax, float zMin, float zMax)
-		: VisualEntity(position, orientation),
+		float xMin, float xMax, float yMin, float yMax, float zMin, float zMax,
+		Style style, glm::vec4 color)
+		: VisualEntity(position, orientation, style, color),
 		xMin(xMin), xMax(xMax), yMin(yMin), yMax(yMax), zMin(zMin), zMax(zMax)
+	{
+	}
+
+	VisualBox::VisualBox(glm::vec3 start, glm::vec3 length, float thickness, glm::vec3 up,
+		Style style, glm::vec4 color)
+		: VisualEntity(position, math::lookToward(length, up), style, color), 
+		xMin(-thickness), xMax(thickness + length.length()), 
+		yMin(-thickness), yMax(thickness), zMin(-thickness), zMax(thickness)
 	{
 	}
 
@@ -33,10 +43,10 @@ namespace graphics {
 		{
 			colorMinusX = graphics::COLOR_WHITE;
 			colorPlusX  = graphics::COLOR_RED;
-			colorMinusY = graphics::COLOR_GREEN;
-			colorPlusY  = graphics::COLOR_BLUE;
+			colorMinusY = graphics::COLOR_BLACK;
+			colorPlusY  = graphics::COLOR_GREEN;
 			colorMinusZ = graphics::COLOR_YELLOW;
-			colorPlusZ  = graphics::COLOR_BLACK;
+			colorPlusZ  = graphics::COLOR_BLUE;
 		}
 		else // style == Style::SOLID_COLOR
 		{
