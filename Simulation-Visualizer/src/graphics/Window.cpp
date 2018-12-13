@@ -153,6 +153,8 @@ namespace graphics {
 		//glDisable(GL_DEPTH_TEST);
 		renderer.clearDepth();
 		guiOverlay.render(renderer);
+		if (simulation != nullptr)
+			simulation->renderGUIOverlay(renderer);
 
 		//glm::vec4 testColor(1.0f, 0.0f, 1.0f, 1.0f);
 		//graphics::Triangle testGuiTriangle { {

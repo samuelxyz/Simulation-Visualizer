@@ -251,6 +251,7 @@
     <ClCompile Include="src\graphics\VertexBuffer.cpp" />
     <ClCompile Include="src\graphics\Window.cpp" />
     <ClCompile Include="src\core\Main.cpp" />
+    <ClCompile Include="src\math\MathUtils.cpp" />
     <ClCompile Include="src\math\Vec2.cpp" />
     <ClCompile Include="src\path\PathTest.cpp" />
     <ClCompile Include="src\path\StandalonePath.c">
@@ -296,6 +297,7 @@
     <ClInclude Include="src\graphics\VertexArray.h" />
     <ClInclude Include="src\graphics\VertexBuffer.h" />
     <ClInclude Include="src\graphics\Window.h" />
+    <ClInclude Include="src\math\MathUtils.h" />
     <ClInclude Include="src\math\Vec2.h" />
     <ClInclude Include="src\math\Vec3.h" />
     <ClInclude Include="src\graphics\content\VisualBox.h" />

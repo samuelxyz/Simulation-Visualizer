@@ -25,7 +25,7 @@ namespace core {
 		axes[1].orientation = glm::angleAxis(core::HALF_PI, glm::vec3(0.0f, 0.0f, 1.0f));
 		axes[2].orientation = glm::angleAxis(core::HALF_PI, glm::vec3(0.0f, -1.0f, 0.0f));
 
-		static constexpr float dotSize = axisThickness * 1.01;
+		static constexpr float dotSize = axisThickness * 1.01f;
 		cursorDot.style = graphics::VisualEntity::Style::SOLID_COLOR;
 		cursorDot.xMin = -dotSize;
 		cursorDot.xMax =  dotSize;

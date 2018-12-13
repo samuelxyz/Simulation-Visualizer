@@ -24,6 +24,7 @@ namespace entity {
 		virtual void render(graphics::Renderer& renderer) const = 0;
 		virtual void renderGUI();
 		void renderLabel(glm::mat4& vpMatrix, int windowWidth, int windowHeight) const;
+		void renderRotationAxis(graphics::Renderer& renderer) const;
 		virtual void update(core::Simulation::Parameters&);
 
 		std::string getName() const { return entityName; }
@@ -35,6 +36,7 @@ namespace entity {
 
 	public:
 		mutable bool showGUI;
+		mutable bool showRotationAxis;
 
 	protected:
 		std::string typeName;

@@ -82,6 +82,13 @@ namespace core {
 		}
 	}
 
+	void Simulation::renderGUIOverlay(graphics::Renderer & renderer) const
+	{
+		for (entity::Entity* e : entities)
+			if (e->showRotationAxis)
+				e->renderRotationAxis(renderer);
+	}
+
 	void Simulation::add(entity::Entity* e)
 	{
 		entities.emplace_back(e);

@@ -68,6 +68,9 @@ namespace graphics {
 
 	void Camera::pollKeys(GLFWwindow* window)
 	{
+		if (ImGui::GetIO().WantCaptureKeyboard)
+			return;
+
 		glm::vec3 forward(std::cos(yaw), 0.0f, -std::sin(yaw));
 		glm::vec3 right(std::sin(yaw), 0.0f, std::cos(yaw));
 

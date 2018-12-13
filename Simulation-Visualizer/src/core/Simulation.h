@@ -38,6 +38,7 @@ namespace core {
 		void update();
 		void render(graphics::Renderer& renderer) const;
 		void renderGUI(glm::mat4& vpMatrix, int windowWidth, int windowHeight);
+		void renderGUIOverlay(graphics::Renderer& renderer) const;
 
 		void add(entity::Entity*);
 
