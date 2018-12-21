@@ -1,4 +1,6 @@
-#include <imgui/imgui.h>
+#include <core/stdafx.h>
+
+#include "graphics/Camera.h"
 
 #include "Entity.h" 
 #include "graphics/content/VisualBox.h"
@@ -83,22 +85,17 @@ namespace entity {
 		ImGui::End();
 	}
 
-	void Entity::renderLabel(glm::mat4& vpMatrix, int windowWidth, int windowHeight) const
+	void Entity::renderLabel(const graphics::Camera& camera) const
 	{
-		glm::vec4 pos4 = glm::vec4(position, 1.0f);
-		//glm::vec4 pos4 = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-		glm::vec4 screenPos = vpMatrix * pos4;
-
-		float labelX = (screenPos.x + 10.0f) * (windowWidth/20.0f);
-		float labelY = (-screenPos.y + 10.0f) * (windowHeight/20.0f);
-
-		ImGui::SetNextWindowPos(ImVec2(labelX, labelY), 0, ImVec2(0.5f, 0.5f));
+		glm::vec2 labelPos = camera.toScreenSpace(position);
+		ImGui::SetNextWindowPos(ImVec2(labelPos.x, labelPos.y), 0, ImVec2(0.5f, 0.5f));
 		if (ImGui::Begin(("##label_" + typeName + entityName).c_str(), nullptr,
 			ImGuiWindowFlags_NoDecoration |
 			ImGuiWindowFlags_NoInputs |
 			ImGuiWindowFlags_AlwaysAutoResize))
 		{
 			ImGui::Text((typeName + ": " + entityName).c_str());
+			//ImGui::Text("Label position: (%.2f, %.2f, %.2f, %.2f)", screenPos.x, screenPos.y, screenPos.z, screenPos.w);
 		}
 		ImGui::End();
 	}

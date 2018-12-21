@@ -73,13 +73,8 @@ namespace graphics {
 	Window::Window()
 		: initialized(false), initializer(), glfwWindow(initializer.glfwWindow),
 		renderer(),
-		camera(glm::vec3(-5.0f, 10.0f, -2.0f), -1.2f, 0.16f),
+		camera(DEFAULT_WIDTH, DEFAULT_HEIGHT, glm::vec3(-5.0f, 10.0f, -2.0f), -1.2f, 0.16f),
 		guiOverlay(camera),
-		//guiVPMatrix(glm::ortho(
-		//	0.0f, graphics::WINDOW_WIDTH,
-		//	0.0f, graphics::WINDOW_HEIGHT,
-		//	-1.0f, 1.0f
-		//)),
 		simulation(nullptr),
 		mouseTracker { 0.0f, 0.0f, false }
 	{
@@ -142,7 +137,8 @@ namespace graphics {
 
 		int width, height;
 		getDimensions(&width, &height);
-		renderer.updateCamera(camera.getVPMatrix(width, height));
+		camera.updateWindowDims(width, height);
+		renderer.updateCamera(camera.getVPMatrix());
 
 		if (simulation != nullptr)
 			simulation->render(renderer);
@@ -173,14 +169,10 @@ namespace graphics {
 
 	void Window::renderGUI()
 	{
-		int width, height;
-		getDimensions(&width, &height);
-		glm::mat4 vpMatrix = camera.getVPMatrix(width, height);
-
 		camera.renderGUI();
 
 		if (simulation != nullptr)
-			simulation->renderGUI(vpMatrix, width, height);
+			simulation->renderGUI(camera);
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

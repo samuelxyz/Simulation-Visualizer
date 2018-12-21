@@ -11,29 +11,19 @@
 
 namespace graphics {
 
-	//Camera::Camera(glm::vec3 position, glm::quat orientation)
-	//	: position(position), orientation(orientation), 
-	//	fov(glm::radians(45.0f))
-	//{
-	//}
-
-	//Camera::Camera(glm::vec3 position, glm::vec3 target)
-	//	: position(position), orientation(lookAt(position, target)), 
-	//	fov(glm::radians(45.0f))
-	//{
-	//}
-
-	Camera::Camera(glm::vec3 position, float pitch, float yaw)
-		: position(position), pitch(pitch), yaw(yaw), fov(glm::radians(45.0f)),
+	Camera::Camera(float windowWidth, float windowHeight,
+		glm::vec3 position, float pitch, float yaw)
+		: windowWidth(windowWidth), windowHeight(windowHeight),
+		position(position), pitch(pitch), yaw(yaw), fov(glm::radians(45.0f)),
 		showAxes(false)
 	{
 	}
 
-	glm::mat4 Camera::getVPMatrix(int windowWidth, int windowHeight) const
+	glm::mat4 Camera::getVPMatrix() const
 	{
 		glm::mat4 projection = glm::perspective(fov, static_cast<float>(windowWidth)/windowHeight, 0.1f, 100.0f);
 		glm::mat4 view = glm::lookAt(position, position + getLookVec(), glm::vec3(0.0f, 1.0f, 0.0f));
-		
+
 		return projection * view;
 	}
 
@@ -45,6 +35,17 @@ namespace graphics {
 	glm::vec3 Camera::getLookVec() const
 	{
 		return glm::vec3(std::cos(yaw)*std::cos(pitch), std::sin(pitch), -std::sin(yaw)*std::cos(pitch));
+	}
+
+	glm::vec2 Camera::toScreenSpace(const glm::vec3& worldPos) const
+	{
+		glm::vec4 pos4 = glm::vec4(worldPos, 1.0f);
+		glm::vec4 screenPos = getVPMatrix() * pos4;
+
+		float screenX = (screenPos.x + screenPos.z) * (windowWidth/(2*screenPos.z));
+		float screenY = (-screenPos.y + screenPos.z) * (windowHeight/(2*screenPos.z));
+
+		return glm::vec2(screenX, screenY);
 	}
 
 	void Camera::renderGUI()
@@ -64,6 +65,12 @@ namespace graphics {
 			ImGui::Checkbox("Show Axes", &showAxes);
 		}
 		ImGui::End();
+	}
+
+	void Camera::updateWindowDims(int width, int height)
+	{
+		windowWidth = width;
+		windowHeight = height;
 	}
 
 	void Camera::pollKeys(GLFWwindow* window)
@@ -94,48 +101,6 @@ namespace graphics {
 
 	void Camera::handleKey(int key, int action)
 	{
-		//glm::vec3 euler = glm::eulerAngles(orientation);
-		//std::cout << "(" << position.x << ", " << position.y << ", " << position.z << 
-		//	"), (" << euler.x << ", " << euler.y << ", " << euler.z << ")" << std::endl;
-
-		//std::cout << "(" << position.x << ", " << position.y << ", " << position.z <<
-		//	")\tPitch: " << pitch << ", yaw: " << yaw << std::endl;
-
-		//if (action == GLFW_RELEASE)
-		//	return;
-
-		// QUATERNION METHOD
-		//glm::mat3 orient = glm::toMat3(orientation);
-
-		//if (key == GLFW_KEY_W)
-		//	position += orient * glm::vec3(movementSpeed, 0.0f, 0.0f);
-		//if (key == GLFW_KEY_S)
-		//	position += orient * glm::vec3(-movementSpeed, 0.0f, 0.0f);
-		//if (key == GLFW_KEY_A)
-		//	position += orient * glm::vec3(0.0f, 0.0f, -movementSpeed);
-		//if (key == GLFW_KEY_D)
-		//	position += orient * glm::vec3(1.0f, 0.0f,  movementSpeed);
-		//if (key == GLFW_KEY_R || key == GLFW_KEY_SPACE)
-		//	position += glm::vec3(0.0f,  movementSpeed, 0.0f);
-		//if (key == GLFW_KEY_F || key == GLFW_KEY_LEFT_SHIFT)
-		//	position += glm::vec3(0.0f, -movementSpeed, 0.0f);
-
-		// CURRENT METHOD
-		//glm::vec3 forward(std::cos(yaw), 0.0f, -std::sin(yaw));
-		//glm::vec3 right(std::sin(yaw), 0.0f, std::cos(yaw));
-
-		//if (key == GLFW_KEY_W)
-		//	position += forward * movementSpeed;
-		//if (key == GLFW_KEY_S)
-		//	position += forward * -movementSpeed;
-		//if (key == GLFW_KEY_A)
-		//	position += right * -movementSpeed;
-		//if (key == GLFW_KEY_D)
-		//	position += right * movementSpeed;
-		//if (key == GLFW_KEY_R || key == GLFW_KEY_SPACE)
-		//	position += glm::vec3(0.0f, movementSpeed, 0.0f);
-		//if (key == GLFW_KEY_F || key == GLFW_KEY_LEFT_SHIFT)
-		//	position += glm::vec3(0.0f, -movementSpeed, 0.0f);
 	}
 
 	void Camera::handleMouseMotion(float xoffset, float yoffset, bool constrainPitch)
@@ -144,30 +109,6 @@ namespace graphics {
 
 		xoffset *= sensitivity /* * std::cos(pitch) */; // at high pitches it's less sensitive
 		yoffset *= sensitivity;
-
-		//// avoid flipping
-		//if (constrainPitch)
-		//{
-		//	float pitch = glm::pitch(orientation);
-
-		//	if (pitch + yoffset > glm::radians(89.0f))
-		//		yoffset = glm::radians(89.0f) - pitch;
-		//	else if (pitch + yoffset < glm::radians(-89.0f))
-		//		yoffset = glm::radians(-89.0f) - pitch;
-		//}
-
-		////orientation = glm::normalize(glm::quat(glm::vec3(yoffset, xoffset, 0.0f)) * orientation);
-		//glm::quat pitcher = glm::angleAxis(yoffset, glm::toMat3(orientation) * glm::vec3(0.0f, 0.0f, 1.0f));
-		//glm::quat yawer = glm::angleAxis(xoffset, glm::vec3(0.0f, -1.0f, 0.0f));
-
-		//orientation = glm::normalize(yawer * (pitcher * orientation));
-
-		//float roll = glm::roll(orientation);
-		//if (roll != 0.0f)
-		//{
-		//	glm::quat rollCorrection(glm::vec3(0.0f, 0.0f, -roll));
-		//	orientation = rollCorrection * orientation;
-		//}
 
 		pitch -= yoffset;
 		yaw += xoffset;
@@ -195,16 +136,4 @@ namespace graphics {
 		if (fov > fovMax)
 			fov = fovMax;
 	}
-
-	//glm::quat Camera::lookAt(glm::vec3 camPos, glm::vec3 target)
-	//{
-	//	glm::vec3 toTarget = glm::normalize(target - camPos);
-	//	glm::vec3 axis = glm::cross(glm::vec3(1.0f, 0.0f, 0.0f), toTarget);
-	//	float angle = std::acos(glm::dot(glm::vec3(1.0f, 0.0f, 0.0f), toTarget));
-	//	glm::quat rotateToTarget = glm::angleAxis(angle, axis);
-
-	//	// todo: rotate to face upward?
-
-	//	return rotateToTarget;
-	//}
 }

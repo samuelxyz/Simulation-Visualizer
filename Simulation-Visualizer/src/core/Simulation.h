@@ -8,6 +8,7 @@ namespace entity {
 
 namespace graphics {
 	class Renderer;
+	class Camera;
 }
 
 namespace core {
@@ -37,7 +38,7 @@ namespace core {
 
 		void update();
 		void render(graphics::Renderer& renderer) const;
-		void renderGUI(glm::mat4& vpMatrix, int windowWidth, int windowHeight);
+		void renderGUI(const graphics::Camera& camera);
 		void renderGUIOverlay(graphics::Renderer& renderer) const;
 
 		void add(entity::Entity*);

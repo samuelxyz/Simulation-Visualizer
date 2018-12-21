@@ -52,7 +52,7 @@ namespace core {
 		renderEntities(renderer);
 	}
 
-	void Simulation::renderGUI(glm::mat4& vpMatrix, int windowWidth, int windowHeight)
+	void Simulation::renderGUI(const graphics::Camera& camera)
 	{
 		if (ImGui::Begin("Simulation"))
 		{
@@ -77,7 +77,7 @@ namespace core {
 			if (e->showGUI)
 			{
 				e->renderGUI();
-				e->renderLabel(vpMatrix, windowWidth, windowHeight);
+				e->renderLabel(camera);
 			}
 		}
 	}

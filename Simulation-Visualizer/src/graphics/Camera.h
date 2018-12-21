@@ -13,6 +13,7 @@ namespace graphics {
 		glm::vec3 position;
 		float pitch, yaw; // radians, yaw is from +x toward -z (counterclockwise for player)
 		float fov; // also radians
+		int windowWidth, windowHeight;
 		bool showAxes;
 
 		// Camera options
@@ -26,17 +27,18 @@ namespace graphics {
 	
 
 	public:
-		Camera(glm::vec3 position = glm::vec3(0.0f), float pitch = 0.0f, float yaw = 0.0f);
+		Camera(float windowWidth, float windowHeight, 
+			glm::vec3 position = glm::vec3(0.0f), float pitch = 0.0f, float yaw = 0.0f);
 
-		//Camera(glm::vec3 position, glm::vec3 target);
-
-		glm::mat4 getVPMatrix(int windowWidth, int windowHeight) const;
+		glm::mat4 getVPMatrix() const;
 		glm::vec3 getPosition() const;
 		glm::vec3 getLookVec() const;
+		glm::vec2 toScreenSpace(const glm::vec3& worldPos) const;
 		bool shouldShowAxes() const { return showAxes; }
 
 		void renderGUI();
 
+		void updateWindowDims(int width, int height);
 		void pollKeys(GLFWwindow* window);
 		void handleKey(int key, int action);
 		void handleMouseMotion(float xoffset, float yoffset, bool constrainPitch = true);
