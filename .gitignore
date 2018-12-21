@@ -261,3 +261,4 @@ __pycache__/
 *.pyc
 /Simulation-Visualizer/Dependencies
 /GLFW/src
+/Simulation-Visualizer/imgui.ini
