@@ -88,7 +88,7 @@ namespace entity {
 	void Entity::renderLabel(const graphics::Camera& camera) const
 	{
 		glm::vec2 labelPos = camera.toScreenSpace(position);
-		ImGui::SetNextWindowPos(ImVec2(labelPos.x, labelPos.y), 0, ImVec2(0.5f, 0.5f));
+		ImGui::SetNextWindowPos(labelPos, 0, glm::vec2(0.5f, 0.5f));
 		if (ImGui::Begin(("##label_" + typeName + entityName).c_str(), nullptr,
 			ImGuiWindowFlags_NoDecoration |
 			ImGuiWindowFlags_NoInputs |
