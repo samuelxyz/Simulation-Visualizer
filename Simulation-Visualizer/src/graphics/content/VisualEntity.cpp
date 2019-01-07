@@ -15,7 +15,9 @@ namespace graphics {
 
 	glm::vec3 VisualEntity::toLocalFrame(glm::vec3 worldVec) const
 	{
-		return glm::inverse(glm::toMat3(orientation)) * (worldVec - position);
+		//return glm::inverse(glm::toMat3(orientation)) * (worldVec - position);
+		return glm::transpose(glm::toMat3(orientation)) * (worldVec - position);
+		// inverse == transpose for rotation matrices
 	}
 
 	glm::vec3 VisualEntity::toWorldFrame(glm::vec3 localVec) const

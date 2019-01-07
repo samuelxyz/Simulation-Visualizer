@@ -28,7 +28,9 @@ namespace entity {
 
 	glm::vec3 Entity::toLocalFrame(glm::vec3 worldVec) const
 	{
-		return glm::inverse(glm::toMat3(orientation)) * (worldVec - position);
+		//return glm::inverse(glm::toMat3(orientation)) * (worldVec - position);
+		return glm::transpose(glm::toMat3(orientation)) * (worldVec - position);
+		// inverse == transpose for rotation matrices
 	}
 
 	glm::vec3 Entity::toWorldFrame(glm::vec3 localVec) const
