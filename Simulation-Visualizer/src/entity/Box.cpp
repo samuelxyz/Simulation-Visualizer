@@ -15,6 +15,15 @@ namespace entity {
 	{
 	}
 
+	bool Box::containsPoint(glm::vec3 worldPoint) const
+	{
+		glm::vec3 localPoint = toLocalFrame(worldPoint);
+		return 
+			xMin <= localPoint.x && localPoint.x <= xMax &&
+			yMin <= localPoint.y && localPoint.y <= yMax &&
+			zMin <= localPoint.z && localPoint.z <= zMax;
+	}
+
 	void Box::render(graphics::Renderer& renderer) const
 	{
 		visualBox.position = position;

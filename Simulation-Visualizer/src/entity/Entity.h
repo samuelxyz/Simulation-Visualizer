@@ -20,10 +20,12 @@ namespace entity {
 
 		glm::vec3 toLocalFrame(glm::vec3 worldVec) const;
 		glm::vec3 toWorldFrame(glm::vec3 localVec) const;
+		virtual bool containsPoint(glm::vec3 worldPoint) const = 0;
 
 		virtual void render(graphics::Renderer& renderer) const = 0;
 		virtual void renderGUI();
 		void renderLabel(const graphics::Camera& camera) const;
+		void renderVelocityVector(graphics::Renderer& renderer) const;
 		void renderRotationAxis(graphics::Renderer& renderer) const;
 		virtual void update(core::Simulation::Parameters&);
 
@@ -35,8 +37,13 @@ namespace entity {
 		void applyWrenchImpulse(glm::vec3 worldPos, glm::vec3 impulse);
 
 	public:
-		mutable bool showGUI;
-		mutable bool showRotationAxis;
+		mutable struct GuiBools
+		{
+			bool gui;
+			bool label;
+			bool velocityVector;
+			bool rotationAxis;
+		} shouldShow;
 
 	protected:
 		std::string typeName;

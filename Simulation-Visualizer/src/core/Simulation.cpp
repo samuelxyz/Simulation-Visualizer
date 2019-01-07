@@ -65,7 +65,7 @@ namespace core {
 				ImGui::BeginChild("Entity Scroll Pane");
 				for (entity::Entity* e : entities)
 				{
-					ImGui::Checkbox(e->getName().c_str(), &(e->showGUI));
+					ImGui::Checkbox(e->getName().c_str(), &(e->shouldShow.gui));
 				}
 				ImGui::EndChild();
 			}
@@ -74,19 +74,22 @@ namespace core {
 
 		for (entity::Entity* e : entities)
 		{
-			if (e->showGUI)
-			{
+			if (e->shouldShow.gui)
 				e->renderGUI();
+			if(e->shouldShow.label)
 				e->renderLabel(camera);
-			}
 		}
 	}
 
 	void Simulation::renderGUIOverlay(graphics::Renderer & renderer) const
 	{
 		for (entity::Entity* e : entities)
-			if (e->showRotationAxis)
+		{
+			if (e->shouldShow.velocityVector)
+				e->renderVelocityVector(renderer);
+			if (e->shouldShow.rotationAxis)
 				e->renderRotationAxis(renderer);
+		}
 	}
 
 	void Simulation::add(entity::Entity* e)

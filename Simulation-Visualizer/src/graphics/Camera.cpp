@@ -57,7 +57,7 @@ namespace graphics {
 				pitch, glm::degrees(pitch), yaw, glm::degrees(yaw));
 
 			{
-				ImGui::SliderFloat("", &fov, fovMin, fovMax, "FOV: %.3f");
+				ImGui::SliderFloat("##FOV", &fov, fovMin, fovMax, "FOV: %.3f");
 				ImGui::SameLine();
 				ImGui::Text("(%.1f deg)", glm::degrees(fov));
 			}

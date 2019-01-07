@@ -7,6 +7,9 @@
 #include "core/Definitions.h"
 #include "math/MathUtils.h"
 
+#define VELOCITY_VECTOR_COLOR glm::vec4(0.0f, 1.0f, 1.0f, 1.0f) // cyan
+#define ROTATION_AXIS_COLOR glm::vec4(1.0f, 0.0f, 1.0f, 1.0f) // magenta
+
 namespace entity {
 
 	Entity::Entity(std::string entityName, glm::vec3 position, glm::quat orientation,
@@ -15,7 +18,7 @@ namespace entity {
 		: entityName(entityName), position(position), orientation(orientation),
 		velocity(velocity), angVelocity(angVel),
 		mass(mass), rotInertia(rotInertia), typeName(typeName),
-		showGUI(false), showRotationAxis(false)
+		shouldShow { false, false, false, false }
 	{
 	}
 
@@ -42,9 +45,10 @@ namespace entity {
 
 		if (ImGui::Begin((typeName + ": " + entityName).c_str()))
 		{
+			ImGui::Checkbox("Show label", &shouldShow.label);
 			ImGui::Text("Mass: %.3f kg", mass);
-			//ImGui::Text("Position: (%.3f, %.3f, %.3f)", position.x, position.y, position.z);
-			//ImGui::Text("Velocity: (%.3f, %.3f, %.3f)", velocity.x, velocity.y, velocity.z);
+			ImGui::Text("Inertia matrix: diag(%.3f, %.3f, %.3f) kg*m^2", 
+				rotInertia[0][0], rotInertia[1][1], rotInertia[2][2]);
 			{
 				ImGui::Text("Position:");
 				ImGui::SameLine();
@@ -55,30 +59,36 @@ namespace entity {
 				ImGui::SameLine();
 				ImGui::InputFloat3("m/s", &velocity.x);
 				// next line
+				ImGui::PushStyleColor(ImGuiCol_CheckMark, VELOCITY_VECTOR_COLOR);
+				ImGui::Checkbox("Show velocity vector", &(shouldShow.velocityVector));
+				ImGui::PopStyleColor();
+				ImGui::SameLine();
 				if (ImGui::Button("Zero velocity"))
 					velocity *= 0.0f;
 			}
 			{
 				ImGui::Text("Angular velocity: %.3f rad/s", glm::angle(angVelocity));
+				// next line
+				ImGui::PushStyleColor(ImGuiCol_CheckMark, ROTATION_AXIS_COLOR);
+				ImGui::Checkbox("Show rotation axis  ", &(shouldShow.rotationAxis));
+				ImGui::PopStyleColor();
 				ImGui::SameLine();
 				if (ImGui::Button("Zero rotation"))
 					angVelocity = glm::angleAxis(0.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-				// next line
-				ImGui::Checkbox("Show rotation axis", &showRotationAxis);
 			}
 			{
 				ImGui::Text("Apply impulse:");
-				ImGui::InputFloat3("", &linImpulse.x);
+				ImGui::InputFloat3("##linImpulseInput", &linImpulse.x);
 				ImGui::SameLine();
-				if (ImGui::ArrowButton(("##linImpulse_" + typeName + entityName).c_str(), ImGuiDir_Right))
+				if (ImGui::ArrowButton("##linImpulseButton", ImGuiDir_Right))
 					applyLinearImpulse(linImpulse);
 			}
 			{
 				ImGui::Text("Apply angular impulse:");
-				ImGui::InputFloat("", &angImpulseQuantity);
-				ImGui::InputFloat3("", &angImpulseAxis.x);
+				ImGui::InputFloat("##angImpulseQuantityInput", &angImpulseQuantity);
+				ImGui::InputFloat3("##angImpulseAxisInput", &angImpulseAxis.x);
 				ImGui::SameLine();
-				if (ImGui::ArrowButton(("##angImpulse_" + typeName + entityName).c_str(), ImGuiDir_Right))
+				if (ImGui::ArrowButton("##angImpulse", ImGuiDir_Right))
 					applyAngularImpulse(glm::normalize(angImpulseAxis) * angImpulseQuantity);
 			}
 		}
@@ -100,11 +110,27 @@ namespace entity {
 		ImGui::End();
 	}
 
+	void Entity::renderVelocityVector(graphics::Renderer & renderer) const
+	{
+		static constexpr float thickness = 0.01f;
+
+		static graphics::VisualBox box(position, velocity,
+			thickness, glm::vec3(0.0f, 1.0f, 0.0f),
+			graphics::VisualBox::Style::SOLID_COLOR, VELOCITY_VECTOR_COLOR);
+		box.position = position;
+		box.xMax = thickness + glm::length(velocity);
+		box.orientation = math::lookToward(velocity);
+
+		box.render(renderer);
+	}
+
 	void Entity::renderRotationAxis(graphics::Renderer & renderer) const
 	{
 		static constexpr float thickness = 0.01f, length = 1.0f;
 
-		static graphics::VisualBox axis(position, glm::axis(angVelocity) * length, thickness, glm::vec3(0.0f, 1.0f, 0.0f));
+		static graphics::VisualBox axis(position, glm::axis(angVelocity) * length,
+			thickness, glm::vec3(0.0f, 1.0f, 0.0f),
+			graphics::VisualBox::Style::SOLID_COLOR, ROTATION_AXIS_COLOR);
 		axis.position = position;
 		axis.orientation = math::lookToward(glm::axis(angVelocity));
 
