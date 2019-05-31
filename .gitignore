@@ -260,5 +260,5 @@ paket-files/
 __pycache__/
 *.pyc
 /Simulation-Visualizer/Dependencies
-/GLFW/src
+/GLFW
 /Simulation-Visualizer/imgui.ini
