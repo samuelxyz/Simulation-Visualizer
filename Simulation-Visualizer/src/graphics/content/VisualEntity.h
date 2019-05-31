@@ -22,8 +22,8 @@ namespace graphics {
 		);
 		virtual ~VisualEntity();
 
-		glm::vec3 toLocalFrame(glm::vec3 worldVec) const;
-		glm::vec3 toWorldFrame(glm::vec3 localVec) const;
+		glm::vec3 toLocalFrame(glm::vec3 worldVec, bool useCachedOrientation = false) const;
+		glm::vec3 toWorldFrame(glm::vec3 localVec, bool useCachedOrientation = false) const;
 
 		virtual void render(graphics::Renderer& renderer) const = 0;
 	};

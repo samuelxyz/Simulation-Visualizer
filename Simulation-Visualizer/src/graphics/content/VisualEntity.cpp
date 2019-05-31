@@ -13,16 +13,23 @@ namespace graphics {
 	{
 	}
 
-	glm::vec3 VisualEntity::toLocalFrame(glm::vec3 worldVec) const
+	glm::vec3 VisualEntity::toLocalFrame(glm::vec3 worldVec, bool useCachedOrientation) const
 	{
-		//return glm::inverse(glm::toMat3(orientation)) * (worldVec - position);
-		return glm::transpose(glm::toMat3(orientation)) * (worldVec - position);
 		// inverse == transpose for rotation matrices
+		static glm::mat3 matrix = glm::transpose(glm::toMat3(orientation));
+		if (!useCachedOrientation)
+			matrix = glm::transpose(glm::toMat3(orientation));
+
+		return matrix * (worldVec - position);
 	}
 
-	glm::vec3 VisualEntity::toWorldFrame(glm::vec3 localVec) const
+	glm::vec3 VisualEntity::toWorldFrame(glm::vec3 localVec, bool useCachedOrientation) const
 	{
-		return glm::toMat3(orientation) * localVec + position;
+		static glm::mat3 matrix = glm::toMat3(orientation);
+		if (!useCachedOrientation)
+			matrix = glm::toMat3(orientation);
+
+		return matrix * localVec + position;
 	}
 
 }

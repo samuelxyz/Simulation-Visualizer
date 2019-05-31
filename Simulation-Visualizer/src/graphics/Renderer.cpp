@@ -18,7 +18,7 @@ namespace graphics
 
   Renderer::Renderer()
   : shaderProgram("resources/shaders/MotLB_generic.glsl"),
-    tBatch(50000, shaderProgram)
+    tBatch(10000, shaderProgram)
   {
     //shaderProgram.bind(); // Seems to be unnecessary
   }
@@ -72,6 +72,11 @@ namespace graphics
   void Renderer::submit(const graphics::CenteredPoly& cp)
   {
     tBatch.submit(cp);
+  }
+
+  void Renderer::submit(const std::vector<graphics::ColoredVertex>& vertices, const std::vector<int>& indices)
+  {
+	  tBatch.submit(vertices, indices);
   }
 
 } /* namespace render */

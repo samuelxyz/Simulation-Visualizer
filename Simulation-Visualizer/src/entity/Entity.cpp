@@ -117,7 +117,7 @@ namespace entity {
 		static constexpr float thickness = 0.01f;
 
 		static graphics::VisualBox box(position, velocity,
-			thickness, glm::vec3(0.0f, 1.0f, 0.0f),
+			thickness, core::VECTOR_UP,
 			graphics::VisualBox::Style::SOLID_COLOR, VELOCITY_VECTOR_COLOR);
 		box.position = position;
 		box.xMax = thickness + glm::length(velocity);
@@ -131,7 +131,7 @@ namespace entity {
 		static constexpr float thickness = 0.01f, length = 1.0f;
 
 		static graphics::VisualBox axis(position, glm::axis(angVelocity) * length,
-			thickness, glm::vec3(0.0f, 1.0f, 0.0f),
+			thickness, core::VECTOR_UP,
 			graphics::VisualBox::Style::SOLID_COLOR, ROTATION_AXIS_COLOR);
 		axis.position = position;
 		axis.orientation = math::lookToward(glm::axis(angVelocity));
@@ -142,7 +142,7 @@ namespace entity {
 	void Entity::update(core::Simulation::Parameters& parameters)
 	{
 		if (parameters.gravityEnabled)
-			velocity += glm::vec3(0.0f, -core::GRAVITY * core::TIME_STEP, 0.0f);
+			velocity += -core::GRAVITY * core::TIME_STEP * core::VECTOR_UP;
 
 		position += velocity * core::TIME_STEP;
 		orientation = glm::normalize(

@@ -22,7 +22,7 @@ namespace graphics {
 	glm::mat4 Camera::getVPMatrix() const
 	{
 		glm::mat4 projection = glm::perspective(fov, static_cast<float>(windowWidth)/windowHeight, 0.1f, 100.0f);
-		glm::mat4 view = glm::lookAt(position, position + getLookVec(), glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 view = glm::lookAt(position, position + getLookVec(), core::VECTOR_UP);
 
 		return projection * view;
 	}
@@ -34,7 +34,7 @@ namespace graphics {
 
 	glm::vec3 Camera::getLookVec() const
 	{
-		return glm::vec3(std::cos(yaw)*std::cos(pitch), std::sin(pitch), -std::sin(yaw)*std::cos(pitch));
+		return glm::vec3(std::cos(yaw)*std::cos(pitch), std::sin(yaw)*std::cos(pitch), std::sin(pitch));
 	}
 
 	glm::vec2 Camera::toScreenSpace(const glm::vec3& worldPos) const
@@ -78,8 +78,8 @@ namespace graphics {
 		if (ImGui::GetIO().WantCaptureKeyboard)
 			return;
 
-		glm::vec3 forward(std::cos(yaw), 0.0f, -std::sin(yaw));
-		glm::vec3 right(std::sin(yaw), 0.0f, std::cos(yaw));
+		glm::vec3 forward(std::cos(yaw), std::sin(yaw), 0.0f);
+		glm::vec3 right(std::sin(yaw), -std::cos(yaw), 0.0f);
 
 		float speed = movementSpeed;
 		if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
@@ -94,9 +94,9 @@ namespace graphics {
 		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 			position += right * speed;
 		if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-			position += glm::vec3(0.0f, speed, 0.0f);
+			position += speed * core::VECTOR_UP;
 		if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-			position += glm::vec3(0.0f, -speed, 0.0f);
+			position += -speed * core::VECTOR_UP;
 	}
 
 	void Camera::handleKey(int key, int action)

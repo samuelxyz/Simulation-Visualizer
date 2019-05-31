@@ -73,7 +73,7 @@ namespace graphics {
 	Window::Window()
 		: initialized(false), initializer(), glfwWindow(initializer.glfwWindow),
 		renderer(),
-		camera(DEFAULT_WIDTH, DEFAULT_HEIGHT, glm::vec3(-5.0f, 10.0f, -2.0f), -1.2f, 0.16f),
+		camera(DEFAULT_WIDTH, DEFAULT_HEIGHT, glm::vec3(-5.0f, -2.0f, 10.0f), -1.2f, 0.16f),
 		guiOverlay(camera),
 		simulation(nullptr),
 		mouseTracker { 0.0f, 0.0f, false }

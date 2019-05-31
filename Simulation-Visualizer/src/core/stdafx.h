@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <utility>
 #include <cassert>
+#include <chrono>
 
 #include <imgui/imgui.h>
 #include <GL/glew.h>

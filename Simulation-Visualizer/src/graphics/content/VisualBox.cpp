@@ -41,9 +41,9 @@ namespace graphics {
 		glm::vec4 colorMinusX, colorPlusX, colorMinusY, colorPlusY, colorMinusZ, colorPlusZ;
 		if (style == Style::MULTICOLOR)
 		{
-			colorMinusX = graphics::COLOR_WHITE;
+			colorMinusX = graphics::COLOR_CYAN;
 			colorPlusX  = graphics::COLOR_RED;
-			colorMinusY = graphics::COLOR_BLACK;
+			colorMinusY = graphics::COLOR_MAGENTA;
 			colorPlusY  = graphics::COLOR_GREEN;
 			colorMinusZ = graphics::COLOR_YELLOW;
 			colorPlusZ  = graphics::COLOR_BLUE;

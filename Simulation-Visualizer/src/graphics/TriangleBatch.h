@@ -41,6 +41,7 @@ namespace graphics
       bool submit(const graphics::Triangle&);
       bool submit(const graphics::Quad&);
       bool submit(const graphics::CenteredPoly&);
+	  bool submit(const std::vector<graphics::ColoredVertex>&, const std::vector<int>&);
 
       void renderAndClearAll();
   };

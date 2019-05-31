@@ -3,6 +3,9 @@
 #include "core/Definitions.h"
 #include "entity/Entity.h"
 #include <imgui/imgui.h>
+#include "graphics/content/VisualSphere.h"
+
+#define FPS_TRACKER_SMOOTHING 30
 
 namespace core {
 
@@ -15,13 +18,12 @@ namespace core {
 		: floor()
 	{
 		// floor
-		glm::vec4 colorWhite(1.0f);
 		glm::vec4 colorGray(0.8f, 0.8f, 0.8f, 1.0f);
-		floor.push_back(graphics::ColoredVertex { colorWhite, glm::vec3(0.0f, -50.0f,  0.0f) });
-		floor.push_back(graphics::ColoredVertex { colorGray , glm::vec3(-5.0f, -50.0f, -5.0f) });
-		floor.push_back(graphics::ColoredVertex { colorGray , glm::vec3(-5.0f, -50.0f,  5.0f) });
-		floor.push_back(graphics::ColoredVertex { colorGray , glm::vec3(5.0f, -50.0f,  5.0f) });
-		floor.push_back(graphics::ColoredVertex { colorGray , glm::vec3(5.0f, -50.0f, -5.0f) });
+		floor.push_back(graphics::ColoredVertex { graphics::COLOR_WHITE, glm::vec3( 0.0f,  0.0f, -50.0f) });
+		floor.push_back(graphics::ColoredVertex { colorGray , glm::vec3(-5.0f, -5.0f, -50.0f) });
+		floor.push_back(graphics::ColoredVertex { colorGray , glm::vec3(-5.0f,  5.0f, -50.0f) });
+		floor.push_back(graphics::ColoredVertex { colorGray , glm::vec3( 5.0f,  5.0f, -50.0f) });
+		floor.push_back(graphics::ColoredVertex { colorGray , glm::vec3( 5.0f, -5.0f, -50.0f) });
 	}
 
 	Simulation::Parameters::Parameters()
@@ -54,11 +56,29 @@ namespace core {
 
 	void Simulation::renderGUI(const graphics::Camera& camera)
 	{
+		// FPS calculations
+		static auto previous = std::chrono::steady_clock::now();
+
+		static unsigned short tickCount = 0;
+		tickCount++;
+
+		static float fps = 0;
+		if (tickCount >= FPS_TRACKER_SMOOTHING)
+		{
+			auto now = std::chrono::steady_clock::now();
+			auto diff = std::chrono::duration_cast<std::chrono::microseconds>(now - previous).count();
+			previous = std::chrono::steady_clock::now();
+
+			fps = 1.0e6f*tickCount / diff;
+			tickCount = 0;
+		}
+
 		if (ImGui::Begin("Simulation"))
 		{
 			ImGui::Checkbox("Enable Gravity", &(parameters.gravityEnabled));
 			ImGui::Checkbox("Pause Time", &(parameters.timePaused));
 			ImGui::Text("Elapsed Time: %.3f s", parameters.elapsedTime);
+			ImGui::Text("FPS: %.0f", fps);
 
 			ImGui::Text("Show Entity Information:");
 			{
@@ -81,7 +101,7 @@ namespace core {
 		}
 	}
 
-	void Simulation::renderGUIOverlay(graphics::Renderer & renderer) const
+	void Simulation::renderGUIOverlay(graphics::Renderer& renderer) const
 	{
 		for (entity::Entity* e : entities)
 		{

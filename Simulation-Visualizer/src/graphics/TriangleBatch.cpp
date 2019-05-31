@@ -135,25 +135,87 @@ namespace graphics
     return true;
   }
 
+  bool TriangleBatch::submit(const std::vector<graphics::ColoredVertex>& vertices, const std::vector<int>& indices)
+  {
+	  if (vertexCount + vertices.size() > maxVertices)
+		  return false;
+
+	  assert(vertices.size() >= 3);
+	  assert(indices.size() % 3 == 0);
+
+	  for (const graphics::ColoredVertex& vertex : vertices)
+	  {
+		  vData[vIndex++] = vertex.color.r;
+		  vData[vIndex++] = vertex.color.g;
+		  vData[vIndex++] = vertex.color.b;
+		  vData[vIndex++] = vertex.color.a;
+
+		  vData[vIndex++] = vertex.position.x;
+		  vData[vIndex++] = vertex.position.y;
+		  vData[vIndex++] = vertex.position.z;
+	  }
+
+	  for (const int& index : indices)
+		  iData[iIndex++] = vertexCount + index;
+
+	  vertexCount += vertices.size();
+
+	  return true;
+  }
+
   void TriangleBatch::renderAndClearAll()
   {
-    // fill the rest of the arrays with 0
-    for (; vIndex < vLength; ++vIndex)
-      vData[vIndex] = 0;
-    for (; iIndex < iLength; ++iIndex)
-      iData[iIndex] = 0;
+	  //// fill the rest of the arrays with 0
+	  //for (; vIndex < vLength; ++vIndex)
+	  //  vData[vIndex] = 0;
+	  //for (; iIndex < iLength; ++iIndex)
+	  //  iData[iIndex] = 0;
 
 
-    // load array data into GL buffer objects
-    indexBuffer.updateData(iData, iLength);
-    vertexBuffer.updateData(vData, vLength * sizeof(float));
+	  //// load array data into GL buffer objects
+	  //indexBuffer.updateData(iData, iLength);
+	  //vertexBuffer.updateData(vData, vLength * sizeof(float));
 
-    Renderer::draw(GL_TRIANGLES, vertexArray, indexBuffer, shaderProgram);
+	  //Renderer::draw(GL_TRIANGLES, vertexArray, indexBuffer, shaderProgram);
 
-    // next render session, whatever's in our member arrays will be overwritten
-    iIndex = 0;
-    vIndex = 0;
-    vertexCount = 0;
+	  //// next render session, whatever's in our member arrays will be overwritten
+	  //iIndex = 0;
+	  //vIndex = 0;
+	  //vertexCount = 0;
+
+	  // first time through, this will initialize iData and vData
+	  static unsigned int iPopulatedPrev = iLength, vPopulatedPrev = vLength;
+	  static bool firstRun = true;
+
+	  // overwrite any remaining data in arrays from previous render
+	  for (unsigned int j = vIndex; j < vPopulatedPrev; ++j)
+		  vData[j] = 0.0f;
+	  for (unsigned int j = iIndex; j < iPopulatedPrev; ++j)
+		  iData[j] = 0;
+
+	  iPopulatedPrev = iIndex;
+	  vPopulatedPrev = vIndex;
+
+	  // load array data into GL buffer objects
+	  if (firstRun)
+	  {
+		  // initialize GL buffers to full size
+		  indexBuffer.updateData(iData, iLength);
+		  vertexBuffer.updateData(vData, vLength * sizeof(float));
+	  }
+	  else
+	  {
+		  // just update whatever portion is needed
+		  indexBuffer.updateData(iData, iIndex);
+		  vertexBuffer.updateData(vData, vIndex * sizeof(float));
+	  }
+
+	  Renderer::draw(GL_TRIANGLES, vertexArray, indexBuffer, shaderProgram);
+
+	  // next render session, whatever's in iData and vData will be overwritten
+	  iIndex = 0;
+	  vIndex = 0;
+	  vertexCount = 0;
   }
 
 } /* namespace graphics */

@@ -38,6 +38,7 @@ namespace graphics
       void submit(const graphics::Triangle&);
       void submit(const graphics::Quad&);
       void submit(const graphics::CenteredPoly&);
+	  void submit(const std::vector<graphics::ColoredVertex>&, const std::vector<int>&);
 
     private:
       ShaderProgram shaderProgram;
