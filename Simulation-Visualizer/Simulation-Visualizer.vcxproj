@@ -77,12 +77,14 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)Dependencies\pathlib\include\;$(SolutionDir)GLFW\include\;$(ProjectDir)Dependencies\glm\;$(ProjectDir)Dependencies\imgui\;$(ProjectDir)Dependencies\GLEW\include\;$(ProjectDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Dependencies\Eigen\include\;$(ProjectDir)Dependencies\pathlib\include\;$(SolutionDir)GLFW\include\;$(ProjectDir)Dependencies\glm\;$(ProjectDir)Dependencies\imgui\;$(ProjectDir)Dependencies\GLEW\include\;$(ProjectDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>IMGUI_IMPL_OPENGL_LOADER_GLEW;GLEW_STATIC;GLM_ENABLE_EXPERIMENTAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <ForcedIncludeFiles>stdafx.h</ForcedIncludeFiles>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <OpenMPSupport>
+      </OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -253,6 +255,7 @@
     <ClCompile Include="src\graphics\Window.cpp" />
     <ClCompile Include="src\core\Main.cpp" />
     <ClCompile Include="src\math\MathUtils.cpp" />
+    <ClCompile Include="src\path\CubeTest.cpp" />
     <ClCompile Include="src\path\PathTest.cpp" />
     <ClCompile Include="src\path\StandalonePath.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
@@ -271,6 +274,7 @@
     <ClCompile Include="src\graphics\content\VisualBox.cpp" />
     <ClCompile Include="src\graphics\content\VisualEntity.cpp" />
     <ClCompile Include="src\graphics\content\VisualSphere.cpp" />
+    <ClCompile Include="src\Scrapbook.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Dependencies\imgui\imgui\imconfig.h" />
