@@ -21,6 +21,8 @@ namespace entity {
 
 		virtual bool containsPoint(glm::vec3 worldPoint) const;
 		virtual void render(graphics::Renderer& renderer) const;
+
+		virtual float getShadowRadius() const;
 	};
 
 }

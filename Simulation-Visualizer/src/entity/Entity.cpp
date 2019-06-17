@@ -39,6 +39,41 @@ namespace entity {
 		return glm::toMat3(orientation) * localVec + position;
 	}
 
+	void Entity::renderShadow(graphics::Renderer & renderer) const
+	{
+		float baseRadius = getShadowRadius();
+		float height = position.z - core::SHADOW_Z;
+
+		if (height < -baseRadius)
+			return;
+
+		float scaleFactor;
+		if (position.z > core::SHADOW_Z)
+			scaleFactor = std::expf(-std::powf(height, 2)*0.1f);
+		else
+			scaleFactor = std::cos(height*core::PI);
+
+		static float randomness = 0.0f; // avoid shadow z-fighting
+		randomness += core::SMALL_DISTANCE;
+		if (randomness > core::SMALL_DISTANCE * 10)
+			randomness = 0.0f;
+
+		glm::vec4 transparent(0.0f);
+		glm::vec4 centerColor = graphics::COLOR_BLACK;
+		centerColor.a = scaleFactor; // umbra darkness (lighter if no umbra at all)
+		glm::vec3 center(position.x, position.y, core::SHADOW_Z + randomness);
+		glm::vec3 radius(baseRadius/std::max(0.7f, scaleFactor), 0.0f, 0.0f); // penumbra gets larger with distance
+
+		graphics::CenteredPoly shadow;
+		shadow.emplace_back(graphics::ColoredVertex { centerColor, center });
+		for (float angle = 0.0f; angle < 6.3f; angle += core::QUARTER_PI/2.0f)
+		{
+			shadow.emplace_back(graphics::ColoredVertex { transparent, center + glm::rotateZ(radius, angle) });
+		}
+
+		renderer.submit(shadow);
+	}
+
 	void Entity::renderGUI()
 	{
 		static glm::vec3 linImpulse(0.0f);

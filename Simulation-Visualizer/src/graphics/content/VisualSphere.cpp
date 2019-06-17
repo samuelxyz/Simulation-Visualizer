@@ -45,8 +45,8 @@ namespace graphics {
 		graphics::ColoredVertex southPole { colorMinusZ, toWorldFrame(glm::vec3(0.0f, 0.0f, -radius), true) };
 
 		// decide mesh resolution
-		int numRings = std::max(10 * radius, 6.0f); // ~number of latitude lines
-		int numNodes = std::max(30 * radius, 12.0f); // ~number of longitude lines
+		int numRings = static_cast<int>(std::max(10 * radius, 6.0f )); // ~number of latitude lines
+		int numNodes = static_cast<int>(std::max(30 * radius, 12.0f)); // ~number of longitude lines
 
 		// this is to calculate stuff that's the same across every ring, but differs across nodes on each ring
 		struct RepeatedNodeData {

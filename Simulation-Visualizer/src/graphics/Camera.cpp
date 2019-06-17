@@ -11,7 +11,7 @@
 
 namespace graphics {
 
-	Camera::Camera(float windowWidth, float windowHeight,
+	Camera::Camera(int windowWidth, int windowHeight,
 		glm::vec3 position, float pitch, float yaw)
 		: windowWidth(windowWidth), windowHeight(windowHeight),
 		position(position), pitch(pitch), yaw(yaw), fov(glm::radians(45.0f)),

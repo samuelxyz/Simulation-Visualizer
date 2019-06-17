@@ -1,5 +1,6 @@
 #include "core/stdafx.h"
 #include "Sphere.h"
+#include "core/Definitions.h"
 
 namespace entity {
 
@@ -27,4 +28,10 @@ namespace entity {
 
 		visualSphere.render(renderer);
 	}
+
+	float Sphere::getShadowRadius() const
+	{
+		return 1.0f*radius;
+	}
+
 }

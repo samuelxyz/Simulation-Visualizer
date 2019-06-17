@@ -2,9 +2,16 @@
 #include "glm/vec3.hpp"
 #include "glm/gtx/quaternion.hpp"
 
+#define DO_CUBE_TEST
+
 namespace core {
 	// Value used for simulation
 	static constexpr float TIME_STEP = 1.0f/60, GRAVITY = 9.80665f;
+
+	// height of the visual "floor" in the visualization
+	static constexpr float FLOOR_Z = -1.0f;
+	static constexpr float SMALL_DISTANCE = 2e-4f;
+	static const float SHADOW_Z = FLOOR_Z + SMALL_DISTANCE;
 
 	static constexpr float
 		PI = 3.141592653589793f,

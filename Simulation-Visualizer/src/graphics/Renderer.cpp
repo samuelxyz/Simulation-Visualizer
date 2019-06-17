@@ -18,7 +18,7 @@ namespace graphics
 
   Renderer::Renderer()
   : shaderProgram("resources/shaders/MotLB_generic.glsl"),
-    tBatch(10000, shaderProgram)
+    tBatch(50000, shaderProgram)
   {
     //shaderProgram.bind(); // Seems to be unnecessary
   }

@@ -22,6 +22,8 @@ namespace entity {
 		virtual bool containsPoint(glm::vec3 worldPoint) const;
 		virtual void render(graphics::Renderer& renderer) const;
 
+		virtual float getShadowRadius() const;
+
 		int funcEval(int n, double* z, double* F);
 		int jacEval(int n, int nnz, double* z, int* indices_of_used_columns,
 			int* len_of_each_column, int* row_index_of_each_value, double* values);

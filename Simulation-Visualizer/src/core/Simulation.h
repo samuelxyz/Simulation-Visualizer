@@ -21,6 +21,8 @@ namespace core {
 			bool gravityEnabled;
 			bool timePaused;
 			float elapsedTime;
+			bool showShadows;
+			bool showEnvironment;
 			Parameters();
 		};
 

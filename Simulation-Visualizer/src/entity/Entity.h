@@ -23,6 +23,7 @@ namespace entity {
 		virtual bool containsPoint(glm::vec3 worldPoint) const = 0;
 
 		virtual void render(graphics::Renderer& renderer) const = 0;
+		virtual void renderShadow(graphics::Renderer& renderer) const;
 		virtual void renderGUI();
 		void renderLabel(const graphics::Camera& camera) const;
 		void renderVelocityVector(graphics::Renderer& renderer) const;
@@ -30,6 +31,7 @@ namespace entity {
 		virtual void update(core::Simulation::Parameters&);
 
 		std::string getName() const { return entityName; }
+		virtual float getShadowRadius() const = 0;
 
 		// world frame
 		void applyLinearImpulse(glm::vec3);

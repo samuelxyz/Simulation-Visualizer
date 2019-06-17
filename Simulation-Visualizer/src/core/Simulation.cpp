@@ -27,7 +27,8 @@ namespace core {
 	}
 
 	Simulation::Parameters::Parameters()
-		: gravityEnabled(false), timePaused(false), elapsedTime(0.0f)
+		: gravityEnabled(false), timePaused(false), elapsedTime(0.0f), 
+		showShadows(true), showEnvironment(true)
 	{
 	}
 
@@ -50,7 +51,8 @@ namespace core {
 
 	void Simulation::render(graphics::Renderer& renderer) const
 	{
-		renderEnvironment(renderer);
+		if (parameters.showEnvironment)
+			renderEnvironment(renderer);
 		renderEntities(renderer);
 	}
 
@@ -79,6 +81,8 @@ namespace core {
 			ImGui::Checkbox("Pause Time", &(parameters.timePaused));
 			ImGui::Text("Elapsed Time: %.3f s", parameters.elapsedTime);
 			ImGui::Text("FPS: %.0f", fps);
+			ImGui::Checkbox("Show Shadows", &(parameters.showShadows)); 
+			ImGui::Checkbox("Show Environment", &(parameters.showEnvironment));
 
 			ImGui::Text("Show Entity Information:");
 			{
@@ -120,13 +124,37 @@ namespace core {
 	void Simulation::renderEntities(graphics::Renderer& renderer) const
 	{
 		for (entity::Entity* e : entities)
+		{
 			e->render(renderer);
+			if (parameters.showShadows)
+				e->renderShadow(renderer);
+		}
 	}
 
 	void Simulation::renderEnvironment(graphics::Renderer& renderer) const
 	{
 		// floor
-		renderer.submit(environment.floor);
+		//renderer.submit(environment.floor);
+		glm::vec4 squareColor;
+		float floorHalfwidth = 5.0f;
+		float floorCheckerSize = 1.0f;
+		for (float i = -floorHalfwidth; i < floorHalfwidth; i += floorCheckerSize)
+		{
+			for (float j = -floorHalfwidth; j < floorHalfwidth; j += floorCheckerSize)
+			{
+				if (std::abs(std::fmodf(i+j, 2.0f)) < 1e-3)
+					squareColor = graphics::COLOR_WHITE;
+				else
+					squareColor = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f); // gray
+
+				renderer.submit(graphics::Quad {{
+					{ squareColor, glm::vec3(i, j, core::FLOOR_Z) },
+					{ squareColor, glm::vec3(i, j+floorCheckerSize, core::FLOOR_Z) },
+					{ squareColor, glm::vec3(i+floorCheckerSize, j+floorCheckerSize, core::FLOOR_Z) },
+					{ squareColor, glm::vec3(i+floorCheckerSize, j,core::FLOOR_Z) }
+				}});
+			}
+		}
 	}
 
 }

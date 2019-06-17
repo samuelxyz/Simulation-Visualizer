@@ -67,7 +67,8 @@ namespace graphics {
 
 		glEnable(GL_DEPTH_TEST);
 
-		glClearColor(0.2f, 0.4f, 0.3f, 1.0f);
+		//glClearColor(0.2f, 0.4f, 0.3f, 1.0f);
+		glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
 	}
 
 	Window::Window()
@@ -90,8 +91,9 @@ namespace graphics {
 		ImGui_ImplOpenGL3_Init();
 
 		// Setup Style
-		ImGui::StyleColorsDark();
-		//ImGui::StyleColorsClassic();
+		//ImGui::StyleColorsDark();
+		//ImGui::StyleColorsLight();
+		ImGui::StyleColorsClassic();
 
 		initialized = true;
 	}

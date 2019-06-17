@@ -27,7 +27,7 @@ namespace graphics {
 	
 
 	public:
-		Camera(float windowWidth, float windowHeight, 
+		Camera(int windowWidth, int windowHeight, 
 			glm::vec3 position = glm::vec3(0.0f), float pitch = 0.0f, float yaw = 0.0f);
 
 		glm::mat4 getVPMatrix() const;
