@@ -4,8 +4,9 @@
 namespace graphics {
 
 	VisualEntity::VisualEntity(glm::vec3 position, glm::quat orientation, 
-		Style style, glm::vec4 color)
-		: position(position), orientation(orientation), style(style), color(color)
+		Style style, glm::vec4 color, float shadeFactor)
+		: position(position), orientation(orientation), 
+		style(style), color(color), shadeFactor(shadeFactor)
 	{
 	}
 

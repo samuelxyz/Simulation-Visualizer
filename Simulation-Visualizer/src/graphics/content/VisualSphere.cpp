@@ -5,8 +5,8 @@
 namespace graphics {
 
 	VisualSphere::VisualSphere(glm::vec3 position, glm::quat orientation, 
-		float radius, Style style, glm::vec4 color)
-		: VisualEntity(position, orientation, style, color), radius(radius)
+		float radius, Style style, glm::vec4 color, float shadeFactor)
+		: VisualEntity(position, orientation, style, color, shadeFactor), radius(radius)
 	{
 	}
 
@@ -16,7 +16,6 @@ namespace graphics {
 
 	void VisualSphere::render(graphics::Renderer& renderer) const
 	{
-		// TODO
 
 		glm::vec4 colorMinusX, colorPlusX, colorMinusY, colorPlusY, colorMinusZ, colorPlusZ;
 		if (style == Style::MULTICOLOR)
@@ -52,6 +51,10 @@ namespace graphics {
 		struct RepeatedNodeData {
 			float longitude;
 			glm::vec4 colorFactor;
+
+			RepeatedNodeData(float longitude, const glm::vec4& colorFactor)
+				: longitude(longitude), colorFactor(colorFactor)
+			{}
 		};
 
 		std::vector<RepeatedNodeData> repeatedNodeData;
@@ -71,7 +74,7 @@ namespace graphics {
 			else
 				colorFactor = glm::mix(colorMinusY, colorPlusX, longitude/core::HALF_PI - 3);
 			
-			repeatedNodeData.emplace_back(RepeatedNodeData{ longitude, colorFactor });
+			repeatedNodeData.emplace_back(longitude, colorFactor);
 		}
 
 		// make vertices
@@ -91,17 +94,30 @@ namespace graphics {
 				glm::vec3 position(ringRadius * std::cos(repeatedNodeData[n].longitude), 
 					ringRadius * std::sin(repeatedNodeData[n].longitude), z);
 
-				vertices.emplace_back(graphics::ColoredVertex { 
+				vertices.emplace_back(
 					glm::mix(repeatedNodeData[n].colorFactor, zColorFactor, std::abs(latitudeNormalized)),
-					toWorldFrame(position, true) });
+					toWorldFrame(position, true));
 			}
 		}
 
 		// add poles at end of vector
-		vertices.emplace_back(northPole); 
-		vertices.emplace_back(southPole);
+		vertices.push_back(northPole); 
+		vertices.push_back(southPole);
 		int northPoleIndex = vertices.size() - 2;
 		int southPoleIndex = vertices.size() - 1;
+
+		// apply shading
+		if (shadeFactor != 0.0f)
+		{
+			for (ColoredVertex& cv : vertices)
+			{
+				// within range [-1, 1]
+				float multiplier = (cv.position.z - position.z) / radius;
+				cv.color = glm::mix(cv.color, COLOR_BLACK,
+					((std::cos(core::mapRange(multiplier, -1.0f, 1.0f, 0.0f, core::PI)) + 1.0f)/2.0f)
+					* shadeFactor);
+			}
+		}
 
 		// do indices
 		std::vector<int> indices;
@@ -109,26 +125,26 @@ namespace graphics {
 		// north pole fan
 		for (int n = 1; n < numNodes; ++n)
 		{
-			indices.emplace_back(northPoleIndex);
-			indices.emplace_back(n-1);
-			indices.emplace_back(n);
+			indices.push_back(northPoleIndex);
+			indices.push_back(n-1);
+			indices.push_back(n);
 		}
-		indices.emplace_back(northPoleIndex);
-		indices.emplace_back(numNodes - 1);
-		indices.emplace_back(0);
+		indices.push_back(northPoleIndex);
+		indices.push_back(numNodes - 1);
+		indices.push_back(0);
 
 		// south pole fan
 		// row = numRows - 1
 		int southRingOffset = (numRings-1)*numNodes;
 		for (int n = 1; n < numNodes; ++n)
 		{
-			indices.emplace_back(southPoleIndex);
-			indices.emplace_back(southRingOffset + n-1);
-			indices.emplace_back(southRingOffset + n);
+			indices.push_back(southPoleIndex);
+			indices.push_back(southRingOffset + n-1);
+			indices.push_back(southRingOffset + n);
 		}
-		indices.emplace_back(southPoleIndex);
-		indices.emplace_back(southRingOffset + numNodes - 1);
-		indices.emplace_back(southRingOffset);
+		indices.push_back(southPoleIndex);
+		indices.push_back(southRingOffset + numNodes - 1);
+		indices.push_back(southRingOffset);
 
 		// mesh
 		
@@ -145,12 +161,12 @@ namespace graphics {
 				//       |      |
 				//      n-1     n
 
-				indices.emplace_back(r*numNodes + n);		// A
-				indices.emplace_back(r*numNodes + n-1);		// B
-				indices.emplace_back((r-1)*numNodes + n);	// C
-				indices.emplace_back(r*numNodes + n-1);		// B
-				indices.emplace_back((r-1)*numNodes + n);	// C
-				indices.emplace_back((r-1)*numNodes + n-1);	// D
+				indices.push_back(r*numNodes + n);		// A
+				indices.push_back(r*numNodes + n-1);	// B
+				indices.push_back((r-1)*numNodes + n);	// C
+				indices.push_back(r*numNodes + n-1);	// B
+				indices.push_back((r-1)*numNodes + n);	// C
+				indices.push_back((r-1)*numNodes + n-1);// D
 			}
 			//      last    0
 			//       |      |
@@ -161,12 +177,12 @@ namespace graphics {
 			//       |      |
 			//      last    0
 
-			indices.emplace_back(r*numNodes);					// A
-			indices.emplace_back(r*numNodes + numNodes-1);		// B
-			indices.emplace_back((r-1)*numNodes);				// C
-			indices.emplace_back(r*numNodes + numNodes-1);		// B
-			indices.emplace_back((r-1)*numNodes);				// C
-			indices.emplace_back((r-1)*numNodes + numNodes-1);	// D
+			indices.push_back(r*numNodes);					// A
+			indices.push_back(r*numNodes + numNodes-1);		// B
+			indices.push_back((r-1)*numNodes);				// C
+			indices.push_back(r*numNodes + numNodes-1);		// B
+			indices.push_back((r-1)*numNodes);				// C
+			indices.push_back((r-1)*numNodes + numNodes-1);	// D
 		}
 
 		renderer.submit(vertices, indices);

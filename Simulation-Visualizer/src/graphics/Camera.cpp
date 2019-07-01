@@ -5,7 +5,7 @@
 #include "GLFW/glfw3.h"
 
 #include "graphics/Camera.h"
-#include "graphics/Definitions.h"
+#include "graphics/Renderer.h"
 
 #include <iostream>
 
@@ -42,6 +42,8 @@ namespace graphics {
 		glm::vec4 pos4 = glm::vec4(worldPos, 1.0f);
 		glm::vec4 screenPos = getVPMatrix() * pos4;
 
+		screenPos.z += 0.18f; // idk why but without this it's a bit off
+
 		float screenX = (screenPos.x + screenPos.z) * (windowWidth/(2*screenPos.z));
 		float screenY = (-screenPos.y + screenPos.z) * (windowHeight/(2*screenPos.z));
 
@@ -52,18 +54,98 @@ namespace graphics {
 	{
 		if (ImGui::Begin("Camera"))
 		{
-			ImGui::Text("Position: (%.3f, %.3f, %.3f)", position.x, position.y, position.z);
-			ImGui::Text("Pitch: %.3f (%.1f deg), Yaw: %.3f (%.1f deg)", 
-				pitch, glm::degrees(pitch), yaw, glm::degrees(yaw));
-
+			ImGui::Text("Position:");
+			ImGui::InputFloat3("##InputPositionSlider", &(position.x));
+			ImGui::Text("Pitch: %+.3f (%.1f deg)", pitch, glm::degrees(pitch));
+			ImGui::Text("Yaw:   %+.3f (%.1f deg)", yaw, glm::degrees(yaw));
+			ImGui::Separator();
 			{
-				ImGui::SliderFloat("##FOV", &fov, fovMin, fovMax, "FOV: %.3f");
+				ImGui::Text("FOV:");
 				ImGui::SameLine();
-				ImGui::Text("(%.1f deg)", glm::degrees(fov));
+				std::string fovStr("%.3f ");
+				char fovDeg[12];
+				::sprintf_s(&(fovDeg[0]), 12, "(%.1f deg)", glm::degrees(fov));
+				fovStr += std::string(fovDeg);
+				ImGui::SliderFloat("##FOV", &fov, fovMin, fovMax, fovStr.c_str() );
 			}
 
+			ImGui::Separator();
+
 			ImGui::Checkbox("Show Axes", &showAxes);
+			//if (showAxes)
+			//{
+			//	ImGui::SameLine();
+			//	ImVec4 rectColor(0.0f, 0.0f, 0.0f, 1.0f);
+			//	ImGui::PushStyleColor(ImGuiCol_Button, rectColor);
+			//	ImGui::PushStyleColor(ImGuiCol_ButtonActive, rectColor);
+			//	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, rectColor);
+			//	ImGui::Button("   ##LabelXYZBackgroundRect");
+			//	ImGui::PopStyleColor(3);
+
+			//	ImGui::SameLine(105.0f);
+			//	ImGui::TextColored(graphics::COLOR_RED, "x");
+
+			//	ImGui::SameLine(0.0f, 1.0f);
+			//	ImGui::TextColored(ImVec4(0.2f, 0.7f, 0.2f, 1.0f), "y");
+
+			//	ImGui::SameLine(0.0f, 1.0f);
+			//	ImGui::TextColored(ImVec4(0.2f, 0.2f, 1.0f, 1.0f), "z");
+
+			//}
 		}
+		ImGui::End();
+	}
+
+	void Camera::renderLabel(const glm::vec3& worldPos, 
+		bool backgroundOnHoverOnly, const std::string& titleID,
+		const std::string& text, const glm::vec4& textColor, 
+		const ImVec2& pivot) const
+	{
+		ImVec2 screenPos = toScreenSpace(worldPos);
+		if (screenPos.y < ImGui::GetFrameHeight())
+			return;
+
+		ImGui::SetNextWindowPos(screenPos, 0, pivot);
+
+		if (backgroundOnHoverOnly)
+		{
+			ImGui::Begin((std::string("##") + titleID).c_str(), nullptr,
+				ImGuiWindowFlags_NoDecoration |
+				ImGuiWindowFlags_NoNav |
+				ImGuiWindowFlags_AlwaysAutoResize |
+				ImGuiWindowFlags_NoBackground);
+		}
+		else
+		{
+			ImGui::Begin((std::string("##") + titleID).c_str(), nullptr,
+				ImGuiWindowFlags_NoDecoration |
+				ImGuiWindowFlags_NoInputs |
+				ImGuiWindowFlags_AlwaysAutoResize |
+				ImGuiWindowFlags_NoBackground);
+		}
+
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, ImGui::GetStyle().WindowRounding);
+
+		if (backgroundOnHoverOnly)
+			ImGui::PushStyleColor(ImGuiCol_Button, COLOR_NONE);
+		else
+			ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_WindowBg));
+
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetColorU32(ImGuiCol_WindowBg));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetColorU32(ImGuiCol_WindowBg));
+
+		if (textColor != COLOR_NONE)
+			ImGui::PushStyleColor(ImGuiCol_Text, textColor);
+
+		ImGui::Button(text.c_str());
+
+		ImGui::PopStyleVar();
+
+		if (textColor != COLOR_NONE)
+			ImGui::PopStyleColor(4);
+		else
+			ImGui::PopStyleColor(3);
+
 		ImGui::End();
 	}
 
@@ -103,16 +185,150 @@ namespace graphics {
 	{
 	}
 
-	void Camera::handleMouseMotion(float xoffset, float yoffset, bool constrainPitch)
+	void Camera::handleLeftMouseMotion(float xoffset, float yoffset, bool constrainPitch)
 	{
 		float sensitivity = mouseSensitivity * (fov / core::QUARTER_PI);
 
 		xoffset *= sensitivity /* * std::cos(pitch) */; // at high pitches it's less sensitive
 		yoffset *= sensitivity;
 
-		pitch -= yoffset;
-		yaw += xoffset;
-		
+		rotate(-yoffset, xoffset, constrainPitch);
+	}
+
+	void Camera::handleRightMouseMotion(float xoffset, float yoffset, const glm::vec3& targetPos, bool constrainPitch)
+	{
+		// Tricky tricky. For the right effect, we want to orbit around the target when considering yaw.
+		// However, when considering pitch we want to orbit around the center of the screen.
+
+		if (glm::length2(targetPos - position) < 1e-6f)
+			return;
+
+		float sensitivity = 2 * mouseSensitivity * (fov / core::QUARTER_PI);
+
+		xoffset *= sensitivity /* * std::cos(pitch) */; // at high pitches it's less sensitive
+		yoffset *= sensitivity; 
+
+		// handle pitch: orbit around "center" of screen
+		{
+			// find rotation center - same z as target, but along camera yaw heading
+			glm::vec3 toTarget(targetPos - position);
+			glm::vec2 toTargetPlanar(toTarget.x, toTarget.y);
+			glm::vec2 cameraForwardPlanar(std::cos(yaw), std::sin(yaw));
+			// the projection of toTargetPlanar onto cameraForwardPlanar
+			glm::vec2 toCenterPlanar = cameraForwardPlanar * (glm::dot(cameraForwardPlanar, toTargetPlanar));
+
+			// from center to camera
+			glm::vec3 radius(-toCenterPlanar, position.z - targetPos.z);
+
+			glm::vec2 planarRadius(radius.x, radius.y);
+			float pr = glm::length(planarRadius);
+
+			float orbitPitch;
+			if (pr == 0.0f)
+			{
+				if (radius.z > 0)
+					orbitPitch = glm::radians(90.0f);
+				else
+					orbitPitch = glm::radians(-90.0f);
+			}
+			else
+			{
+				orbitPitch = std::atan2f(radius.z, pr);
+			}
+
+			float orbitYaw;
+			if (pr == 0.0f)
+				orbitYaw = 0.0f;
+			else
+				orbitYaw = std::atan2f(planarRadius.y, planarRadius.x);
+
+			float newOrbitPitch = orbitPitch - yoffset;
+			if (constrainPitch)
+			{
+				if (newOrbitPitch > glm::radians(89.0f))
+					newOrbitPitch = glm::radians(89.0f);
+				else if (newOrbitPitch < glm::radians(-89.0f))
+					newOrbitPitch = glm::radians(-89.0f);
+			}
+
+			glm::vec3 newRadius(
+				std::cos(newOrbitPitch) * std::cos(orbitYaw),
+				std::cos(newOrbitPitch) * std::sin(orbitYaw),
+				std::sin(newOrbitPitch)
+			);
+			newRadius *= glm::length(radius);
+
+			glm::vec3 dx = newRadius - radius;
+			position += dx;
+
+			rotate(orbitPitch - newOrbitPitch, 0.0f, constrainPitch);
+		}
+
+		// handle yaw: orbit around object
+		{
+			glm::vec3 radius = position - targetPos;
+
+			glm::vec2 planarRadius(radius.x, radius.y);
+			float pr = glm::length(planarRadius);
+
+			float orbitYaw;
+			if (pr == 0.0f)
+				orbitYaw = 0.0f;
+			else
+				orbitYaw = std::atan2f(planarRadius.y, planarRadius.x);
+			float newOrbitYaw = orbitYaw - xoffset;
+
+			glm::vec2 newPlanarRadius(std::cos(newOrbitYaw), std::sin(newOrbitYaw));
+			newPlanarRadius *= pr;
+
+			glm::vec2 dx = newPlanarRadius - planarRadius;
+			position += glm::vec3(dx, 0.0f);
+
+			rotate(0.0f, -xoffset, false);
+		}
+	}
+
+	void Camera::handleScroll(float yoffset, GLFWwindow* window, const glm::vec3& targetPos)
+	{
+		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) 
+		{ 
+			// move in and out from target
+			constexpr static float stepSize = 4.0f;
+
+			glm::vec3 toTarget = targetPos - position;
+			
+			float radius = glm::length(toTarget);
+
+			if (radius < 1e-6f)
+				return;
+
+			if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+				yoffset *= 5.0f;
+			float newRadius = radius - scrollSensitivity * stepSize * yoffset;
+
+			if (newRadius < 1e-1f)
+				newRadius = 1e-1f;
+
+			toTarget *= newRadius / radius;
+
+			position = targetPos - toTarget;
+		}
+		else // plain scrolling changes field of view
+		{
+			fov -= scrollSensitivity * yoffset;
+
+			if (fov < fovMin)
+				fov = fovMin;
+			if (fov > fovMax)
+				fov = fovMax;
+		}
+	}
+
+	void Camera::rotate(float dpitch, float dyaw, bool constrainPitch)
+	{
+		pitch += dpitch;
+		yaw += dyaw;
+
 		if (yaw > core::PI)
 			yaw -= core::TWO_PI;
 		else if (yaw <= -core::PI)
@@ -125,15 +341,5 @@ namespace graphics {
 			else if (pitch < glm::radians(-89.0f))
 				pitch = glm::radians(-89.0f);
 		}
-	}
-
-	void Camera::handleScroll(float yoffset)
-	{
-		fov -= scrollSensitivity * yoffset;
-
-		if (fov < fovMin)
-			fov = fovMin;
-		if (fov > fovMax)
-			fov = fovMax;
 	}
 }

@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <iterator>
 
+#include <cstdio>
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -25,3 +26,4 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <Eigen/Dense>
 #include <Eigen/SparseCore>
+#include <fmt/printf.h>

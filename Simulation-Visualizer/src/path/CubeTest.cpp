@@ -1,4 +1,5 @@
 #include "core/Definitions.h"
+#ifndef DECLARE_PATH_FUNCS_IN_MAIN
 #ifdef DO_CUBE_TEST
 
 #include "core/stdafx.h"
@@ -181,10 +182,10 @@ int cubeTest()
 	q_xo = 0.0;
 	q_yo = 0.0;
 	q_zo = 0.501;
-	q0_o = core::QUAT_ZERO.w;
-	q1_o = core::QUAT_ZERO.x;
-	q2_o = core::QUAT_ZERO.y;
-	q3_o = core::QUAT_ZERO.z;
+	q0_o = core::QUAT_IDENTITY.w;
+	q1_o = core::QUAT_IDENTITY.x;
+	q2_o = core::QUAT_IDENTITY.y;
+	q3_o = core::QUAT_IDENTITY.z;
 	v_xo = 1.0;
 	v_yo = 1.0;
 	v_zo = 0.0;
@@ -275,7 +276,7 @@ int funcEval(int n, double* z, double* F)
 
 	return 0;
 }
-// column_starting_indices is actually called column_start
+
 int jacEval(int n, int nnz, double* z, int* column_starting_indices,
 	int* len_of_each_column, int* row_index_of_each_value, double* values)
 {
@@ -520,11 +521,14 @@ int jacEval(int n, int nnz, double* z, int* column_starting_indices,
 
 	std::cout << std::endl; // this is a comment
 #endif
-	
-	return 0;
+	if (N_J3 == 0.0)
+		return 1;
+	else
+		return 0;
 }
 
 #undef EXTRACT_VARS_FROM_Z
 #undef CALCULATE_INTERMEDIATE_VARS
 
+#endif
 #endif

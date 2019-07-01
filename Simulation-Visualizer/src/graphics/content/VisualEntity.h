@@ -1,6 +1,7 @@
 #pragma once
 #include "graphics/Renderable.h"
 #include "glm/gtx/quaternion.hpp"
+#include "core/Definitions.h"
 
 namespace graphics {
 
@@ -14,11 +15,13 @@ namespace graphics {
 			SOLID_COLOR
 		} style;
 		glm::vec4 color; // only used for Style::SOLID_COLOR
+		float shadeFactor;
 
 	public:
 		VisualEntity(glm::vec3 position = glm::vec3(0.0f),
-			glm::quat orientation = glm::angleAxis(0.0f, glm::vec3(1.0f, 0.0f, 0.0f)),
-			Style style = Style::MULTICOLOR, glm::vec4 color = glm::vec4(0.0f)
+			glm::quat orientation = core::QUAT_IDENTITY,
+			Style style = Style::MULTICOLOR, glm::vec4 color = glm::vec4(0.0f),
+			float shadeFactor = 0.0f
 		);
 		virtual ~VisualEntity();
 

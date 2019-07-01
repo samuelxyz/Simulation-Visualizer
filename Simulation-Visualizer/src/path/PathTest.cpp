@@ -1,4 +1,5 @@
 #include "core/Definitions.h"
+#ifndef DECLARE_PATH_FUNCS_IN_MAIN
 #ifndef DO_CUBE_TEST
 
 extern "C" {
@@ -67,4 +68,5 @@ int jacEval(int n, int nnz, double* z, int* column_starting_indices,
 	return 0;
 }
 
+#endif
 #endif
