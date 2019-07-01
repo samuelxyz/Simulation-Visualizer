@@ -1,21 +1,21 @@
 #include "core/stdafx.h"
+#include "core/Definitions.h"
 #include "VisualBox.h"
-#include "math/MathUtils.h"
 
 namespace graphics {
 
 	VisualBox::VisualBox(glm::vec3 position, glm::quat orientation, 
 		float xMin, float xMax, float yMin, float yMax, float zMin, float zMax,
-		Style style, glm::vec4 color)
-		: VisualEntity(position, orientation, style, color),
+		Style style, glm::vec4 color, float shadeFactor)
+		: VisualEntity(position, orientation, style, color, shadeFactor),
 		xMin(xMin), xMax(xMax), yMin(yMin), yMax(yMax), zMin(zMin), zMax(zMax)
 	{
 	}
 
 	VisualBox::VisualBox(glm::vec3 start, glm::vec3 length, float thickness, glm::vec3 up,
-		Style style, glm::vec4 color)
-		: VisualEntity(position, math::lookToward(length, up), style, color), 
-		xMin(-thickness), xMax(thickness + length.length()), 
+		Style style, glm::vec4 color, float shadeFactor)
+		: VisualEntity(start, core::quatLookAt(length, up), style, color, shadeFactor),
+		xMin(-thickness), xMax(thickness + glm::length(length)), 
 		yMin(-thickness), yMax(thickness), zMin(-thickness), zMax(thickness)
 	{
 	}
@@ -29,16 +29,26 @@ namespace graphics {
 		glm::vec3 vertices[]
 		{
 			toWorldFrame(glm::vec3{ xMin, yMin, zMin }), // 0
-			toWorldFrame(glm::vec3{ xMin, yMin, zMax }), // 1
-			toWorldFrame(glm::vec3{ xMin, yMax, zMin }), // 2
-			toWorldFrame(glm::vec3{ xMin, yMax, zMax }), // 3
-			toWorldFrame(glm::vec3{ xMax, yMin, zMin }), // 4
-			toWorldFrame(glm::vec3{ xMax, yMin, zMax }), // 5
-			toWorldFrame(glm::vec3{ xMax, yMax, zMin }), // 6
-			toWorldFrame(glm::vec3{ xMax, yMax, zMax }), // 7
+			toWorldFrame(glm::vec3{ xMin, yMin, zMax }, true), // 1
+			toWorldFrame(glm::vec3{ xMin, yMax, zMin }, true), // 2
+			toWorldFrame(glm::vec3{ xMin, yMax, zMax }, true), // 3
+			toWorldFrame(glm::vec3{ xMax, yMin, zMin }, true), // 4
+			toWorldFrame(glm::vec3{ xMax, yMin, zMax }, true), // 5
+			toWorldFrame(glm::vec3{ xMax, yMax, zMin }, true), // 6
+			toWorldFrame(glm::vec3{ xMax, yMax, zMax }, true), // 7
 		};
 
-		glm::vec4 colorMinusX, colorPlusX, colorMinusY, colorPlusY, colorMinusZ, colorPlusZ;
+		glm::vec4 colors[6];
+		
+		// names
+		glm::vec4 
+			& colorMinusX	= colors[0], 
+			& colorPlusX	= colors[1], 
+			& colorMinusY	= colors[2], 
+			& colorPlusY	= colors[3], 
+			& colorMinusZ	= colors[4], 
+			& colorPlusZ	= colors[5];
+
 		if (style == Style::MULTICOLOR)
 		{
 			colorMinusX = graphics::COLOR_CYAN;
@@ -48,14 +58,33 @@ namespace graphics {
 			colorMinusZ = graphics::COLOR_YELLOW;
 			colorPlusZ  = graphics::COLOR_BLUE;
 		}
-		else // style == Style::SOLID_COLOR
+		else // if (style == Style::SOLID_COLOR)
 		{
-			colorMinusX = color;
-			colorPlusX  = color;
-			colorMinusY = color;
-			colorPlusY  = color;
-			colorMinusZ = color;
-			colorPlusZ  = color;
+			for (glm::vec4& c : colors)
+				c = color;
+		}
+
+		if (shadeFactor != 0.0f)
+		{
+			glm::mat3 orientMat = glm::toMat3(orientation);
+
+			// should be within [-1, 1]
+			float multipliers[]
+			{
+				(orientMat * glm::vec3{ -1.0f,  0.0f,  0.0f }).z,
+				(orientMat * glm::vec3{  1.0f,  0.0f,  0.0f }).z,
+				(orientMat * glm::vec3{  0.0f, -1.0f,  0.0f }).z,
+				(orientMat * glm::vec3{  0.0f,  1.0f,  0.0f }).z,
+				(orientMat * glm::vec3{  0.0f,  0.0f, -1.0f }).z,
+				(orientMat * glm::vec3{  0.0f,  0.0f,  1.0f }).z
+			};
+
+			for (int i = 0; i < 6; ++i)
+			{
+				colors[i] = glm::mix(colors[i], COLOR_BLACK,
+					((std::cos(core::mapRange(multipliers[i], -1.0f, 1.0f, 0.0f, core::PI)) + 1.0f)/2.0f)
+					* shadeFactor);
+			}
 		}
 
 		graphics::Quad sides[]

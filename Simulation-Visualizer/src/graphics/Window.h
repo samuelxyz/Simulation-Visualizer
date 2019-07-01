@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include "core/Definitions.h"
 #include "core/Simulation.h"
 #include "graphics/Renderable.h"
 #include "graphics/Camera.h"
@@ -38,7 +39,6 @@ namespace graphics {
 			bool dragging;
 		} mouseTracker;
 
-
 	public:
 		Window();
 		virtual ~Window();
@@ -73,6 +73,7 @@ namespace graphics {
 	private:
 
 		static Window* getWindow(GLFWwindow*); // from window user pointer
+		static bool guiMouseCheck(GLFWwindow*); // ~ImGui::GetIO().WantCaptureMouse
 
 	};
 

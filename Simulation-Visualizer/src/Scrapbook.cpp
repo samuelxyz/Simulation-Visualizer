@@ -26,6 +26,20 @@ void writeOut(Eigen::SparseMatrix<float>& mat, int valnum, int innernum, int out
 
 int scrapbook()
 {
+	std::cout << "Isnormal:" << 
+		"\nNaN\t" << std::isnormal(NAN) <<
+		"\n-NaN\t" << std::isnormal(-NAN) <<
+		"\nInf\t" << std::isnormal(INFINITY) <<
+		"\n-Inf\t" << std::isnormal(-INFINITY) <<
+		"\n1.0\t" << std::isnormal(1.0) <<
+		"\n-1.0\t" << std::isnormal(-1.0) << 
+		"\n1e-12\t" << std::isnormal(1e-12) <<std::endl;
+
+	return 0;
+}
+
+int scrapbookOld()
+{
 	Eigen::SparseMatrix<float> mat(5,5);
 	mat.insert(3, 4) = 17.0f;
 	mat.insert(0, 2) = 9.0f;

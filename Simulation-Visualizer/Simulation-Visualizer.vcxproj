@@ -77,7 +77,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)Dependencies\Eigen\include\;$(ProjectDir)Dependencies\pathlib\include\;$(SolutionDir)GLFW\include\;$(ProjectDir)Dependencies\glm\;$(ProjectDir)Dependencies\imgui\;$(ProjectDir)Dependencies\GLEW\include\;$(ProjectDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Dependencies\Eigen\include\;$(ProjectDir)Dependencies\pathlib\include\;$(SolutionDir)GLFW\include\;$(ProjectDir)Dependencies\glm\;$(ProjectDir)Dependencies\imgui\;$(ProjectDir)Dependencies\GLEW\include\;$(ProjectDir)Dependencies\fmt\include\;$(ProjectDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>IMGUI_IMPL_OPENGL_LOADER_GLEW;GLEW_STATIC;GLM_ENABLE_EXPERIMENTAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Dependencies\fmt\src\format.cc" />
     <ClCompile Include="Dependencies\imgui\imgui\imgui.cpp">
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ForcedIncludeFiles>
@@ -254,7 +255,6 @@
     <ClCompile Include="src\graphics\VertexBuffer.cpp" />
     <ClCompile Include="src\graphics\Window.cpp" />
     <ClCompile Include="src\core\Main.cpp" />
-    <ClCompile Include="src\math\MathUtils.cpp" />
     <ClCompile Include="src\path\CubeTest.cpp" />
     <ClCompile Include="src\path\PathTest.cpp" />
     <ClCompile Include="src\path\StandalonePath.c">
@@ -293,7 +293,6 @@
     <ClInclude Include="src\core\Definitions.h" />
     <ClInclude Include="src\entity\Entity.h" />
     <ClInclude Include="src\entity\Box.h" />
-    <ClInclude Include="src\graphics\Definitions.h" />
     <ClInclude Include="src\graphics\IndexBuffer.h" />
     <ClInclude Include="src\graphics\Renderable.h" />
     <ClInclude Include="src\graphics\Renderer.h" />
@@ -302,7 +301,6 @@
     <ClInclude Include="src\graphics\VertexArray.h" />
     <ClInclude Include="src\graphics\VertexBuffer.h" />
     <ClInclude Include="src\graphics\Window.h" />
-    <ClInclude Include="src\math\MathUtils.h" />
     <ClInclude Include="src\graphics\content\VisualBox.h" />
     <ClInclude Include="src\graphics\content\VisualEntity.h" />
     <ClInclude Include="src\graphics\content\VisualSphere.h" />

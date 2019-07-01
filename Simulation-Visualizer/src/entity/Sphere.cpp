@@ -4,7 +4,7 @@
 
 namespace entity {
 
-	Sphere::Sphere(std::string entityName, glm::vec3 position, glm::quat orientation, glm::vec3 velocity, glm::quat angVel,
+	Sphere::Sphere(std::string entityName, glm::vec3 position, glm::quat orientation, glm::vec3 velocity, glm::vec3 angVel,
 		float mass, glm::mat3 rotInertia, float radius)
 		: Entity(entityName, position, orientation, velocity, angVel, mass, rotInertia, "EntitySphere"),
 		radius(radius),
@@ -18,7 +18,12 @@ namespace entity {
 
 	bool Sphere::containsPoint(glm::vec3 worldPoint) const
 	{
-		return (worldPoint - position).length() <= radius;
+		return glm::length(worldPoint - position) <= radius;
+	}
+
+	bool Sphere::intersectsFloor() const
+	{
+		return position.z - radius <= core::FLOOR_Z;
 	}
 
 	void Sphere::render(graphics::Renderer & renderer) const

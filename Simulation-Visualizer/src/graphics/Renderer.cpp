@@ -5,7 +5,7 @@
  *      Author: Samuel Tan
  */
 
-#include "graphics/Definitions.h"
+#include "core/Definitions.h"
 #include "graphics/Renderer.h"
 #include "graphics/IndexBuffer.h"
 #include "graphics/VertexArray.h"

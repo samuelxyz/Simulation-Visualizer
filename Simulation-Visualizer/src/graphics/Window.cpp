@@ -1,9 +1,10 @@
 #include "graphics/Window.h"
-#include "graphics/Definitions.h"
+#include "core/Definitions.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
+#include <imgui/imgui_internal.h>
 
 #include <cassert>
 #include <iostream>
@@ -22,6 +23,7 @@ namespace graphics {
 		glfwWindowHint(GLFW_SAMPLES, 4);
 		glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
 		//glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+		glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
 
 		/* Create a windowed mode window and its OpenGL context */
 		glfwWindow = glfwCreateWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT,
@@ -39,7 +41,7 @@ namespace graphics {
 		glfwSetMouseButtonCallback(glfwWindow, handleMouseButton);
 		glfwSetScrollCallback(glfwWindow, handleScroll);
 
-		glfwSetWindowPos(glfwWindow, 50, 50);
+		//glfwSetWindowPos(glfwWindow, 50, 50);
 		glfwShowWindow(glfwWindow);
 
 		/* Make the window's context current */
@@ -135,15 +137,19 @@ namespace graphics {
 
 	void Window::render()
 	{
-		Renderer::clearScreen();
-
 		int width, height;
 		getDimensions(&width, &height);
+
+		if (!(width > 0 && height > 0))
+			return; // window is minimized or something
+
+		Renderer::clearScreen();
+
 		camera.updateWindowDims(width, height);
 		renderer.updateCamera(camera.getVPMatrix());
 
 		if (simulation != nullptr)
-			simulation->render(renderer);
+			simulation->render(renderer, camera.getPosition());
 		renderer.renderAndClearAll();
 
 		// GUI WIP code
@@ -152,7 +158,7 @@ namespace graphics {
 		renderer.clearDepth();
 		guiOverlay.render(renderer);
 		if (simulation != nullptr)
-			simulation->renderGUIOverlay(renderer);
+			simulation->renderGUIOverlay(renderer, camera);
 
 		//glm::vec4 testColor(1.0f, 0.0f, 1.0f, 1.0f);
 		//graphics::Triangle testGuiTriangle { {
@@ -185,17 +191,17 @@ namespace graphics {
 		renderable.render(renderer);
 	}
 
-	void Window::directRender(const graphics::Triangle & tri)
+	void Window::directRender(const graphics::Triangle& tri)
 	{
 		renderer.submit(tri);
 	}
 
-	void Window::directRender(const graphics::Quad & quad)
+	void Window::directRender(const graphics::Quad& quad)
 	{
 		renderer.submit(quad);
 	}
 
-	void Window::directRender(const graphics::CenteredPoly & cp)
+	void Window::directRender(const graphics::CenteredPoly& cp)
 	{
 		renderer.submit(cp);
 	}
@@ -240,13 +246,14 @@ namespace graphics {
 
 	void Window::handleMouseMotion(GLFWwindow* glfwWindow, double xpos, double ypos)
 	{
-		if (ImGui::GetIO().WantCaptureMouse)
+		if (guiMouseCheck(glfwWindow))
 			return;
 
 		Window* window = getWindow(glfwWindow);
 
 		if (window != nullptr && window->initialized && window->mouseTracker.dragging && 
-			glfwGetMouseButton(glfwWindow, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+			(glfwGetMouseButton(glfwWindow, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS ||
+				glfwGetMouseButton(glfwWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS))
 		{
 			int windowHeight;
 			window->getDimensions(nullptr, &windowHeight);
@@ -259,7 +266,11 @@ namespace graphics {
 
 			//std::cout << "dx: " << dx << ", dy: " << dy << std::endl;
 
-			window->camera.handleMouseMotion(dx, dy);
+			if (glfwGetMouseButton(glfwWindow, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+				window->camera.handleLeftMouseMotion(dx, dy);
+			if (glfwGetMouseButton(glfwWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+				window->camera.handleRightMouseMotion(dx, dy, 
+					getWindow(glfwWindow)->simulation->getFocusedEntityPosition());
 
 			window->mouseTracker.prevX = x;
 			window->mouseTracker.prevY = y;
@@ -269,10 +280,10 @@ namespace graphics {
 	void Window::handleMouseButton(GLFWwindow* glfwWindow, int button, int action,
 		int mods)
 	{
-		if (ImGui::GetIO().WantCaptureMouse)
+		if (guiMouseCheck(glfwWindow))
 			return;
 
-		if (button == GLFW_MOUSE_BUTTON_LEFT)
+		if (button == GLFW_MOUSE_BUTTON_LEFT || button == GLFW_MOUSE_BUTTON_RIGHT)
 		{
 			Window* window = getWindow(glfwWindow);
 
@@ -300,17 +311,36 @@ namespace graphics {
 
 	void Window::handleScroll(GLFWwindow* glfwWindow, double xoffset, double yoffset)
 	{
-		if (ImGui::GetIO().WantCaptureMouse)
+		if (guiMouseCheck(glfwWindow))
 			return;
 
 		Window* window = getWindow(glfwWindow);
 		if (window != nullptr && window->initialized)
-			window->camera.handleScroll(static_cast<float>(yoffset));
+			window->camera.handleScroll(static_cast<float>(yoffset), glfwWindow,
+				window->simulation->getFocusedEntityPosition());
 	}
 
 	Window* Window::getWindow(GLFWwindow* glfwWindow)
 	{
 		return (Window*)glfwGetWindowUserPointer(glfwWindow);
+	}
+
+	bool Window::guiMouseCheck(GLFWwindow* window)
+	{
+		if (ImGui::GetIO().WantCaptureMouse)
+		{
+			if (ImGui::GetCurrentContext()->HoveredWindow != nullptr &&
+				(ImGui::GetCurrentContext()->HoveredWindow->Flags & ImGuiWindowFlags_NoBackground))
+				// we are hovering over a label, doesn't count
+				return false;
+			else if (ImGui::GetCurrentContext()->ActiveIdWindow != nullptr &&
+				(ImGui::GetCurrentContext()->ActiveIdWindow->Flags & ImGuiWindowFlags_NoBackground))
+				// same here
+				return false;
+			else
+				return true;
+		}
+		return false;
 	}
 
 } /* namespace graphics */

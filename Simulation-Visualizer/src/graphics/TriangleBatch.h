@@ -12,7 +12,7 @@
 #include "graphics/ShaderProgram.h"
 #include "graphics/VertexArray.h"
 #include "graphics/VertexBuffer.h"
-#include "graphics/Definitions.h"
+#include "core/Definitions.h"
 
 namespace graphics
 {
