@@ -768,9 +768,20 @@ namespace core {
 
 	void Simulation::render(graphics::Renderer& renderer, const glm::vec3& cameraPos) const
 	{
-		if (parameters.showEnvironment)
-			renderEnvironment(renderer);
-		renderEntities(renderer, cameraPos);
+		if (cameraPos.z > core::FLOOR_Z)
+		{
+			if (parameters.showEnvironment)
+				renderEnvironment(renderer);
+			renderEntities(renderer, cameraPos);
+		}
+		else // reverse the rendering order
+		{
+			renderEntities(renderer, cameraPos);
+			if (parameters.showEnvironment)
+				renderEnvironment(renderer);
+		}
+
+
 	}
 
 	void Simulation::renderGUI(const graphics::Camera& camera)
@@ -1007,7 +1018,9 @@ namespace core {
 				if (std::abs(std::fmodf(i+j, 2.0f)) < 1e-3)
 					squareColor = graphics::COLOR_WHITE;
 				else
-					squareColor = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f); // gray
+					squareColor = glm::vec4(0.6f, 0.6f, 0.6f, 0.5f); // gray
+
+				squareColor.a = 0.5f;
 
 				renderer.submit(graphics::Quad {{
 					{ squareColor, glm::vec3(i, j, core::FLOOR_Z) },
