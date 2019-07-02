@@ -124,6 +124,7 @@ namespace core {
 		const glm::vec3& getFocusedEntityPosition() const;
 
 		int addSteps(Simulation::Timeline& timeline, int numSteps);
+		int addStepsUntilEnd(Simulation::Timeline& timeline);
 		void recordTimestep(entity::Entity*);
 		// Returns true on success
 		bool addFreefallStep(entity::Entity*);

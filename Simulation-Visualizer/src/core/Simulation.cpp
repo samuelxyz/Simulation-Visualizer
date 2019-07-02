@@ -581,6 +581,72 @@ namespace core {
 		return successes;
 	}
 
+	int Simulation::addStepsUntilEnd(Simulation::Timeline & timeline)
+	{
+		static constexpr int max = 1000;
+
+		// start from current state, replacing any existing version of events
+		timeline.erase(timeline.begin() + parameters.currentStep, timeline.end());
+		recordTimestep(pathSim.box);
+
+		int successes = 0;
+		bool usePath = false; // start with freefall since it's fast to compute
+		bool lastPathSuccessful = true;
+		bool lastFreefallSuccessful = true;
+
+		while (true)
+		{
+			if (usePath)
+			{
+				// try a path step
+				pathSim.box->loadState(timeline.back());
+				pathSim.captureBoxState();
+				pathSim.printZ();
+				pathSim.printCache();
+				if (pathSim.addStep(timeline))
+				{
+					lastPathSuccessful = true;
+					++successes;
+				}
+				else
+				{
+					// path not successful
+					lastPathSuccessful = false;
+					if (lastFreefallSuccessful)
+						usePath = false; // switch to freefall
+					else
+						return successes; // neither method is working
+				}
+			}
+			else
+			{
+				// try a freefall step
+				if (addFreefallStep(pathSim.box))
+				{
+					lastFreefallSuccessful = true;
+					++successes;
+				}
+				else
+				{
+					// freefall not successful
+					lastFreefallSuccessful = false;
+					if (lastPathSuccessful)
+						usePath = true; // switch to path
+					else
+						return successes; // neither method is working
+				}
+			}
+
+			if (glm::length2(timeline.back().velocity) < 1e-6f &&
+				glm::length2(timeline.back().angVelocity) < 1e-6f)
+				return successes; // everything stopped, we're done
+
+			if (successes > max)
+				return successes;
+		}
+		return successes;
+	}
+
 	// Does not record contact point
 	void Simulation::recordTimestep(entity::Entity* e)
 	{
@@ -824,6 +890,14 @@ namespace core {
 					parameters.timePaused = false;
 					parameters.loopPlayback = false;
 				}
+				if (ImGui::Button("Calculate Until Stop"))
+				{
+					addStepsUntilEnd(timeline);
+					parameters.timePaused = false;
+					parameters.loopPlayback = false;
+				}
+			}
+			{
 				ImGui::Separator();
 				ImGui::Text("FPS: %.0f", fps);
 			}
