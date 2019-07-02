@@ -239,7 +239,7 @@ namespace core {
 		J1(2, 23) = 1.0;
 		J1.block<3, 3>(3, 3) << -I11, -I12, -I13, -I21, -I22, -I23, -I31, -I32, -I33;
 		J1.block<3, 3>(3, 6) << 0.0, p_n, -p_o, -p_n, 0.0, p_t, p_o, -p_t, 0.0;
-		J1.block<3, 2>(3, 13) << 0.0, q_z-a1_z, a1_z-q_z, 0.0, q_y-a1_y, a1_x-q_x;
+		J1.block<3, 2>(3, 12) << 0.0, q_z-a1_z, a1_z-q_z, 0.0, q_y-a1_y, a1_x-q_x;
 		J1.col(23).segment(3, 2) << a1_y-q_y, q_x-a1_x;
 		J1(5, 14) = 1.0;
 		J1.block<3, 9>(3, 33) << w_xo - w_x, w_yo - w_y, w_zo - w_z, h*w_xo*w_zo, h*w_yo*w_zo, h*w_zo*w_zo, -h*w_xo*w_yo, -h*w_yo*w_yo, -h*w_yo*w_zo,
@@ -252,22 +252,20 @@ namespace core {
 		J1.block<3, 3>(6, 3) << 0.0, e_t*e_t*mu*p_n*(a1_z - q_z), -e_t*e_t*mu*p_n*(a1_y - q_y),
 			-e_o*e_o*mu*p_n*(a1_z - q_z), 0.0, e_o*e_o*mu*p_n*(a1_x - q_x),
 			0.0, 0.0, e_r*e_r*mu*p_n;
-		J1.block<3, 3>(6, 6) << 0.0, -e_t*e_t*mu*p_n*w_z, e_t*e_t*mu*p_n*w_y,
-			e_o*e_o*mu*p_n*w_z, 0.0, -e_o*e_o*mu*p_n*w_x,
-			0.0, 0.0, 0.0;
+		J1.block<2, 3>(6, 6) << 0.0, -e_t*e_t*mu*p_n*w_z, e_t*e_t*mu*p_n*w_y,
+			e_o*e_o*mu*p_n*w_z, 0.0, -e_o*e_o*mu*p_n*w_x;
 		J1.block<3, 3>(6, 12) = sig*Eigen::Matrix3d::Identity();
 		J1.col(15).segment(6, 3) << p_t, p_o, p_r;
 		J1.col(23).segment(6, 3) << e_t*e_t*mu*v_x - e_t*e_t*mu*w_z*(a1_y - q_y) + e_t*e_t*mu*w_y*(a1_z - q_z),
 			e_o*e_o*mu*v_y + e_o*e_o*mu*w_z*(a1_x - q_x) - e_o*e_o*mu*w_x*(a1_z - q_z),
 			e_r*e_r*mu*w_z;
-		J1.block<3, 3>(6, 42) << 0.0, e_t*e_t*mu*p_n*w_z, -e_t*e_t*mu*p_n*w_y,
-			-e_o*e_o*mu*p_n*w_z, 0.0, e_o*e_o*mu*p_n*w_x,
-			0.0, 0.0, 0.0;
+		J1.block<2, 3>(6, 42) << 0.0, e_t*e_t*mu*p_n*w_z, -e_t*e_t*mu*p_n*w_y,
+			-e_o*e_o*mu*p_n*w_z, 0.0, e_o*e_o*mu*p_n*w_x;
 
 		//	// contact constraints without complementarity equation
 		J1.block<3, 3>(9, 6) = -Eigen::Matrix3d::Identity();
 		J1.block<3, 3>(9, 9).setIdentity();
-		J1(11, 23) = 1.0;
+		J1(11, 22) = 1.0;
 
 		J1.block<3, 6>(12, 16) << -R11, R11, -R12, R12, -R13, R13,
 			-R21, R21, -R22, R22, -R23, R23,
@@ -315,25 +313,27 @@ namespace core {
 			2*q1, 2*q0, 2*q3, 2*q2,
 			2*q0, -2*q1, -2*q2, 2*q3;
 
-		J2.block<9, 4>(33, 24) << 4*I_xx*R11*q0 - 4*I_yy*R12*q3 + 4*I_zz*R13*q2, 4*I_xx*R11*q1 + 4*I_yy*R12*q2 + 4*I_zz*R13*q3, 4*I_yy*R12*q1 - 4*I_xx*R11*q2 + 4*I_zz*R13*q0, 4*I_zz*R13*q1 - 4*I_yy*R12*q0 - 4*I_xx*R11*q3,
-			2*I_xx*R11*q3 + 2*I_xx*R21*q0 + 2*I_yy*R12*q0 - 2*I_yy*R22*q3 - 2*I_zz*R13*q1 + 2*I_zz*R23*q2, 2*I_xx*R11*q2 + 2*I_xx*R21*q1 - 2*I_yy*R12*q1 + 2*I_yy*R22*q2 - 2*I_zz*R13*q0 + 2*I_zz*R23*q3, 2*I_xx*R11*q1 - 2*I_xx*R21*q2 + 2*I_yy*R12*q2 + 2*I_yy*R22*q1 + 2*I_zz*R13*q3 + 2*I_zz*R23*q0, 2*I_xx*R11*q0 - 2*I_xx*R21*q3 - 2*I_yy*R12*q3 - 2*I_yy*R22*q0 + 2*I_zz*R13*q2 + 2*I_zz*R23*q1,
-			2*I_xx*R31*q0 - 2*I_xx*R11*q2 + 2*I_yy*R12*q1 - 2*I_yy*R32*q3 + 2*I_zz*R13*q0 + 2*I_zz*R33*q2, 2*I_xx*R11*q3 + 2*I_xx*R31*q1 + 2*I_yy*R12*q0 + 2*I_yy*R32*q2 - 2*I_zz*R13*q1 + 2*I_zz*R33*q3, 2*I_yy*R12*q3 - 2*I_xx*R31*q2 - 2*I_xx*R11*q0 + 2*I_yy*R32*q1 - 2*I_zz*R13*q2 + 2*I_zz*R33*q0, 2*I_xx*R11*q1 - 2*I_xx*R31*q3 + 2*I_yy*R12*q2 - 2*I_yy*R32*q0 + 2*I_zz*R13*q3 + 2*I_zz*R33*q1,
-			2*I_xx*R11*q3 + 2*I_xx*R21*q0 + 2*I_yy*R12*q0 - 2*I_yy*R22*q3 - 2*I_zz*R13*q1 + 2*I_zz*R23*q2, 2*I_xx*R11*q2 + 2*I_xx*R21*q1 - 2*I_yy*R12*q1 + 2*I_yy*R22*q2 - 2*I_zz*R13*q0 + 2*I_zz*R23*q3, 2*I_xx*R11*q1 - 2*I_xx*R21*q2 + 2*I_yy*R12*q2 + 2*I_yy*R22*q1 + 2*I_zz*R13*q3 + 2*I_zz*R23*q0, 2*I_xx*R11*q0 - 2*I_xx*R21*q3 - 2*I_yy*R12*q3 - 2*I_yy*R22*q0 + 2*I_zz*R13*q2 + 2*I_zz*R23*q1,
-			4*I_xx*R21*q3 + 4*I_yy*R22*q0 - 4*I_zz*R23*q1, 4*I_xx*R21*q2 - 4*I_yy*R22*q1 - 4*I_zz*R23*q0, 4*I_xx*R21*q1 + 4*I_yy*R22*q2 + 4*I_zz*R23*q3, 4*I_xx*R21*q0 - 4*I_yy*R22*q3 + 4*I_zz*R23*q2,
-			2*I_xx*R31*q3 - 2*I_xx*R21*q2 + 2*I_yy*R22*q1 + 2*I_yy*R32*q0 + 2*I_zz*R23*q0 - 2*I_zz*R33*q1, 2*I_xx*R21*q3 + 2*I_xx*R31*q2 + 2*I_yy*R22*q0 - 2*I_yy*R32*q1 - 2*I_zz*R23*q1 - 2*I_zz*R33*q0, 2*I_xx*R31*q1 - 2*I_xx*R21*q0 + 2*I_yy*R22*q3 + 2*I_yy*R32*q2 - 2*I_zz*R23*q2 + 2*I_zz*R33*q3, 2*I_xx*R21*q1 + 2*I_xx*R31*q0 + 2*I_yy*R22*q2 - 2*I_yy*R32*q3 + 2*I_zz*R23*q3 + 2*I_zz*R33*q2,
-			2*I_xx*R31*q0 - 2*I_xx*R11*q2 + 2*I_yy*R12*q1 - 2*I_yy*R32*q3 + 2*I_zz*R13*q0 + 2*I_zz*R33*q2, 2*I_xx*R11*q3 + 2*I_xx*R31*q1 + 2*I_yy*R12*q0 + 2*I_yy*R32*q2 - 2*I_zz*R13*q1 + 2*I_zz*R33*q3, 2*I_yy*R12*q3 - 2*I_xx*R31*q2 - 2*I_xx*R11*q0 + 2*I_yy*R32*q1 - 2*I_zz*R13*q2 + 2*I_zz*R33*q0, 2*I_xx*R11*q1 - 2*I_xx*R31*q3 + 2*I_yy*R12*q2 - 2*I_yy*R32*q0 + 2*I_zz*R13*q3 + 2*I_zz*R33*q1,
-			2*I_xx*R31*q3 - 2*I_xx*R21*q2 + 2*I_yy*R22*q1 + 2*I_yy*R32*q0 + 2*I_zz*R23*q0 - 2*I_zz*R33*q1, 2*I_xx*R21*q3 + 2*I_xx*R31*q2 + 2*I_yy*R22*q0 - 2*I_yy*R32*q1 - 2*I_zz*R23*q1 - 2*I_zz*R33*q0, 2*I_xx*R31*q1 - 2*I_xx*R21*q0 + 2*I_yy*R22*q3 + 2*I_yy*R32*q2 - 2*I_zz*R23*q2 + 2*I_zz*R33*q3, 2*I_xx*R21*q1 + 2*I_xx*R31*q0 + 2*I_yy*R22*q2 - 2*I_yy*R32*q3 + 2*I_zz*R23*q3 + 2*I_zz*R33*q2,
-			4*I_yy*R32*q1 - 4*I_xx*R31*q2 + 4*I_zz*R33*q0, 4*I_xx*R31*q3 + 4*I_yy*R32*q0 - 4*I_zz*R33*q1, 4*I_yy*R32*q3 - 4*I_xx*R31*q0 - 4*I_zz*R33*q2, 4*I_xx*R31*q1 + 4*I_yy*R32*q2 + 4*I_zz*R33*q3;
+		J2.block<9, 4>(33, 24) << 
+			4*I_xx*R11*q0 - 4*I_yy*R12*q3 + 4*I_zz*R13*q2,													4*I_xx*R11*q1 + 4*I_yy*R12*q2 + 4*I_zz*R13*q3,													4*I_yy*R12*q1 - 4*I_xx*R11*q2 + 4*I_zz*R13*q0,													4*I_zz*R13*q1 - 4*I_yy*R12*q0 - 4*I_xx*R11*q3,
+			2*I_xx*R11*q3 + 2*I_xx*R21*q0 + 2*I_yy*R12*q0 - 2*I_yy*R22*q3 - 2*I_zz*R13*q1 + 2*I_zz*R23*q2,	2*I_xx*R11*q2 + 2*I_xx*R21*q1 - 2*I_yy*R12*q1 + 2*I_yy*R22*q2 - 2*I_zz*R13*q0 + 2*I_zz*R23*q3,	2*I_xx*R11*q1 - 2*I_xx*R21*q2 + 2*I_yy*R12*q2 + 2*I_yy*R22*q1 + 2*I_zz*R13*q3 + 2*I_zz*R23*q0,	2*I_xx*R11*q0 - 2*I_xx*R21*q3 - 2*I_yy*R12*q3 - 2*I_yy*R22*q0 + 2*I_zz*R13*q2 + 2*I_zz*R23*q1,
+			2*I_xx*R31*q0 - 2*I_xx*R11*q2 + 2*I_yy*R12*q1 - 2*I_yy*R32*q3 + 2*I_zz*R13*q0 + 2*I_zz*R33*q2,	2*I_xx*R11*q3 + 2*I_xx*R31*q1 + 2*I_yy*R12*q0 + 2*I_yy*R32*q2 - 2*I_zz*R13*q1 + 2*I_zz*R33*q3,	2*I_yy*R12*q3 - 2*I_xx*R31*q2 - 2*I_xx*R11*q0 + 2*I_yy*R32*q1 - 2*I_zz*R13*q2 + 2*I_zz*R33*q0,	2*I_xx*R11*q1 - 2*I_xx*R31*q3 + 2*I_yy*R12*q2 - 2*I_yy*R32*q0 + 2*I_zz*R13*q3 + 2*I_zz*R33*q1,
+			2*I_xx*R11*q3 + 2*I_xx*R21*q0 + 2*I_yy*R12*q0 - 2*I_yy*R22*q3 - 2*I_zz*R13*q1 + 2*I_zz*R23*q2,	2*I_xx*R11*q2 + 2*I_xx*R21*q1 - 2*I_yy*R12*q1 + 2*I_yy*R22*q2 - 2*I_zz*R13*q0 + 2*I_zz*R23*q3,	2*I_xx*R11*q1 - 2*I_xx*R21*q2 + 2*I_yy*R12*q2 + 2*I_yy*R22*q1 + 2*I_zz*R13*q3 + 2*I_zz*R23*q0,	2*I_xx*R11*q0 - 2*I_xx*R21*q3 - 2*I_yy*R12*q3 - 2*I_yy*R22*q0 + 2*I_zz*R13*q2 + 2*I_zz*R23*q1,
+			4*I_xx*R21*q3 + 4*I_yy*R22*q0 - 4*I_zz*R23*q1,													4*I_xx*R21*q2 - 4*I_yy*R22*q1 - 4*I_zz*R23*q0,													4*I_xx*R21*q1 + 4*I_yy*R22*q2 + 4*I_zz*R23*q3,													4*I_xx*R21*q0 - 4*I_yy*R22*q3 + 4*I_zz*R23*q2,
+			2*I_xx*R31*q3 - 2*I_xx*R21*q2 + 2*I_yy*R22*q1 + 2*I_yy*R32*q0 + 2*I_zz*R23*q0 - 2*I_zz*R33*q1,	2*I_xx*R21*q3 + 2*I_xx*R31*q2 + 2*I_yy*R22*q0 - 2*I_yy*R32*q1 - 2*I_zz*R23*q1 - 2*I_zz*R33*q0,	2*I_xx*R31*q1 - 2*I_xx*R21*q0 + 2*I_yy*R22*q3 + 2*I_yy*R32*q2 - 2*I_zz*R23*q2 + 2*I_zz*R33*q3,	2*I_xx*R21*q1 + 2*I_xx*R31*q0 + 2*I_yy*R22*q2 - 2*I_yy*R32*q3 + 2*I_zz*R23*q3 + 2*I_zz*R33*q2,
+			2*I_xx*R31*q0 - 2*I_xx*R11*q2 + 2*I_yy*R12*q1 - 2*I_yy*R32*q3 + 2*I_zz*R13*q0 + 2*I_zz*R33*q2,	2*I_xx*R11*q3 + 2*I_xx*R31*q1 + 2*I_yy*R12*q0 + 2*I_yy*R32*q2 - 2*I_zz*R13*q1 + 2*I_zz*R33*q3,	2*I_yy*R12*q3 - 2*I_xx*R31*q2 - 2*I_xx*R11*q0 + 2*I_yy*R32*q1 - 2*I_zz*R13*q2 + 2*I_zz*R33*q0,	2*I_xx*R11*q1 - 2*I_xx*R31*q3 + 2*I_yy*R12*q2 - 2*I_yy*R32*q0 + 2*I_zz*R13*q3 + 2*I_zz*R33*q1,
+			2*I_xx*R31*q3 - 2*I_xx*R21*q2 + 2*I_yy*R22*q1 + 2*I_yy*R32*q0 + 2*I_zz*R23*q0 - 2*I_zz*R33*q1,	2*I_xx*R21*q3 + 2*I_xx*R31*q2 + 2*I_yy*R22*q0 - 2*I_yy*R32*q1 - 2*I_zz*R23*q1 - 2*I_zz*R33*q0,	2*I_xx*R31*q1 - 2*I_xx*R21*q0 + 2*I_yy*R22*q3 + 2*I_yy*R32*q2 - 2*I_zz*R23*q2 + 2*I_zz*R33*q3,	2*I_xx*R21*q1 + 2*I_xx*R31*q0 + 2*I_yy*R22*q2 - 2*I_yy*R32*q3 + 2*I_zz*R23*q3 + 2*I_zz*R33*q2,
+			4*I_yy*R32*q1 - 4*I_xx*R31*q2 + 4*I_zz*R33*q0,													4*I_xx*R31*q3 + 4*I_yy*R32*q0 - 4*I_zz*R33*q1,													4*I_yy*R32*q3 - 4*I_xx*R31*q0 - 4*I_zz*R33*q2,													4*I_xx*R31*q1 + 4*I_yy*R32*q2 + 4*I_zz*R33*q3;
 
 		J2.block<3, 3>(42, 0) = h*Eigen::Matrix3d::Identity();
 
 		Eigen::MatrixXd J3 = Eigen::MatrixXd::Zero(28, 24);
 		J3.topRows(24).setIdentity();
 		double N_J3 = std::pow(h*h*w_x*w_x + h*h*w_y*w_y + h*h*w_z*w_z + 4, 1.5);
-		J3.block<4, 3>(24, 3) << -(h*(q1_o*h*h*w_y*w_y - q2_o*w_x*h*h*w_y + q1_o*h*h*w_z*w_z - q3_o*w_x*h*h*w_z + 2*q0_o*w_x*h + 4*q1_o))/N_J3, -(h*(q2_o*h*h*w_x*w_x - q1_o*w_y*h*h*w_x + q2_o*h*h*w_z*w_z - q3_o*w_y*h*h*w_z + 2*q0_o*w_y*h + 4*q2_o))/N_J3, -(h*(q3_o*h*h*w_x*w_x - q1_o*w_z*h*h*w_x + q3_o*h*h*w_y*w_y - q2_o*w_z*h*h*w_y + 2*q0_o*w_z*h + 4*q3_o))/N_J3,
-			(h*(q0_o*h*h*w_y*w_y - q3_o*w_x*h*h*w_y + q0_o*h*h*w_z*w_z + q2_o*w_x*h*h*w_z - 2*q1_o*w_x*h + 4*q0_o))/N_J3, (h*(q3_o*h*h*w_x*w_x - q0_o*w_y*h*h*w_x + q3_o*h*h*w_z*w_z + q2_o*w_y*h*h*w_z - 2*q1_o*w_y*h + 4*q3_o))/N_J3, -(h*(q2_o*h*h*w_x*w_x + q0_o*w_z*h*h*w_x + q2_o*h*h*w_y*w_y + q3_o*w_z*h*h*w_y + 2*q1_o*w_z*h + 4*q2_o))/N_J3,
-			-(h*(q3_o*h*h*w_y*w_y + q0_o*w_x*h*h*w_y + q3_o*h*h*w_z*w_z + q1_o*w_x*h*h*w_z + 2*q2_o*w_x*h + 4*q3_o))/N_J3, (h*(q0_o*h*h*w_x*w_x + q3_o*w_y*h*h*w_x + q0_o*h*h*w_z*w_z - q1_o*w_y*h*h*w_z - 2*q2_o*w_y*h + 4*q0_o))/N_J3, (h*(q1_o*h*h*w_x*w_x + q3_o*w_z*h*h*w_x + q1_o*h*h*w_y*w_y - q0_o*w_z*h*h*w_y - 2*q2_o*w_z*h + 4*q1_o))/N_J3,
-			(h*(q2_o*h*h*w_y*w_y + q1_o*w_x*h*h*w_y + q2_o*h*h*w_z*w_z - q0_o*w_x*h*h*w_z - 2*q3_o*w_x*h + 4*q2_o))/N_J3, -(h*(q1_o*h*h*w_x*w_x + q2_o*w_y*h*h*w_x + q1_o*h*h*w_z*w_z + q0_o*w_y*h*h*w_z + 2*q3_o*w_y*h + 4*q1_o))/N_J3, (h*(q0_o*h*h*w_x*w_x - q2_o*w_z*h*h*w_x + q0_o*h*h*w_y*w_y + q1_o*w_z*h*h*w_y - 2*q3_o*w_z*h + 4*q0_o))/N_J3;
+		J3.block<4, 3>(24, 3) << 
+			-(h*(q1_o*h*h*w_y*w_y - q2_o*w_x*h*h*w_y + q1_o*h*h*w_z*w_z - q3_o*w_x*h*h*w_z + 2*q0_o*w_x*h + 4*q1_o))/N_J3, -(h*(q2_o*h*h*w_x*w_x - q1_o*w_y*h*h*w_x + q2_o*h*h*w_z*w_z - q3_o*w_y*h*h*w_z + 2*q0_o*w_y*h + 4*q2_o))/N_J3, -(h*(q3_o*h*h*w_x*w_x - q1_o*w_z*h*h*w_x + q3_o*h*h*w_y*w_y - q2_o*w_z*h*h*w_y + 2*q0_o*w_z*h + 4*q3_o))/N_J3,
+			 (h*(q0_o*h*h*w_y*w_y - q3_o*w_x*h*h*w_y + q0_o*h*h*w_z*w_z + q2_o*w_x*h*h*w_z - 2*q1_o*w_x*h + 4*q0_o))/N_J3,  (h*(q3_o*h*h*w_x*w_x - q0_o*w_y*h*h*w_x + q3_o*h*h*w_z*w_z + q2_o*w_y*h*h*w_z - 2*q1_o*w_y*h + 4*q3_o))/N_J3, -(h*(q2_o*h*h*w_x*w_x + q0_o*w_z*h*h*w_x + q2_o*h*h*w_y*w_y + q3_o*w_z*h*h*w_y + 2*q1_o*w_z*h + 4*q2_o))/N_J3,
+			-(h*(q3_o*h*h*w_y*w_y + q0_o*w_x*h*h*w_y + q3_o*h*h*w_z*w_z + q1_o*w_x*h*h*w_z + 2*q2_o*w_x*h + 4*q3_o))/N_J3,  (h*(q0_o*h*h*w_x*w_x + q3_o*w_y*h*h*w_x + q0_o*h*h*w_z*w_z - q1_o*w_y*h*h*w_z - 2*q2_o*w_y*h + 4*q0_o))/N_J3,  (h*(q1_o*h*h*w_x*w_x + q3_o*w_z*h*h*w_x + q1_o*h*h*w_y*w_y - q0_o*w_z*h*h*w_y - 2*q2_o*w_z*h + 4*q1_o))/N_J3,
+			 (h*(q2_o*h*h*w_y*w_y + q1_o*w_x*h*h*w_y + q2_o*h*h*w_z*w_z - q0_o*w_x*h*h*w_z - 2*q3_o*w_x*h + 4*q2_o))/N_J3, -(h*(q1_o*h*h*w_x*w_x + q2_o*w_y*h*h*w_x + q1_o*h*h*w_z*w_z + q0_o*w_y*h*h*w_z + 2*q3_o*w_y*h + 4*q1_o))/N_J3,  (h*(q0_o*h*h*w_x*w_x - q2_o*w_z*h*h*w_x + q0_o*h*h*w_y*w_y + q1_o*w_z*h*h*w_y - 2*q3_o*w_z*h + 4*q0_o))/N_J3;
 
 		Eigen::SparseMatrix<double> J = Eigen::SparseView<Eigen::MatrixXd>(J1*J2*J3, 1.0).cast<double>();
 		J.makeCompressed();
