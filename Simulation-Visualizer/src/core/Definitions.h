@@ -1,6 +1,7 @@
 #pragma once
 #include "glm/vec3.hpp"
 #include "glm/gtx/quaternion.hpp"
+#include <vector>
 
 #define LAUNCH_DIRECT
 #define DECLARE_PATH_FUNCS_IN_MAIN
@@ -65,6 +66,32 @@ namespace core {
 	{
 		return (val - minOld) * (maxNew - minNew) / (maxOld - minOld) + minNew;
 	}
+
+	struct Timestep
+	{
+		glm::vec3 position;
+		glm::quat orientation;
+		glm::vec3 velocity;
+		glm::vec3 angVelocity;
+		glm::vec3 contactPoint; // if no contact point (freefall) then this will equal position
+
+		Timestep(
+			const glm::vec3& position, const glm::quat& orientation,
+			const glm::vec3& velocity, const glm::vec3& angVelocity,
+			const glm::vec3& contactPoint)
+			: position(position), orientation(orientation), velocity(velocity),
+			angVelocity(angVelocity), contactPoint(contactPoint)
+		{
+		}
+
+		bool hasContactPoint() const { return position != contactPoint; }
+	};
+
+	struct Timeline : public std::vector<Timestep>
+	{
+		float timeOf(int timestepIndex) const { return timestepIndex * core::TIME_STEP; }
+		float backTime() const { return timeOf(size() - 1); }
+	};
 }
 
 namespace graphics {

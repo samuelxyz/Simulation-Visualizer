@@ -212,7 +212,7 @@ namespace entity {
 			);
 	}
 
-	void Entity::loadState(core::Simulation::Timestep& timestep)
+	void Entity::loadState(core::Timestep& timestep)
 	{
 		position = timestep.position;
 		orientation = timestep.orientation;

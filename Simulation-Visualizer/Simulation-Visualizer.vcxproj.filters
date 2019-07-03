@@ -105,6 +105,12 @@
     <ClCompile Include="Dependencies\fmt\src\format.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\core\PathSim.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\PathSimBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\graphics\Window.h">
@@ -186,6 +192,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\entity\Sphere.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\PathSim.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\PathSimBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

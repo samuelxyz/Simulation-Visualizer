@@ -40,7 +40,7 @@ namespace entity {
 		const glm::mat3& getRotInertia() const { return rotInertia; }
 		virtual float getShadowRadius() const = 0;
 		virtual bool intersectsFloor() const = 0;
-		void loadState(core::Simulation::Timestep&);
+		void loadState(core::Timestep&);
 
 		// world frame
 		void applyLinearImpulse(glm::vec3);

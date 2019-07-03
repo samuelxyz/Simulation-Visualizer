@@ -4,6 +4,7 @@
 #include "entity/Box.h"
 #include "entity/Sphere.h"
 #include "core/Simulation.h"
+#include "core/PathSimBox.h"
 extern "C" {
 #include "path_standalone/Standalone_Path.h"
 }
@@ -13,14 +14,14 @@ core::Simulation* globalSim;
 int window()
 {
 	graphics::Window window;
-	core::Simulation simulation;
+	core::Simulation simulation(new core::PathSimBox);
 	window.setSimulation(&simulation);
 	globalSim = &simulation;
 
 	entity::Box* box = new entity::Box("Box1",
 		glm::vec3(0.0f, 0.0f, 1.0f), core::QUAT_IDENTITY, glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(0.0f)
 	);
-	simulation.pathSim.setBox(box);
+	simulation.pathSim->setTarget(box);
 	simulation.add(box);
 
 	//simulation.add(new entity::Sphere("Sphere1",
@@ -83,13 +84,13 @@ int main()
 
 int funcEval(int n, double* z, double* F)
 {
-	return globalSim->pathSim.cubeFuncEval(z, F);
+	return globalSim->pathSim->funcEval(z, F);
 }
 
 int jacEval(int n, int nnz, double* z, int* column_starting_indices,
 	int* len_of_each_column, int* row_index_of_each_value, double* values)
 {
-	return globalSim->pathSim.cubeJacEval(z, column_starting_indices, len_of_each_column, row_index_of_each_value, values);
+	return globalSim->pathSim->jacEval(z, column_starting_indices, len_of_each_column, row_index_of_each_value, values);
 }
 
 #endif
