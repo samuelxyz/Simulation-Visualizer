@@ -24,7 +24,7 @@ namespace graphics {
 
 		virtual ~VisualBox();
 
-		virtual void render(graphics::Renderer& renderer) const;
+		virtual void render(graphics::Renderer& renderer) const override;
 	};
 
 }

@@ -148,6 +148,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\entity\Cylinder.cpp" />
     <ClCompile Include="Dependencies\fmt\src\format.cc" />
     <ClCompile Include="Dependencies\imgui\imgui\imgui.cpp">
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -278,8 +279,10 @@
     <ClCompile Include="src\graphics\content\VisualEntity.cpp" />
     <ClCompile Include="src\graphics\content\VisualSphere.cpp" />
     <ClCompile Include="src\Scrapbook.cpp" />
+    <ClCompile Include="src\graphics\content\VisualCylinder.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\entity\Cylinder.h" />
     <ClInclude Include="Dependencies\imgui\imgui\imconfig.h" />
     <ClInclude Include="Dependencies\imgui\imgui\imgui.h" />
     <ClInclude Include="Dependencies\imgui\imgui\imgui_impl_glfw.h" />
@@ -309,6 +312,7 @@
     <ClInclude Include="src\graphics\content\VisualBox.h" />
     <ClInclude Include="src\graphics\content\VisualEntity.h" />
     <ClInclude Include="src\graphics\content\VisualSphere.h" />
+    <ClInclude Include="src\graphics\content\VisualCylinder.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

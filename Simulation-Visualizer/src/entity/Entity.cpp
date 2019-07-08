@@ -79,9 +79,6 @@ namespace entity {
 
 	void Entity::renderGUI()
 	{
-		static glm::vec3 linImpulse(0.0f);
-		static glm::vec3 angImpulse(0.0f);
-
 		if (ImGui::Begin((typeName + ": " + entityName).c_str()))
 		{
 			ImGui::Checkbox("Show label", &shouldShow.label);
@@ -128,6 +125,20 @@ namespace entity {
 			}
 			ImGui::Separator();
 			{
+				static float angle = 0;
+				static glm::vec3 axis;
+				ImGui::Text("Rotate:");
+				ImGui::SameLine();
+				ImGui::InputFloat("##RotateAngleInput", &angle);
+				ImGui::InputFloat3("##RotateAxisInput", &axis.x);
+				ImGui::SameLine();
+				if (ImGui::ArrowButton("##RotateButton", ImGuiDir_Right))
+				{
+					orientation = glm::normalize(glm::angleAxis(angle, axis) * orientation);
+				}
+			}
+			{
+				static glm::vec3 linImpulse(0.0f);
 				ImGui::Text("Apply impulse:");
 				ImGui::InputFloat3("##linImpulseInput", &linImpulse.x);
 				ImGui::SameLine();
@@ -135,6 +146,7 @@ namespace entity {
 					applyLinearImpulse(linImpulse);
 			}
 			{
+				static glm::vec3 angImpulse(0.0f);
 				ImGui::Text("Apply angular impulse:");
 				ImGui::InputFloat3("##angImpulseInput", &angImpulse.x);
 				ImGui::SameLine();

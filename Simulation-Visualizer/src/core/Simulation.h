@@ -35,7 +35,7 @@ namespace core {
 			Parameters();
 		};
 
-		PathSim* pathSim;
+		PathSim* pathSim; // needs to be accessed from PATH solver
 
 	private:
 		static constexpr unsigned int FPS_TRACKER_SMOOTHING = 30u;
@@ -50,7 +50,7 @@ namespace core {
 		Timeline timeline;
 
 	public:
-		Simulation(PathSim* pathSim);
+		Simulation();
 		~Simulation();
 
 		void update();
@@ -59,6 +59,7 @@ namespace core {
 		void renderGUIOverlay(graphics::Renderer& renderer, const graphics::Camera& camera) const;
 
 		void add(entity::Entity*);
+		void setTarget(entity::Entity*);
 		const glm::vec3& getFocusedEntityPosition() const;
 
 		int addSteps(core::Timeline& timeline, int numSteps);

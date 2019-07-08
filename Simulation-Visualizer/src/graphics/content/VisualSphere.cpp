@@ -1,5 +1,4 @@
 #include "core/stdafx.h"
-#include "core/Definitions.h"
 #include "VisualSphere.h"
 
 namespace graphics {

@@ -19,6 +19,8 @@ namespace entity {
 			float xMin = -1.0f, float xMax = 1.0f, float yMin = -1.0f, float yMax = 1.0f, float zMin = -1.0f, float zMax = 1.0f);
 		virtual ~Box();
 
+		virtual core::PathSim* createPathSim() const override;
+
 		virtual bool containsPoint(glm::vec3 worldPoint) const;
 		virtual bool intersectsFloor() const override;
 		virtual void render(graphics::Renderer& renderer) const;

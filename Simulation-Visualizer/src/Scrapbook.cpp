@@ -26,14 +26,12 @@ void writeOut(Eigen::SparseMatrix<float>& mat, int valnum, int innernum, int out
 
 int scrapbook()
 {
-	std::cout << "Isnormal:" << 
-		"\nNaN\t" << std::isnormal(NAN) <<
-		"\n-NaN\t" << std::isnormal(-NAN) <<
-		"\nInf\t" << std::isnormal(INFINITY) <<
-		"\n-Inf\t" << std::isnormal(-INFINITY) <<
-		"\n1.0\t" << std::isnormal(1.0) <<
-		"\n-1.0\t" << std::isnormal(-1.0) << 
-		"\n1e-12\t" << std::isnormal(1e-12) <<std::endl;
+	glm::quat q = glm::angleAxis(1.5f, glm::vec3(0.0f, 0.0f, 1.0f));
+
+	std::cout << 
+		"Pitch: " << glm::pitch(q) << 
+		"\nYaw: " << glm::yaw(q) << 
+		"\nRoll: " << glm::roll(q) << std::endl;
 
 	return 0;
 }

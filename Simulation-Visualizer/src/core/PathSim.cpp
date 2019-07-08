@@ -8,7 +8,7 @@ namespace core {
 		: p_x(0.0), p_y(0.0), p_z(0.0), p_xt(0.0), p_yt(0.0), p_zt(0.0),
 		mu(0.5), e_o(0.5), e_r(0.5), e_t(0.5)
 	{
-		// initialize arrays in derived class constructors
+		// arrays will be initialized in derived class constructors
 		// Do not call any virtual functions (like n()) here.
 		// When this constructor is called, the derived part 
 		// of the object does not yet exist

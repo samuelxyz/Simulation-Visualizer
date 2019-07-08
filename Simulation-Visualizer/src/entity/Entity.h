@@ -18,6 +18,8 @@ namespace entity {
 			glm::vec3 angVel, float mass, glm::mat3 rotInertia, std::string typeName = "Entity");
 		virtual ~Entity();
 
+		virtual core::PathSim* createPathSim() const = 0;
+
 		glm::vec3 toLocalFrame(glm::vec3 worldVec) const;
 		glm::vec3 toWorldFrame(glm::vec3 localVec) const;
 		virtual bool containsPoint(glm::vec3 worldPoint) const = 0;

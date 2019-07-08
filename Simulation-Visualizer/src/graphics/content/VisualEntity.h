@@ -1,6 +1,5 @@
 #pragma once
 #include "graphics/Renderable.h"
-#include "glm/gtx/quaternion.hpp"
 #include "core/Definitions.h"
 
 namespace graphics {

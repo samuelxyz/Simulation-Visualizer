@@ -8,8 +8,8 @@
 
 namespace core {
 
-	Simulation::Simulation(PathSim* pathSim)
-		: pathSim(pathSim), entities(), environment(), parameters(), timeline()
+	Simulation::Simulation()
+		: pathSim(nullptr), entities(), environment(), parameters(), timeline()
 	{
 	}
 
@@ -31,8 +31,6 @@ namespace core {
 		playbackSpeed(1.0), loopPlayback(false)
 	{
 	}
-
-	
 
 	int Simulation::addSteps(core::Timeline& timeline, int numSteps)
 	{
@@ -195,6 +193,7 @@ namespace core {
 
 	Simulation::~Simulation()
 	{
+		// deleting nullptr does nothing so that's fine
 		for (entity::Entity* e : entities)
 			delete e;
 
@@ -500,9 +499,20 @@ namespace core {
 		}
 	}
 
+	void Simulation::setTarget(entity::Entity* e)
+	{
+		// Add to this->entities if not already present
+		if (std::find(entities.begin(), entities.end(), e) == entities.end())
+			add(e);
+
+		pathSim = e->createPathSim();
+		pathSim->setTarget(e);
+	}
+
 	const glm::vec3 & Simulation::getFocusedEntityPosition() const
 	{
-		return entities[0]->getPosition();
+		// ideally this would maybe have something to do with the mouse position but this is fine for now
+		return pathSim->target->getPosition();
 	}
 
 	void Simulation::renderEntities(graphics::Renderer& renderer, const glm::vec3& cameraPos) const
