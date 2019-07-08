@@ -129,7 +129,9 @@ namespace entity {
 				static glm::vec3 axis;
 				ImGui::Text("Rotate:");
 				ImGui::SameLine();
-				ImGui::InputFloat("##RotateAngleInput", &angle);
+				ImGui::PushItemWidth(45.0f);
+				ImGui::InputFloat("rad##RotateAngleInput", &angle);
+				ImGui::PopItemWidth();
 				ImGui::InputFloat3("##RotateAxisInput", &axis.x);
 				ImGui::SameLine();
 				if (ImGui::ArrowButton("##RotateButton", ImGuiDir_Right))

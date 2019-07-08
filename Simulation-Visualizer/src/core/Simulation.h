@@ -60,7 +60,7 @@ namespace core {
 
 		void add(entity::Entity*);
 		void setTarget(entity::Entity*);
-		const glm::vec3& getFocusedEntityPosition() const;
+		glm::vec3 getFocusedEntityPosition(const graphics::Camera& camera) const;
 
 		int addSteps(core::Timeline& timeline, int numSteps);
 		int addStepsUntilEnd(core::Timeline& timeline);

@@ -63,8 +63,7 @@ namespace graphics {
 				ImGui::Text("FOV:");
 				ImGui::SameLine();
 				std::string fovStr("%.3f ");
-				char fovDeg[12];
-				::sprintf_s(&(fovDeg[0]), 12, "(%.1f deg)", glm::degrees(fov));
+				std::string fovDeg = fmt::sprintf("(%+05.1f deg)", glm::degrees(fov));
 				fovStr += std::string(fovDeg);
 				ImGui::SliderFloat("##FOV", &fov, fovMin, fovMax, fovStr.c_str() );
 			}

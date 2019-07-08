@@ -270,7 +270,7 @@ namespace graphics {
 				window->camera.handleLeftMouseMotion(dx, dy);
 			if (glfwGetMouseButton(glfwWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
 				window->camera.handleRightMouseMotion(dx, dy, 
-					getWindow(glfwWindow)->simulation->getFocusedEntityPosition());
+					window->simulation->getFocusedEntityPosition(window->camera));
 
 			window->mouseTracker.prevX = x;
 			window->mouseTracker.prevY = y;
@@ -317,7 +317,7 @@ namespace graphics {
 		Window* window = getWindow(glfwWindow);
 		if (window != nullptr && window->initialized)
 			window->camera.handleScroll(static_cast<float>(yoffset), glfwWindow,
-				window->simulation->getFocusedEntityPosition());
+				window->simulation->getFocusedEntityPosition(window->camera));
 	}
 
 	Window* Window::getWindow(GLFWwindow* glfwWindow)

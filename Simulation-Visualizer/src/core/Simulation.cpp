@@ -509,10 +509,41 @@ namespace core {
 		pathSim->setTarget(e);
 	}
 
-	const glm::vec3 & Simulation::getFocusedEntityPosition() const
+	glm::vec3 Simulation::getFocusedEntityPosition(const graphics::Camera& camera) const
 	{
 		// ideally this would maybe have something to do with the mouse position but this is fine for now
-		return pathSim->target->getPosition();
+
+		entity::Entity* closestOnScreen = nullptr;
+
+		// this is modified from Camera::toScreenSpace()
+		for (entity::Entity* e : entities)
+		{
+			glm::vec4 pos4 = glm::vec4(e->getPosition(), 1.0f);
+			glm::vec4 screenPos = camera.getVPMatrix() * pos4;
+			screenPos.z += 0.18f; // idk why but without this it's a bit off
+
+			float screenX = (screenPos.x + screenPos.z) / screenPos.z;
+			float screenY = (-screenPos.y + screenPos.z) / screenPos.z;
+
+			if (screenPos.z > 0.0f && 0.0f <= screenX && screenX <= 2.0f && 0.0f <= screenY && screenY <= 2.0f)
+			{
+				if (closestOnScreen == nullptr)
+				{
+					closestOnScreen = e;
+				}
+				else
+				{
+					if (glm::length2(e->getPosition() - camera.getPosition()) <
+						glm::length2(closestOnScreen->getPosition() - camera.getPosition()))
+						closestOnScreen = e;
+				}
+			}
+		}
+
+		if (closestOnScreen == nullptr)
+			return camera.getPosition() + camera.getLookVec();
+		else
+			return closestOnScreen->getPosition();
 	}
 
 	void Simulation::renderEntities(graphics::Renderer& renderer, const glm::vec3& cameraPos) const
