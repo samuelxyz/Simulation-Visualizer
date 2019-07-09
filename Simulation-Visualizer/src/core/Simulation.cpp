@@ -509,7 +509,7 @@ namespace core {
 		pathSim->setTarget(e);
 	}
 
-	glm::vec3 Simulation::getFocusedEntityPosition(const graphics::Camera& camera) const
+	const entity::Entity* const Simulation::getFocusedEntity(const graphics::Camera& camera) const
 	{
 		// ideally this would maybe have something to do with the mouse position but this is fine for now
 
@@ -540,10 +540,7 @@ namespace core {
 			}
 		}
 
-		if (closestOnScreen == nullptr)
-			return camera.getPosition() + camera.getLookVec();
-		else
-			return closestOnScreen->getPosition();
+		return closestOnScreen;
 	}
 
 	void Simulation::renderEntities(graphics::Renderer& renderer, const glm::vec3& cameraPos) const

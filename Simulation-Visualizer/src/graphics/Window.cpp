@@ -1,13 +1,10 @@
+#include "core/stdafx.h"
 #include "graphics/Window.h"
 #include "core/Definitions.h"
 
-#include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 #include <imgui/imgui_internal.h>
-
-#include <cassert>
-#include <iostream>
 
 namespace graphics {
 
@@ -79,7 +76,7 @@ namespace graphics {
 		camera(DEFAULT_WIDTH, DEFAULT_HEIGHT, glm::vec3(-5.0f, -2.0f, 10.0f), -1.2f, 0.16f),
 		guiOverlay(camera),
 		simulation(nullptr),
-		mouseTracker { 0.0f, 0.0f, false }
+		mouseTracker { 0.0f, 0.0f, false, nullptr}
 	{
 
 		glfwSetWindowUserPointer(glfwWindow, this);
@@ -233,6 +230,7 @@ namespace graphics {
 		glViewport(0, 0, width, height);
 	}
 
+	// replaced by camera.pollKeys()
 	void Window::handleKey(GLFWwindow* glfwWindow, int key, int scancode, int action,
 		int mods)
 	{
@@ -270,7 +268,7 @@ namespace graphics {
 				window->camera.handleLeftMouseMotion(dx, dy);
 			if (glfwGetMouseButton(glfwWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
 				window->camera.handleRightMouseMotion(dx, dy, 
-					window->simulation->getFocusedEntityPosition(window->camera));
+					window->mouseTracker.focusedEntity);
 
 			window->mouseTracker.prevX = x;
 			window->mouseTracker.prevY = y;
@@ -299,12 +297,21 @@ namespace graphics {
 				window->mouseTracker.prevY = windowHeight - static_cast<float>(yd);
 				window->mouseTracker.prevX = static_cast<float>(xd);
 
-				//std::cout << "Left mouse click detected" << std::endl;
 				window->mouseTracker.dragging = true;
+				if (button == GLFW_MOUSE_BUTTON_RIGHT)
+					window->mouseTracker.focusedEntity = window->simulation->getFocusedEntity(window->camera);
 			}
 			else // action == GLFW_RELEASE
 			{
-				window->mouseTracker.dragging = false;
+				if (button == GLFW_MOUSE_BUTTON_LEFT && 
+					glfwGetMouseButton(glfwWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE)
+					window->mouseTracker.dragging = false;
+				if (button == GLFW_MOUSE_BUTTON_RIGHT)
+				{
+					window->mouseTracker.focusedEntity = nullptr;
+					if (glfwGetMouseButton(glfwWindow, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE)
+						window->mouseTracker.dragging = false;
+				}
 			}
 		}
 	}
@@ -317,7 +324,7 @@ namespace graphics {
 		Window* window = getWindow(glfwWindow);
 		if (window != nullptr && window->initialized)
 			window->camera.handleScroll(static_cast<float>(yoffset), glfwWindow,
-				window->simulation->getFocusedEntityPosition(window->camera));
+				window->simulation->getFocusedEntity(window->camera));
 	}
 
 	Window* Window::getWindow(GLFWwindow* glfwWindow)

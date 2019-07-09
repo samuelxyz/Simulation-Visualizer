@@ -9,6 +9,10 @@
 #include "graphics/Camera.h"
 #include "graphics/content/GUIOverlay.h"
 
+namespace entity {
+	class Entity;
+}
+
 namespace graphics {
 
 	class Window
@@ -37,6 +41,7 @@ namespace graphics {
 		{
 			float prevX, prevY;
 			bool dragging;
+			const entity::Entity* focusedEntity;
 		} mouseTracker;
 
 	public:
@@ -72,8 +77,11 @@ namespace graphics {
 
 	private:
 
-		static Window* getWindow(GLFWwindow*); // from window user pointer
-		static bool guiMouseCheck(GLFWwindow*); // ~ImGui::GetIO().WantCaptureMouse
+		// from window user pointer
+		static Window* getWindow(GLFWwindow*);
+
+		// Custom equivalent of ImGui::GetIO().WantCaptureMouse
+		static bool guiMouseCheck(GLFWwindow*);
 
 	};
 

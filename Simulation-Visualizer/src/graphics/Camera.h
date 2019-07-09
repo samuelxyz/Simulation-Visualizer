@@ -4,6 +4,10 @@
 
 #include "core/Definitions.h"
 
+namespace entity {
+	class Entity;
+}
+
 namespace graphics {
 
 	class Renderer;
@@ -50,8 +54,8 @@ namespace graphics {
 		void pollKeys(GLFWwindow* window);
 		void handleKey(int key, int action);
 		void handleLeftMouseMotion(float xoffset, float yoffset, bool constrainPitch = true);
-		void handleRightMouseMotion(float xoffset, float yoffset, const glm::vec3& targetPos, bool constrainPitch = true);
-		void handleScroll(float yoffset, GLFWwindow* window, const glm::vec3& targetPos);
+		void handleRightMouseMotion(float xoffset, float yoffset, const entity::Entity* const focusedEntity, bool constrainPitch = true);
+		void handleScroll(float yoffset, GLFWwindow* window, const entity::Entity* const focusedEntity);
 
 	private:
 		//glm::quat lookAt(glm::vec3 camPos, glm::vec3 target);

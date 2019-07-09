@@ -1,13 +1,8 @@
 #include "core/stdafx.h"
 
-#include <imgui/imgui.h>
-
-#include "GLFW/glfw3.h"
-
 #include "graphics/Camera.h"
 #include "graphics/Renderer.h"
-
-#include <iostream>
+#include "entity/Entity.h"
 
 namespace graphics {
 
@@ -194,10 +189,16 @@ namespace graphics {
 		rotate(-yoffset, xoffset, constrainPitch);
 	}
 
-	void Camera::handleRightMouseMotion(float xoffset, float yoffset, const glm::vec3& targetPos, bool constrainPitch)
+	void Camera::handleRightMouseMotion(float xoffset, float yoffset, const entity::Entity* const focusedEntity, bool constrainPitch)
 	{
 		// Tricky tricky. For the right effect, we want to orbit around the target when considering yaw.
 		// However, when considering pitch we want to orbit around the center of the screen.
+
+		glm::vec3 targetPos;
+		if (focusedEntity == nullptr)
+			targetPos = getPosition() + getLookVec();
+		else
+			targetPos = focusedEntity->getPosition();
 
 		if (glm::length2(targetPos - position) < 1e-6f)
 			return;
@@ -287,10 +288,16 @@ namespace graphics {
 		}
 	}
 
-	void Camera::handleScroll(float yoffset, GLFWwindow* window, const glm::vec3& targetPos)
+	void Camera::handleScroll(float yoffset, GLFWwindow* window, const entity::Entity* const focusedEntity)
 	{
 		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) 
 		{ 
+			glm::vec3 targetPos;
+			if (focusedEntity == nullptr)
+				targetPos = getPosition() + getLookVec();
+			else
+				targetPos = focusedEntity->getPosition();
+
 			// move in and out from target
 			constexpr static float stepSize = 4.0f;
 
