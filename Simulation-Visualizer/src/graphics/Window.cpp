@@ -1,6 +1,8 @@
 #include "core/stdafx.h"
 #include "graphics/Window.h"
 #include "core/Definitions.h"
+#include "graphics/content/VisualSphere.h"
+#include "entity/Entity.h"
 
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
@@ -106,70 +108,68 @@ namespace graphics {
 	{
 	}
 
-	void Window::GUIOverlay::render(graphics::Renderer& renderer) const
+	void Window::GUIOverlay::render(const Window& window, graphics::Renderer& renderer) const
 	{
-		if (!camera.shouldShowAxes())
-			return;
-
-		glm::vec3 lookTargetPos = camera.getPosition() + camera.getLookVec();
-
-		for (unsigned int i = 0; i < axes.size(); ++i)
+		if (camera.shouldShowAxes())
 		{
-			axes[i].position = lookTargetPos;
-			axes[i].render(renderer);
+			glm::vec3 lookTargetPos = camera.getPosition() + camera.getLookVec();
 
-			glm::vec3 labelPos3d(lookTargetPos);
-			labelPos3d[i] += axisLength * 1.1f;
-			//glm::vec2 labelPos = camera.toScreenSpace(labelPos3d);
-			//labelPos.x += 4.0f;
-
-			//ImGui::SetNextWindowPos(labelPos, 0, glm::vec2(0.5f, 0.5f));
-			//const char* name;
-			//if (i == 0)
-			//	name = "x";
-			//else if (i == 1)
-			//	name = "y";
-			//else
-			//	name = "z";
-
-			//ImGui::Begin((std::string("##labelAxis") + std::string(name)).c_str(), nullptr,
-			//	ImGuiWindowFlags_NoDecoration |
-			//	ImGuiWindowFlags_NoInputs |
-			//	ImGuiWindowFlags_AlwaysAutoResize | 
-			//	ImGuiWindowFlags_NoBackground);
-			//if (i == 0)
-			//	ImGui::PushStyleColor(ImGuiCol_Text, graphics::COLOR_RED);
-			//else if (i == 1)
-			//	ImGui::PushStyleColor(ImGuiCol_Text, graphics::COLOR_GREEN);
-			//else
-			//	ImGui::PushStyleColor(ImGuiCol_Text, graphics::COLOR_BLUE);
-			//ImGui::Text(name);
-			//ImGui::PopStyleColor();
-			//ImGui::End();
-
-			std::string name;
-			const glm::vec4* color;
-			if (i == 0)
+			for (unsigned int i = 0; i < axes.size(); ++i)
 			{
-				name = "x";
-				color = &(graphics::COLOR_RED);
-			}
-			else if (i == 1)
-			{
-				name = "y";
-				color = &(graphics::COLOR_GREEN);
-			}
-			else
-			{
-				name = "z";
-				color = &(graphics::COLOR_BLUE);
+				axes[i].position = lookTargetPos;
+				axes[i].render(renderer);
+
+				glm::vec3 labelPos3d(lookTargetPos);
+				labelPos3d[i] += axisLength * 1.1f;
+
+				std::string name;
+				const glm::vec4* color;
+				if (i == 0)
+				{
+					name = "x";
+					color = &(graphics::COLOR_RED);
+				}
+				else if (i == 1)
+				{
+					name = "y";
+					color = &(graphics::COLOR_GREEN);
+				}
+				else
+				{
+					name = "z";
+					color = &(graphics::COLOR_BLUE);
+				}
+
+				camera.renderLabel(labelPos3d, true, "labelAxis" + name, name, *color, ImVec2(0.47f, 0.5f));
 			}
 
-			camera.renderLabel(labelPos3d, true, "labelAxis" + name, name, *color, ImVec2(0.47f, 0.5f));
+			cursorDot.position = lookTargetPos;
+			cursorDot.render(renderer);
 		}
 
-		cursorDot.position = lookTargetPos;
-		cursorDot.render(renderer);
+		static int dotTimer = 15;
+		if (window.mouseTracker.focusedEntity != nullptr)
+		{
+			// render dot on focused entity
+			if (dotTimer > 0)
+				--dotTimer;
+
+			glm::vec4 color = graphics::COLOR_ORBIT;
+			color.a = 0.8f - dotTimer/20.0f;
+
+			graphics::VisualSphere dot(window.mouseTracker.focusedEntity->getPosition(),
+				core::QUAT_IDENTITY, (dotTimer/1.5f + 1.0f) * core::MARKER_DOT_RADIUS,
+				graphics::VisualEntity::Style::SOLID_COLOR, color);
+
+			dot.render(renderer);
+
+			window.camera.renderLabel(window.mouseTracker.focusedEntity->getPosition(), 
+				true, "CameraOrbitingMarkerLabel", "Orbiting", graphics::COLOR_DEFAULT, graphics::PIVOT_RIGHT);
+		}
+		else
+		{
+			dotTimer = 15;
+		}
 	}
 
 	Window::Window()
@@ -255,7 +255,7 @@ namespace graphics {
 		
 		//glDisable(GL_DEPTH_TEST);
 		renderer.clearDepth();
-		guiOverlay.render(renderer);
+		guiOverlay.render(*this, renderer);
 		if (simulation != nullptr)
 			simulation->renderGUIOverlay(renderer, camera);
 

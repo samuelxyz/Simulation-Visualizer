@@ -44,10 +44,9 @@ namespace graphics {
 		void renderGUI();
 
 		// TitleID does not need "##"
-		// TextColor zero vector to use ImGui default
 		void renderLabel(const glm::vec3& worldPos, 
 			bool backgroundOnHoverOnly, const std::string& titleID,
-			const std::string& text, const glm::vec4& textColor = COLOR_NONE, 
+			const std::string& text, const glm::vec4& textColor = COLOR_DEFAULT, 
 			const ImVec2& pivot = PIVOT_LEFT) const;
 
 		void updateWindowDims(int width, int height);

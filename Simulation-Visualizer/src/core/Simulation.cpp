@@ -445,7 +445,9 @@ namespace core {
 				}
 				ImGui::Unindent();
 				
+				ImGui::PushStyleColor(ImGuiCol_CheckMark, graphics::COLOR_CONTACT);
 				ImGui::Checkbox("Show Contact Point", &(parameters.showContactPoint));
+				ImGui::PopStyleColor();
 			}
 			// Entity checkboxes
 			ImGui::Separator();
@@ -583,16 +585,14 @@ namespace core {
 
 	void Simulation::renderContactPoint(graphics::Renderer& renderer, const graphics::Camera& camera) const
 	{
-		static constexpr float radius = 0.04f;
-
 		const Timestep& now = timeline[parameters.currentStep];
 
 		if (!now.hasContactPoint())
 			return;
 
 		graphics::VisualSphere sphere(now.contactPoint, 
-			core::QUAT_IDENTITY, radius, graphics::VisualEntity::Style::SOLID_COLOR, 
-			graphics::COLOR_CONTACT, 0.5f);
+			core::QUAT_IDENTITY, core::MARKER_DOT_RADIUS, graphics::VisualEntity::Style::SOLID_COLOR, 
+			graphics::COLOR_CONTACT);
 
 		sphere.render(renderer);
 

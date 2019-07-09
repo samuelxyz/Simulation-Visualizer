@@ -128,14 +128,14 @@ namespace graphics {
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetColorU32(ImGuiCol_WindowBg));
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetColorU32(ImGuiCol_WindowBg));
 
-		if (textColor != COLOR_NONE)
+		if (textColor != COLOR_DEFAULT)
 			ImGui::PushStyleColor(ImGuiCol_Text, textColor);
 
 		ImGui::Button(text.c_str());
 
 		ImGui::PopStyleVar();
 
-		if (textColor != COLOR_NONE)
+		if (textColor != COLOR_DEFAULT)
 			ImGui::PopStyleColor(4);
 		else
 			ImGui::PopStyleColor(3);

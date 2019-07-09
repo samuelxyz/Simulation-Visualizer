@@ -33,13 +33,13 @@ namespace graphics {
 		GLFWwindow* glfwWindow;
 		Renderer renderer;
 		Camera camera;
-		struct GUIOverlay : public graphics::Renderable
+		struct GUIOverlay
 		{
 		public:
 			GUIOverlay(graphics::Camera& camera);
 			virtual ~GUIOverlay();
 
-			virtual void render(graphics::Renderer& renderer) const;
+			virtual void render(const Window& window, graphics::Renderer& renderer) const;
 
 		private:
 			graphics::Camera& camera;

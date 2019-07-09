@@ -162,14 +162,12 @@ namespace entity {
 	void Entity::renderLabel(const graphics::Camera& camera) const
 	{
 		camera.renderLabel(position, false, typeName + entityName + "NameLabel",
-			typeName + ": " + entityName, graphics::COLOR_NONE, graphics::PIVOT_CENTER);
+			typeName + ": " + entityName, graphics::COLOR_NONE, graphics::PIVOT_BOTTOM);
 	}
 
 	void Entity::renderPositionMarker(graphics::Renderer& renderer, const graphics::Camera& camera) const
 	{
-		static constexpr float radius = 0.04f;
-
-		graphics::VisualSphere sphere(position, core::QUAT_IDENTITY, radius);
+		graphics::VisualSphere sphere(position, core::QUAT_IDENTITY, core::MARKER_DOT_RADIUS);
 
 		sphere.render(renderer);
 

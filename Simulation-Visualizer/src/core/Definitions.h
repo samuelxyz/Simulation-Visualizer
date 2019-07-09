@@ -20,6 +20,7 @@ namespace core {
 	{
 		return FLOOR_Z + SMALL_DISTANCE * std::abs(cameraPos.z);
 	}
+	static constexpr float MARKER_DOT_RADIUS = 0.04f;
 
 	static constexpr float
 		PI = 3.141592653589793f,
@@ -118,16 +119,21 @@ namespace graphics {
 
 	// theme colors
 	static const glm::vec4&
-		COLOR_NONE		{ COLOR_TRANSPARENT },
-		COLOR_VELOCITY	{ COLOR_CYAN },
-		COLOR_ANGVEL	{ COLOR_MAGENTA },
-		COLOR_CONTACT	{ COLOR_RED };
+		COLOR_NONE { COLOR_TRANSPARENT },
+		COLOR_DEFAULT {COLOR_NONE},
+		COLOR_VELOCITY { COLOR_CYAN },
+		COLOR_ANGVEL { COLOR_MAGENTA },
+		COLOR_CONTACT { COLOR_RED },
+		COLOR_ORBIT { COLOR_GREEN };
 
 	typedef std::array<ColoredVertex, 3> Triangle;
 	typedef std::array<ColoredVertex, 4> Quad; // clockwise or counterclockwise
 	typedef std::vector<ColoredVertex> CenteredPoly; // first vertex is center
 
 	static const ImVec2
-		PIVOT_LEFT		{ 0.0f, 0.5f },
-		PIVOT_CENTER	{ 0.5f, 0.5f };
+		PIVOT_LEFT { 0.0f, 0.5f },
+		PIVOT_CENTER { 0.5f, 0.5f },
+		PIVOT_RIGHT { 1.0f, 0.5f },
+		PIVOT_TOP { 0.5f, 0.0f },
+		PIVOT_BOTTOM { 0.5f, 1.0f };
 }

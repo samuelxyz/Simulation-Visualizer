@@ -14,7 +14,7 @@ namespace graphics {
 			glm::quat orientation = core::QUAT_IDENTITY,
 			float radius = 1.0f,
 			Style style = Style::MULTICOLOR, glm::vec4 color = glm::vec4(0.0f),
-			float shadeFactor = 0.0f);
+			float shadeFactor = 0.5f);
 
 		virtual ~VisualSphere();
 
