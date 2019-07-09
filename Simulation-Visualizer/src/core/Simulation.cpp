@@ -278,7 +278,7 @@ namespace core {
 
 	void Simulation::render(graphics::Renderer& renderer, const glm::vec3& cameraPos) const
 	{
-		if (cameraPos.z > core::FLOOR_Z)
+		if (cameraPos.z > graphics::FLOOR_Z)
 		{
 			if (parameters.showEnvironment)
 				renderEnvironment(renderer);
@@ -472,6 +472,10 @@ namespace core {
 			if(e->shouldShow.label)
 				e->renderLabel(camera);
 		}
+
+		const entity::Entity* hovered = getHoveredEntity(camera);
+		if (hovered != nullptr && !(hovered->shouldShow.label))
+			hovered->renderLabel(camera);
 	}
 
 	void Simulation::renderGUIOverlay(graphics::Renderer& renderer, const graphics::Camera& camera) const
@@ -515,13 +519,15 @@ namespace core {
 	{
 		// ideally this would maybe have something to do with the mouse position but this is fine for now
 
-		entity::Entity* closestOnScreen = nullptr;
+		const entity::Entity* target = getHoveredEntity(camera);
+		if (target != nullptr)
+			return target;
 
 		// this is modified from Camera::toScreenSpace()
 		for (entity::Entity* e : entities)
 		{
 			glm::vec4 pos4 = glm::vec4(e->getPosition(), 1.0f);
-			glm::vec4 screenPos = camera.getVPMatrix() * pos4;
+			glm::vec4 screenPos = camera.getVPMatrix(true) * pos4;
 			screenPos.z += 0.18f; // idk why but without this it's a bit off
 
 			float screenX = (screenPos.x + screenPos.z) / screenPos.z;
@@ -529,20 +535,49 @@ namespace core {
 
 			if (screenPos.z > 0.0f && 0.0f <= screenX && screenX <= 2.0f && 0.0f <= screenY && screenY <= 2.0f)
 			{
-				if (closestOnScreen == nullptr)
+				if (target == nullptr)
 				{
-					closestOnScreen = e;
+					target = e;
 				}
 				else
 				{
 					if (glm::length2(e->getPosition() - camera.getPosition()) <
-						glm::length2(closestOnScreen->getPosition() - camera.getPosition()))
-						closestOnScreen = e;
+						glm::length2(target->getPosition() - camera.getPosition()))
+						target = e;
 				}
 			}
 		}
 
-		return closestOnScreen;
+		return target;
+	}
+
+	// ray-scan entities using mouse position ray thingy
+	const entity::Entity* const Simulation::getHoveredEntity(const graphics::Camera & camera) const
+	{
+		glm::vec3 mouseRay = camera.getMouseRay();
+
+		std::vector<float> srSq; // cached shadow radii of each entity (used for cr
+		float rMaxSq = 0.0f;
+		for (const entity::Entity* e : entities)
+		{
+			float sr = e->getShadowRadius();
+			srSq.push_back(sr*sr);
+
+			float rSq = glm::length2(e->getPosition() - camera.getPosition());
+			if (rSq > rMaxSq)
+				rMaxSq = rSq;
+		}
+
+		for (float r = 0.0f; r < rMaxSq; r += 0.05f)
+		{
+			glm::vec3 testPos = camera.getPosition() + r*mouseRay;
+			for (unsigned int i = 0; i < entities.size(); ++i)
+				if (glm::length2(entities[i]->getPosition() - testPos) < srSq[i])
+					if (entities[i]->containsPoint(testPos))
+						return entities[i];
+		}
+
+		return nullptr;
 	}
 
 	void Simulation::renderEntities(graphics::Renderer& renderer, const glm::vec3& cameraPos) const
@@ -574,10 +609,10 @@ namespace core {
 				squareColor.a = 0.5f;
 
 				renderer.submit(graphics::Quad {{
-					{ squareColor, glm::vec3(i, j, core::FLOOR_Z) },
-					{ squareColor, glm::vec3(i, j+floorCheckerSize, core::FLOOR_Z) },
-					{ squareColor, glm::vec3(i+floorCheckerSize, j+floorCheckerSize, core::FLOOR_Z) },
-					{ squareColor, glm::vec3(i+floorCheckerSize, j,core::FLOOR_Z) }
+					{ squareColor, glm::vec3(i, j, graphics::FLOOR_Z) },
+					{ squareColor, glm::vec3(i, j+floorCheckerSize, graphics::FLOOR_Z) },
+					{ squareColor, glm::vec3(i+floorCheckerSize, j+floorCheckerSize, graphics::FLOOR_Z) },
+					{ squareColor, glm::vec3(i+floorCheckerSize, j,graphics::FLOOR_Z) }
 				}});
 			}
 		}
@@ -591,7 +626,7 @@ namespace core {
 			return;
 
 		graphics::VisualSphere sphere(now.contactPoint, 
-			core::QUAT_IDENTITY, core::MARKER_DOT_RADIUS, graphics::VisualEntity::Style::SOLID_COLOR, 
+			core::QUAT_IDENTITY, graphics::MARKER_DOT_RADIUS, graphics::VisualEntity::Style::SOLID_COLOR, 
 			graphics::COLOR_CONTACT);
 
 		sphere.render(renderer);

@@ -46,7 +46,7 @@ namespace entity {
 		// vertical distance between cylinder center and lowest point on tilted cylinder
 		float greatestDZ = height * 0.5f * cosTheta + radius * sinTheta;
 
-		return position.z - greatestDZ <= core::FLOOR_Z;
+		return position.z - greatestDZ <= graphics::FLOOR_Z;
 	}
 
 	void Cylinder::render(graphics::Renderer & renderer) const
@@ -54,7 +54,7 @@ namespace entity {
 		visualCylinder.position = position;
 		visualCylinder.orientation = orientation;
 
-		float height = position.z - core::FLOOR_Z;
+		float height = position.z - graphics::FLOOR_Z;
 		visualCylinder.shadeFactor = std::max(0.4f - (height/getShadowRadius() * 0.15f), 0.1f);
 
 		visualCylinder.render(renderer);

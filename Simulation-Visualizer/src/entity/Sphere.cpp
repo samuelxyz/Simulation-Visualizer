@@ -23,7 +23,7 @@ namespace entity {
 
 	bool Sphere::intersectsFloor() const
 	{
-		return position.z - radius <= core::FLOOR_Z;
+		return position.z - radius <= graphics::FLOOR_Z;
 	}
 
 	void Sphere::render(graphics::Renderer & renderer) const

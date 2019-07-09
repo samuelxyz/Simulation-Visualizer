@@ -354,7 +354,7 @@ namespace core {
 		z[8] = q_zo - heg/2;
 		z[9] = q_xo;
 		z[10] = q_yo;
-		z[11] = core::FLOOR_Z;
+		z[11] = graphics::FLOOR_Z;
 	}
 
 	void PathSimBox::printZ()

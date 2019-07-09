@@ -158,7 +158,7 @@ namespace graphics {
 			color.a = 0.8f - dotTimer/20.0f;
 
 			graphics::VisualSphere dot(window.mouseTracker.focusedEntity->getPosition(),
-				core::QUAT_IDENTITY, (dotTimer/1.5f + 1.0f) * core::MARKER_DOT_RADIUS,
+				core::QUAT_IDENTITY, (dotTimer/1.5f + 1.0f) * graphics::MARKER_DOT_RADIUS,
 				graphics::VisualEntity::Style::SOLID_COLOR, color);
 
 			dot.render(renderer);
@@ -400,6 +400,12 @@ namespace graphics {
 				window->mouseTracker.prevX = static_cast<float>(xd);
 
 				window->mouseTracker.dragging = true;
+				if (button == GLFW_MOUSE_BUTTON_LEFT && !guiMouseCheck(glfwWindow))
+				{
+					const entity::Entity* hovered = window->simulation->getHoveredEntity(window->camera);
+					if (hovered != nullptr)
+						hovered->shouldShow.gui = true;
+				}
 				if (button == GLFW_MOUSE_BUTTON_RIGHT)
 					window->mouseTracker.focusedEntity = window->simulation->getFocusedEntity(window->camera);
 			}

@@ -11,16 +11,6 @@
 namespace core {
 	// Value used for simulation
 	static constexpr float TIME_STEP = 1e-2f, GRAVITY = 9.80665f;
-	static constexpr float FRAME_DURATION = 1.0f/60;
-
-	// height of the visual "floor" in the visualization
-	static constexpr float FLOOR_Z = 0.0f;
-	static constexpr float SMALL_DISTANCE = 2e-4f;
-	static float calcShadowZ(const glm::vec3& cameraPos)
-	{
-		return FLOOR_Z + SMALL_DISTANCE * std::abs(cameraPos.z);
-	}
-	static constexpr float MARKER_DOT_RADIUS = 0.04f;
 
 	static constexpr float
 		PI = 3.141592653589793f,
@@ -136,4 +126,16 @@ namespace graphics {
 		PIVOT_RIGHT { 1.0f, 0.5f },
 		PIVOT_TOP { 0.5f, 0.0f },
 		PIVOT_BOTTOM { 0.5f, 1.0f };
+
+	static constexpr float FRAME_DURATION = 1.0f/60;
+	static constexpr float RENDER_DISTANCE = 100.0f;
+
+	// height of the visual "floor" in the visualization
+	static constexpr float FLOOR_Z = 0.0f;
+	static constexpr float SMALL_DISTANCE = 2e-4f;
+	static float calcShadowZ(const glm::vec3& cameraPos)
+	{
+		return FLOOR_Z + SMALL_DISTANCE * std::abs(cameraPos.z);
+	}
+	static constexpr float MARKER_DOT_RADIUS = 0.04f;
 }

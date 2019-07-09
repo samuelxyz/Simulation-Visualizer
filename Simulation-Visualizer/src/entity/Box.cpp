@@ -45,7 +45,7 @@ namespace entity {
 		};
 
 		for (int i = 0; i < 8; ++i)
-			if (toWorldFrame(vertices[i]).z <= core::FLOOR_Z)
+			if (toWorldFrame(vertices[i]).z <= graphics::FLOOR_Z)
 				return true;
 
 		return false;
@@ -56,7 +56,7 @@ namespace entity {
 		visualBox.position = position;
 		visualBox.orientation = orientation;
 
-		float height = position.z - core::FLOOR_Z;
+		float height = position.z - graphics::FLOOR_Z;
 		visualBox.shadeFactor = std::max(0.4f - (height/getShadowRadius() * 0.15f), 0.1f);
 
 		visualBox.render(renderer);

@@ -14,12 +14,19 @@ namespace graphics {
 	{
 	}
 
-	glm::mat4 Camera::getVPMatrix() const
+	glm::mat4& Camera::getVPMatrix(bool useCached) const
 	{
-		glm::mat4 projection = glm::perspective(fov, static_cast<float>(windowWidth)/windowHeight, 0.1f, 100.0f);
-		glm::mat4 view = glm::lookAt(position, position + getLookVec(), core::VECTOR_UP);
+		static glm::mat4 cached;
 
-		return projection * view;
+		if (!useCached)
+		{
+			glm::mat4 projection = glm::perspective(fov, static_cast<float>(windowWidth)/windowHeight, 0.1f, graphics::RENDER_DISTANCE);
+			glm::mat4 view = glm::lookAt(position, position + getLookVec(), core::VECTOR_UP);
+
+			cached = projection * view;
+		}
+
+		return cached;
 	}
 
 	glm::vec3 Camera::getPosition() const
@@ -43,6 +50,21 @@ namespace graphics {
 		float screenY = (-screenPos.y + screenPos.z) * (windowHeight/(2*screenPos.z));
 
 		return glm::vec2(screenX, screenY);
+	}
+
+	glm::vec3 Camera::getMouseRay() const
+	{
+		glm::vec2 screenPos = ImGui::GetMousePos();
+
+		// let screenPos.z = 1.0f
+		float x = 2*screenPos.x / windowWidth - 1.0f;
+		float y = 1.0f - 2*screenPos.y / windowHeight;
+
+		// 1.002f is another magic number that idk why it works lol
+		glm::vec4 scrPos4(x, y, 1.002f, 1.0f);
+		glm::vec4 ray = glm::inverse(getVPMatrix()) * scrPos4;
+
+		return glm::normalize(glm::vec3(ray.x, ray.y, ray.z));
 	}
 
 	void Camera::renderGUI()

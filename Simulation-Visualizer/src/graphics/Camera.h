@@ -35,10 +35,12 @@ namespace graphics {
 		Camera(int windowWidth, int windowHeight, 
 			glm::vec3 position = glm::vec3(0.0f), float pitch = 0.0f, float yaw = 0.0f);
 
-		glm::mat4 getVPMatrix() const;
+		glm::mat4& getVPMatrix(bool useCached = false) const;
 		glm::vec3 getPosition() const;
 		glm::vec3 getLookVec() const;
+		// ImGui coordinates
 		glm::vec2 toScreenSpace(const glm::vec3& worldPos) const;
+		glm::vec3 getMouseRay() const;
 		bool shouldShowAxes() const { return showAxes; }
 
 		void renderGUI();

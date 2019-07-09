@@ -39,7 +39,7 @@ namespace entity {
 	void Entity::renderShadow(graphics::Renderer & renderer, const glm::vec3& cameraPos) const
 	{
 		float baseRadius = getShadowRadius();
-		float height = position.z - core::calcShadowZ(cameraPos);
+		float height = position.z - graphics::calcShadowZ(cameraPos);
 
 		if (height < -baseRadius)
 			return;
@@ -51,8 +51,8 @@ namespace entity {
 			scaleFactor = std::cos(height/baseRadius * core::PI);
 
 		//static float randomness = 0.0f; // avoid shadow z-fighting
-		//randomness += core::SMALL_DISTANCE;
-		//if (randomness > core::SMALL_DISTANCE * 10)
+		//randomness += graphics::SMALL_DISTANCE;
+		//if (randomness > graphics::SMALL_DISTANCE * 10)
 		//	randomness = 0.0f;
 
 		glm::vec4 transparent(0.0f);
@@ -64,7 +64,7 @@ namespace entity {
 			centerColor.a = std::max(0.0f, 1.0f - 0.2f*height/baseRadius);
 		else
 			centerColor.a = scaleFactor;
-		glm::vec3 center(position.x, position.y, core::calcShadowZ(cameraPos)/* + randomness*/);
+		glm::vec3 center(position.x, position.y, graphics::calcShadowZ(cameraPos)/* + randomness*/);
 		glm::vec3 radius(baseRadius*scaleFactor, 0.0f, 0.0f); // penumbra gets bigger with distance
 
 		graphics::CenteredPoly shadow;
@@ -167,7 +167,7 @@ namespace entity {
 
 	void Entity::renderPositionMarker(graphics::Renderer& renderer, const graphics::Camera& camera) const
 	{
-		graphics::VisualSphere sphere(position, core::QUAT_IDENTITY, core::MARKER_DOT_RADIUS);
+		graphics::VisualSphere sphere(position, core::QUAT_IDENTITY, graphics::MARKER_DOT_RADIUS);
 
 		sphere.render(renderer);
 

@@ -61,6 +61,7 @@ namespace core {
 		void add(entity::Entity*);
 		void setTarget(entity::Entity*);
 		const entity::Entity* const getFocusedEntity(const graphics::Camera& camera) const;
+		const entity::Entity* const getHoveredEntity(const graphics::Camera& camera) const;
 
 		int addSteps(core::Timeline& timeline, int numSteps);
 		int addStepsUntilEnd(core::Timeline& timeline);
