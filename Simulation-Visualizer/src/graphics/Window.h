@@ -7,7 +7,7 @@
 #include "core/Simulation.h"
 #include "graphics/Renderable.h"
 #include "graphics/Camera.h"
-#include "graphics/content/GUIOverlay.h"
+#include "graphics/content/VisualBox.h"
 
 namespace entity {
 	class Entity;
@@ -33,7 +33,21 @@ namespace graphics {
 		GLFWwindow* glfwWindow;
 		Renderer renderer;
 		Camera camera;
-		core::GUIOverlay guiOverlay;
+		struct GUIOverlay : public graphics::Renderable
+		{
+		public:
+			GUIOverlay(graphics::Camera& camera);
+			virtual ~GUIOverlay();
+
+			virtual void render(graphics::Renderer& renderer) const;
+
+		private:
+			graphics::Camera& camera;
+			static constexpr float axisLength = 0.05f;
+			static constexpr float axisThickness = 0.001f;
+			mutable std::array<graphics::VisualBox, 3> axes;
+			mutable graphics::VisualBox cursorDot;
+		} guiOverlay;
 		//glm::mat4 guiVPMatrix;
 		core::Simulation* simulation;
 

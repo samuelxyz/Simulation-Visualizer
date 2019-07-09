@@ -237,7 +237,6 @@
     <ClCompile Include="src\core\PathSimBox.cpp" />
     <ClCompile Include="src\core\PathSim.cpp" />
     <ClCompile Include="src\entity\Sphere.cpp" />
-    <ClCompile Include="src\graphics\content\GUIOverlay.cpp" />
     <ClCompile Include="src\core\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -294,7 +293,6 @@
     <ClInclude Include="src\core\PathSimBox.h" />
     <ClInclude Include="src\core\PathSim.h" />
     <ClInclude Include="src\entity\Sphere.h" />
-    <ClInclude Include="src\graphics\content\GUIOverlay.h" />
     <ClInclude Include="src\core\stdafx.h" />
     <ClInclude Include="src\core\Simulation.h" />
     <ClInclude Include="src\graphics\Camera.h" />
