@@ -148,7 +148,7 @@ namespace graphics {
 		}
 
 		static int dotTimer = 15;
-		if (window.mouseTracker.focusedEntity != nullptr)
+		if (window.mouseTracker.orbitingEntity != nullptr)
 		{
 			// render dot on focused entity
 			if (dotTimer > 0)
@@ -157,13 +157,13 @@ namespace graphics {
 			glm::vec4 color = graphics::COLOR_ORBIT;
 			color.a = 0.8f - dotTimer/20.0f;
 
-			graphics::VisualSphere dot(window.mouseTracker.focusedEntity->getPosition(),
+			graphics::VisualSphere dot(window.mouseTracker.orbitingEntity->getPosition(),
 				core::QUAT_IDENTITY, (dotTimer/1.5f + 1.0f) * graphics::MARKER_DOT_RADIUS,
 				graphics::VisualEntity::Style::SOLID_COLOR, color);
 
 			dot.render(renderer);
 
-			window.camera.renderLabel(window.mouseTracker.focusedEntity->getPosition(), 
+			window.camera.renderLabel(window.mouseTracker.orbitingEntity->getPosition(), 
 				true, "CameraOrbitingMarkerLabel", "Orbiting", graphics::COLOR_DEFAULT, graphics::PIVOT_RIGHT);
 		}
 		else
@@ -178,7 +178,7 @@ namespace graphics {
 		camera(DEFAULT_WIDTH, DEFAULT_HEIGHT, glm::vec3(-5.0f, -2.0f, 10.0f), -1.2f, 0.16f),
 		guiOverlay(camera),
 		simulation(nullptr),
-		mouseTracker { 0.0f, 0.0f, false, nullptr}
+		mouseTracker { 0.0f, 0.0f, false, nullptr, false}
 	{
 
 		glfwSetWindowUserPointer(glfwWindow, this);
@@ -364,13 +364,13 @@ namespace graphics {
 			float dx = x - window->mouseTracker.prevX;
 			float dy = y - window->mouseTracker.prevY;
 
-			//std::cout << "dx: " << dx << ", dy: " << dy << std::endl;
+			window->mouseTracker.isJustClickAndNotDrag = false;
 
 			if (glfwGetMouseButton(glfwWindow, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 				window->camera.handleLeftMouseMotion(dx, dy);
 			if (glfwGetMouseButton(glfwWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
 				window->camera.handleRightMouseMotion(dx, dy, 
-					window->mouseTracker.focusedEntity);
+					window->mouseTracker.orbitingEntity);
 
 			window->mouseTracker.prevX = x;
 			window->mouseTracker.prevY = y;
@@ -392,6 +392,7 @@ namespace graphics {
 
 			if (action == GLFW_PRESS)
 			{
+				// track dragging
 				double xd, yd;
 				glfwGetCursorPos(glfwWindow, &xd, &yd);
 				int windowHeight;
@@ -400,23 +401,31 @@ namespace graphics {
 				window->mouseTracker.prevX = static_cast<float>(xd);
 
 				window->mouseTracker.dragging = true;
-				if (button == GLFW_MOUSE_BUTTON_LEFT && !guiMouseCheck(glfwWindow))
-				{
-					const entity::Entity* hovered = window->simulation->getHoveredEntity(window->camera);
-					if (hovered != nullptr)
-						hovered->shouldShow.gui = true;
-				}
+				window->mouseTracker.isJustClickAndNotDrag = true;
+
+				// start orbiting
 				if (button == GLFW_MOUSE_BUTTON_RIGHT)
-					window->mouseTracker.focusedEntity = window->simulation->getFocusedEntity(window->camera);
+					window->mouseTracker.orbitingEntity = window->simulation->getFocusedEntity(window->camera);
 			}
 			else // action == GLFW_RELEASE
 			{
+				// stop tracking dragging
 				if (button == GLFW_MOUSE_BUTTON_LEFT && 
 					glfwGetMouseButton(glfwWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE)
 					window->mouseTracker.dragging = false;
+
+				// show entity GUI
+				if (button == GLFW_MOUSE_BUTTON_LEFT && window->mouseTracker.isJustClickAndNotDrag)
+				{
+					const entity::Entity* hovered = window->simulation->getHoveredEntity(window->camera);
+					if (hovered != nullptr)
+						hovered->shouldShow.gui = !(hovered->shouldShow.gui); // toggle
+				}
+
+				// stop orbiting
 				if (button == GLFW_MOUSE_BUTTON_RIGHT)
 				{
-					window->mouseTracker.focusedEntity = nullptr;
+					window->mouseTracker.orbitingEntity = nullptr;
 					if (glfwGetMouseButton(glfwWindow, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE)
 						window->mouseTracker.dragging = false;
 				}

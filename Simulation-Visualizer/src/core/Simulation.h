@@ -32,6 +32,7 @@ namespace core {
 			bool showContactPoint;
 			float playbackSpeed;
 			bool loopPlayback;
+			bool logOutput;
 			Parameters();
 		};
 

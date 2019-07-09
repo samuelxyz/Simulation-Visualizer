@@ -89,7 +89,7 @@ static void install_interface(MCP *m)
 }
 
 void pathMain(int n, int nnz, int *status,
-	double *z, double *f, double *lb, double *ub)
+	double *z, double *f, double *lb, double *ub, int log)
 {
 	Options_Interface *o;
 	MCP *m;
@@ -101,7 +101,10 @@ void pathMain(int n, int nnz, int *status,
 	double dnnz;
 	int i;
 
-	Output_SetLog(stdout);
+	if (log)
+		Output_SetLog(stdout);
+	else
+		Output_SetLog(NULL);
 
 	o = Options_Create();
 	Path_AddOptions(o);

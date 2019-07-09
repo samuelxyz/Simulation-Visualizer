@@ -54,7 +54,7 @@ namespace core
 		// Uses PATH variables, capture from target entity first if necessary
 		// Adds step to end of timeline and returns true if successful
 		// Does not update target entity
-		virtual bool addStep(core::Timeline& timeline);
+		virtual bool addStep(core::Timeline& timeline, bool log = true);
 		// Updates cache only. z should be updated in subclass overrides
 		virtual void captureTargetState();
 		virtual void printZ() = 0;

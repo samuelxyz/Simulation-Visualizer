@@ -22,11 +22,12 @@ namespace core {
 		delete[] upper_bounds;
 	}
 
-	bool PathSim::addStep(core::Timeline& timeline)
+	bool PathSim::addStep(core::Timeline& timeline, bool log)
 	{
-		pathMain(n(), nnz(), &status, z, F, lower_bounds, upper_bounds);
+		pathMain(n(), nnz(), &status, z, F, lower_bounds, upper_bounds, log);
 
-		printZ();
+		if (log)
+			printZ();
 
 		if (status != 1)
 			return false; // solution not found
@@ -79,7 +80,8 @@ namespace core {
 		w_yo = angVelocity.y;
 		w_zo = angVelocity.z;
 
-		printCache();
+		if (log)
+			printCache();
 
 		return true;
 	}

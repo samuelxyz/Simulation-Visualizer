@@ -55,7 +55,11 @@ namespace graphics {
 		{
 			float prevX, prevY;
 			bool dragging;
-			const entity::Entity* focusedEntity;
+			const entity::Entity* orbitingEntity;
+
+			// Whether the mouse has been moved since the last mouse-click-down event
+			bool isJustClickAndNotDrag;
+
 		} mouseTracker;
 
 	public:

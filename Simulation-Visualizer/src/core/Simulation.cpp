@@ -28,7 +28,7 @@ namespace core {
 	Simulation::Parameters::Parameters()
 		: timePaused(true), playbackTime(0.0f), currentStep(0),
 		showShadows(true), showEnvironment(true), showContactPoint(true),
-		playbackSpeed(1.0), loopPlayback(false)
+		playbackSpeed(1.0), loopPlayback(false), logOutput(true)
 	{
 	}
 
@@ -49,9 +49,12 @@ namespace core {
 				// try a path step
 				pathSim->target->loadState(timeline.back());
 				pathSim->captureTargetState();
-				pathSim->printZ();
-				pathSim->printCache();
-				if (pathSim->addStep(timeline))
+				if (parameters.logOutput)
+				{
+					pathSim->printZ();
+					pathSim->printCache();
+				}
+				if (pathSim->addStep(timeline, parameters.logOutput))
 				{
 					lastPathSuccessful = true;
 					++successes;
@@ -108,9 +111,12 @@ namespace core {
 				// try a path step
 				pathSim->target->loadState(timeline.back());
 				pathSim->captureTargetState();
-				pathSim->printZ();
-				pathSim->printCache();
-				if (pathSim->addStep(timeline))
+				if (parameters.logOutput)
+				{
+					pathSim->printZ();
+					pathSim->printCache();
+				}
+				if (pathSim->addStep(timeline, parameters.logOutput))
 				{
 					lastPathSuccessful = true;
 					++successes;
@@ -417,6 +423,7 @@ namespace core {
 					parameters.timePaused = false;
 					parameters.loopPlayback = false;
 				}
+				ImGui::Checkbox("Log Output", &(parameters.logOutput));
 			}
 			{
 				ImGui::Separator();
@@ -438,7 +445,9 @@ namespace core {
 							ImGui::GetStyle().WindowPadding.x, 0.0f);
 					}
 
+					ImGui::PushStyleColor(ImGuiCol_CheckMark, graphics::COLOR_BLACK);
 					ImGui::Checkbox("Show Shadows", &(parameters.showShadows));
+					ImGui::PopStyleColor();
 
 					if (!parameters.showEnvironment)
 						ImGui::PopStyleColor(2);
@@ -558,6 +567,7 @@ namespace core {
 
 		std::vector<float> srSq; // cached shadow radii of each entity (used for cr
 		float rMaxSq = 0.0f;
+		float rMinSq = graphics::RENDER_DISTANCE*graphics::RENDER_DISTANCE;
 		for (const entity::Entity* e : entities)
 		{
 			float sr = e->getShadowRadius();
@@ -566,9 +576,13 @@ namespace core {
 			float rSq = glm::length2(e->getPosition() - camera.getPosition());
 			if (rSq > rMaxSq)
 				rMaxSq = rSq;
+			if (rSq < rMinSq)
+				rMinSq = rSq;
 		}
+		
+		float rMax = std::sqrtf(rMaxSq);
 
-		for (float r = 0.0f; r < rMaxSq; r += 0.05f)
+		for (float r = std::sqrtf(rMinSq); r < rMax; r += 0.05f)
 		{
 			glm::vec3 testPos = camera.getPosition() + r*mouseRay;
 			for (unsigned int i = 0; i < entities.size(); ++i)

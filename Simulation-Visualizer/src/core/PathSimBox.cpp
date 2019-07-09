@@ -42,7 +42,6 @@ namespace core {
 		wid = b->getSizeY();
 		heg = b->getSizeZ();
 		captureTargetState();
-		printConstants();
 	}
 
 	int PathSimBox::funcEval(double* z, double* F)
