@@ -40,6 +40,8 @@ namespace entity {
 		const glm::vec3& getAngVelocity() const { return angVelocity; }
 		float getMass() const { return mass; }
 		const glm::mat3& getRotInertia() const { return rotInertia; }
+
+		// For technical reasons, this should be >= the maximum extent of the entity
 		virtual float getShadowRadius() const = 0;
 		virtual bool intersectsFloor() const = 0;
 		void loadState(core::Timestep&);

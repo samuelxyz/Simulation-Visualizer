@@ -565,33 +565,180 @@ namespace core {
 	{
 		glm::vec3 mouseRay = camera.getMouseRay();
 
-		std::vector<float> srSq; // cached shadow radii of each entity (used for cr
-		float rMaxSq = 0.0f;
-		float rMinSq = graphics::RENDER_DISTANCE*graphics::RENDER_DISTANCE;
-		for (const entity::Entity* e : entities)
-		{
-			float sr = e->getShadowRadius();
-			srSq.push_back(sr*sr);
+		//// Algorithm: "Original hitscan"
+		//// Hitscans along mouse ray, through entire distance range
+		//// where an entity might plausibly be
+		//const entity::Entity* result1 = [&]() -> const entity::Entity* {
+		//	auto startTime = std::chrono::steady_clock::now();
+		//	static int tickCount = 0; ++tickCount;
+		//
+		//	std::vector<float> srSq; // cached shadow radius of each entity
+		//	float rMaxSq = 0.0f;
+		//	float rMinSq = graphics::RENDER_DISTANCE*graphics::RENDER_DISTANCE;
+		//	float srOfMax = 0.0f; // shadow radii of closest and farthest entities
+		//	float srOfMin = 0.0f;
+		//	for (const entity::Entity* e : entities)
+		//	{
+		//		float sr = e->getShadowRadius();
+		//		srSq.push_back(sr*sr);
+		//
+		//		float rSq = glm::length2(e->getPosition() - camera.getPosition());
+		//		if (rSq > rMaxSq)
+		//		{
+		//			rMaxSq = rSq;
+		//			srOfMax = sr;
+		//		}
+		//		if (rSq < rMinSq)
+		//		{
+		//			rMinSq = rSq;
+		//			srOfMin = sr;
+		//		}
+		//	}
+		//
+		//	float rMax = std::sqrtf(rMaxSq) + srOfMax;
+		//
+		//	for (float r = std::sqrtf(rMinSq) - srOfMin; r < rMax; r += 0.05f)
+		//	{
+		//		glm::vec3 testPos = camera.getPosition() + r*mouseRay;
+		//		for (unsigned int i = 0; i < entities.size(); ++i)
+		//			if (glm::length2(entities[i]->getPosition() - testPos) < srSq[i])
+		//				if (entities[i]->containsPoint(testPos))
+		//				{
+		//					auto finish = std::chrono::steady_clock::now();
+		//					if (tickCount % 60 == 0)
+		//						std::cout << "Original (!): " <<
+		//						std::chrono::duration_cast<std::chrono::microseconds>(finish-startTime).count();
+		//					return entities[i];
+		//				}
+		//	}
+		//	auto finish = std::chrono::steady_clock::now();
+		//	if (tickCount % 60 == 0)
+		//		std::cout << "Original (.): " << 
+		//		std::chrono::duration_cast<std::chrono::microseconds>(finish-startTime).count();
+		//	return nullptr;
+		//}();
 
-			float rSq = glm::length2(e->getPosition() - camera.getPosition());
-			if (rSq > rMaxSq)
-				rMaxSq = rSq;
-			if (rSq < rMinSq)
-				rMinSq = rSq;
-		}
-		
-		float rMax = std::sqrtf(rMaxSq);
+		//// Algorithm: "Restricted Hitscan"
+		//// For each entity: checks for proximity, then hitscans through shadow sphere
+		//// Much much faster than "Original Hitscan" when not hovering near entities
+		//const entity::Entity* result2 = [&]() -> const entity::Entity* {
+		//	auto startTime = std::chrono::steady_clock::now();
+		//	static int tickCount = 0; ++tickCount;
+		//
+		//	const entity::Entity* closestE = nullptr;
+		//	//float rClosest = std::numeric_limits<float>::max();
+		//	float rClosest = graphics::RENDER_DISTANCE;
+		//	for (const entity::Entity* e : entities)
+		//	{
+		//		float rCenter = glm::length(e->getPosition() - camera.getPosition());
+		//		float sr = e->getShadowRadius();
+		//
+		//		if (glm::length2(camera.getPosition() + rCenter*mouseRay - e->getPosition()) > sr*sr)
+		//			continue; // we're nowhere near e
+		//
+		//		float min = rCenter - sr;
+		//		float max = rCenter + sr;
+		//		for (float r = min; r < rClosest && r < max; r += 0.05f)
+		//		{
+		//			if (e->containsPoint(camera.getPosition() + r*mouseRay))
+		//			{
+		//				rClosest = r;
+		//				closestE = e;
+		//				break;
+		//			}
+		//		}
+		//	}
+		//
+		//	auto finish = std::chrono::steady_clock::now();
+		//	if (tickCount % 60 == 0)
+		//		std::cout << " Restricted: " <<
+		//		std::chrono::duration_cast<std::chrono::microseconds>(finish-startTime).count() <<
+		//		" @" << closestE;
+		//	return closestE;
+		//}();
 
-		for (float r = std::sqrtf(rMinSq); r < rMax; r += 0.05f)
-		{
-			glm::vec3 testPos = camera.getPosition() + r*mouseRay;
-			for (unsigned int i = 0; i < entities.size(); ++i)
-				if (glm::length2(entities[i]->getPosition() - testPos) < srSq[i])
-					if (entities[i]->containsPoint(testPos))
-						return entities[i];
-		}
+		// Algorithm: "Restricted II"
+		// For each entity, checks for proximity, then "hitscans" outward 
+		// in both directions from where the entity "center" is along mouse ray
+		// Much faster than "Restricted I" when hovering over entities
+		// Much much faster than "Original Hitscan" when not hovering near entities
 
-		return nullptr;
+		//const entity::Entity* result3 = [&]() -> const entity::Entity* {
+			//auto startTime = std::chrono::steady_clock::now();
+			//static int tickCount = 0; ++tickCount;
+
+			const entity::Entity* closestE = nullptr;
+			float rClosest = std::numeric_limits<float>::max();
+			//float rClosest = graphics::RENDER_DISTANCE;
+			for (const entity::Entity* e : entities)
+			{
+				float rCenter = glm::length(e->getPosition() - camera.getPosition());
+				float sr = e->getShadowRadius();
+
+				if (rCenter - sr > rClosest)
+					continue; // closer entity already found
+
+				if (glm::length2(camera.getPosition() + rCenter*mouseRay - e->getPosition()) > sr*sr)
+					continue; // we're nowhere near e
+
+				// start from center location and spread forward/backward to check for hits
+				bool toggle = true;
+				for (float dr = 0.05f; dr < sr; dr += (toggle)? 0.05f : 0.0f)
+				{
+					float r = (toggle) ? rCenter + dr : rCenter - dr;
+					if (e->containsPoint(camera.getPosition() + r*mouseRay))
+					{
+						rClosest = r;
+						closestE = e;
+						break;
+					}
+					toggle = !toggle;
+				}
+			}
+
+			//auto finish = std::chrono::steady_clock::now();
+			//if (tickCount % 60 == 0)
+			//	std::cout << " Restricted ii: " <<
+			//	std::chrono::duration_cast<std::chrono::microseconds>(finish-startTime).count() <<
+			//	" @" << closestE << std::endl;
+			return closestE;
+		//}();
+
+
+		// This alternate method can be faster if there are only a few objects spaced far apart,
+		// but otherwise it's slower so I'm not using it.
+		// Sorts entities by proximity, then hitscans through each plausible range in order.
+		//
+		//// List sorted by closest entity first
+		//std::vector<entity::Entity*> distanceList { entities };
+		//std::sort(distanceList.begin(), distanceList.end(),
+		//	[&camera](const entity::Entity* a, const entity::Entity* b)
+		//	{
+		//		return glm::length2(a->getPosition() - camera.getPosition()) <
+		//			glm::length2(b->getPosition() - camera.getPosition());
+		//	}
+		//);
+		//for (auto e : distanceList)
+		//{
+		//	float dist = glm::length(e->getPosition() - camera.getPosition());
+		//
+		//	// quick test first: test middle of the range.
+		//	glm::vec3 centerTestPos = camera.getPosition() + dist*mouseRay;
+		//	if (e->containsPoint(centerTestPos))
+		//		return e;
+		//
+		//	float sr = e->getShadowRadius();
+		//	float close = dist - sr;
+		//	float far = dist + sr;
+		//
+		//	for (float r = close; r < far; r += 0.05f)
+		//	{
+		//		glm::vec3 testPos = camera.getPosition() + r*mouseRay;
+		//		if (e->containsPoint(testPos))
+		//			return e;
+		//	}
+		//}
+
 	}
 
 	void Simulation::renderEntities(graphics::Renderer& renderer, const glm::vec3& cameraPos) const
