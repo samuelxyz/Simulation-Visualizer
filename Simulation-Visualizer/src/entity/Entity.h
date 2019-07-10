@@ -25,7 +25,8 @@ namespace entity {
 		virtual bool containsPoint(glm::vec3 worldPoint) const = 0;
 
 		virtual void render(graphics::Renderer& renderer) const = 0;
-		virtual void renderShadow(graphics::Renderer& renderer, const glm::vec3& cameraPos) const;
+		void renderShadow(graphics::Renderer& renderer, const glm::vec3& cameraPos, float shadowSizeMultiplier) const;
+		virtual void renderShadow(graphics::Renderer& renderer, const glm::vec3& cameraPos) const = 0;
 		virtual void renderGUI();
 		void renderLabel(const graphics::Camera& camera) const;
 		void renderPositionMarker(graphics::Renderer& renderer, const graphics::Camera& camera) const;
@@ -42,7 +43,7 @@ namespace entity {
 		const glm::mat3& getRotInertia() const { return rotInertia; }
 
 		// For technical reasons, this should be >= the maximum extent of the entity
-		virtual float getShadowRadius() const = 0;
+		virtual float getBoundingRadius() const = 0;
 		virtual bool intersectsFloor() const = 0;
 		void loadState(core::Timestep&);
 

@@ -36,9 +36,9 @@ namespace entity {
 		return glm::toMat3(orientation) * localVec + position;
 	}
 
-	void Entity::renderShadow(graphics::Renderer & renderer, const glm::vec3& cameraPos) const
+	void Entity::renderShadow(graphics::Renderer & renderer, const glm::vec3& cameraPos, float shadowSizeMultiplier) const
 	{
-		float baseRadius = getShadowRadius();
+		float baseRadius = getBoundingRadius() * shadowSizeMultiplier;
 		float height = position.z - graphics::calcShadowZ(cameraPos);
 
 		if (height < -baseRadius)

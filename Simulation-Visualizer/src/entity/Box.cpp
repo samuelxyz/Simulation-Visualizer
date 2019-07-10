@@ -57,14 +57,22 @@ namespace entity {
 		visualBox.orientation = orientation;
 
 		float height = position.z - graphics::FLOOR_Z;
-		visualBox.shadeFactor = std::max(0.4f - (height/getShadowRadius() * 0.15f), 0.1f);
+		visualBox.shadeFactor = std::max(0.4f - (height/getBoundingRadius() * 0.15f), 0.1f);
 
 		visualBox.render(renderer);
 	}
 
-	float Box::getShadowRadius() const
+	void Box::renderShadow(graphics::Renderer & renderer, const glm::vec3& cameraPos) const
 	{
-		return 2.0f* std::max(std::max(
+		Entity::renderShadow(renderer, cameraPos, 1.155f);
+	}
+
+	float Box::getBoundingRadius() const
+	{
+		// this makes some assumptions, might be overestimate, 
+		// but it's pretty fast
+
+		return 1.732f * std::max(std::max(
 				std::max(std::abs(xMin), std::abs(xMax)),
 				std::max(std::abs(yMin), std::abs(yMax))
 			),	std::max(std::abs(zMin), std::abs(zMax)));

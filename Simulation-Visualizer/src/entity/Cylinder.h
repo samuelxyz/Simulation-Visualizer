@@ -25,8 +25,8 @@ namespace entity {
 		virtual bool containsPoint(glm::vec3 worldPoint) const;
 		virtual bool intersectsFloor() const override;
 		virtual void render(graphics::Renderer& renderer) const;
-
-		virtual float getShadowRadius() const;
+		virtual void renderShadow(graphics::Renderer& renderer, const glm::vec3& cameraPos) const override;
+		virtual float getBoundingRadius() const;
 	};
 
 }

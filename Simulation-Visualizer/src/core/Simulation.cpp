@@ -579,7 +579,7 @@ namespace core {
 		//	float srOfMin = 0.0f;
 		//	for (const entity::Entity* e : entities)
 		//	{
-		//		float sr = e->getShadowRadius();
+		//		float sr = e->getBoundingRadius();
 		//		srSq.push_back(sr*sr);
 		//
 		//		float rSq = glm::length2(e->getPosition() - camera.getPosition());
@@ -631,7 +631,7 @@ namespace core {
 		//	for (const entity::Entity* e : entities)
 		//	{
 		//		float rCenter = glm::length(e->getPosition() - camera.getPosition());
-		//		float sr = e->getShadowRadius();
+		//		float sr = e->getBoundingRadius();
 		//
 		//		if (glm::length2(camera.getPosition() + rCenter*mouseRay - e->getPosition()) > sr*sr)
 		//			continue; // we're nowhere near e
@@ -673,7 +673,7 @@ namespace core {
 			for (const entity::Entity* e : entities)
 			{
 				float rCenter = glm::length(e->getPosition() - camera.getPosition());
-				float sr = e->getShadowRadius();
+				float sr = e->getBoundingRadius();
 
 				if (rCenter - sr > rClosest)
 					continue; // closer entity already found
@@ -727,7 +727,7 @@ namespace core {
 		//	if (e->containsPoint(centerTestPos))
 		//		return e;
 		//
-		//	float sr = e->getShadowRadius();
+		//	float sr = e->getBoundingRadius();
 		//	float close = dist - sr;
 		//	float far = dist + sr;
 		//
