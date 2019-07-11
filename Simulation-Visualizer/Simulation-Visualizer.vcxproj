@@ -148,6 +148,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\core\PathSimCylinder.cpp" />
     <ClCompile Include="src\entity\Cylinder.cpp" />
     <ClCompile Include="Dependencies\fmt\src\format.cc" />
     <ClCompile Include="Dependencies\imgui\imgui\imgui.cpp">
@@ -281,6 +282,7 @@
     <ClCompile Include="src\graphics\content\VisualCylinder.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\core\PathSimCylinder.h" />
     <ClInclude Include="src\entity\Cylinder.h" />
     <ClInclude Include="Dependencies\imgui\imgui\imconfig.h" />
     <ClInclude Include="Dependencies\imgui\imgui\imgui.h" />

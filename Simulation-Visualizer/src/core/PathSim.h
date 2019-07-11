@@ -47,7 +47,7 @@ namespace core
 		virtual int n() const = 0;
 		// overestimate of jacobian nonzeros. This would be static except it also has to be virtual
 		int nnz() const { return n() * n(); }
-		virtual void setTarget(entity::Entity*) = 0;
+		virtual void setTarget(entity::Entity*);
 		virtual int funcEval(double* z, double* F) = 0;
 		virtual int jacEval(double* z, int* column_starting_indices,
 			int* len_of_each_column, int* row_index_of_each_value, double* values) = 0;
@@ -57,9 +57,10 @@ namespace core
 		virtual bool addStep(core::Timeline& timeline, bool log = true);
 		// Updates cache only. z should be updated in subclass overrides
 		virtual void captureTargetState();
-		virtual void printZ() = 0;
-		void printCache();
-		virtual void printConstants() = 0;
+		virtual void printZ() const = 0;
+		virtual void printF() const;
+		void printCache() const;
+		virtual void printConstants() const = 0;
 	};
 
 }

@@ -3,13 +3,13 @@
 
 namespace core {
 
-	struct PathSimBox :
+	struct PathSimCylinder :
 		public PathSim
 	{
-		double len, wid, heg;
+		double radius, heg;
 
-		PathSimBox();
-		virtual ~PathSimBox();
+		PathSimCylinder();
+		virtual ~PathSimCylinder();
 
 		virtual void setTarget(entity::Entity* target) override;
 		virtual int funcEval(double* z, double* F) override;
@@ -20,7 +20,7 @@ namespace core {
 		virtual void printZ() const override;
 		virtual void printConstants() const override;
 
-		virtual int n() const override { return 24; }
+		virtual int n() const override { return 21;	}
 	};
 
 }

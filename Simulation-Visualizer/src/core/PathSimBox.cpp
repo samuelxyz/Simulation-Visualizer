@@ -29,19 +29,14 @@ namespace core {
 
 	void PathSimBox::setTarget(entity::Entity* e)
 	{
-		this->target = e;
+		PathSim::setTarget(e);
 		
 		entity::Box* b = dynamic_cast<entity::Box*>(e);
 		assert(b != nullptr && "PathSimBox's target must be a Box");
 
-		m = b->getMass();
-		I_xx = b->getRotInertia()[0][0];
-		I_yy = b->getRotInertia()[1][1];
-		I_zz = b->getRotInertia()[2][2];
 		len = b->getSizeX();
 		wid = b->getSizeY();
 		heg = b->getSizeZ();
-		captureTargetState();
 	}
 
 	int PathSimBox::funcEval(double* z, double* F)
@@ -350,13 +345,13 @@ namespace core {
 		z[5] = w_zo;
 		z[6] = q_xo;
 		z[7] = q_yo;
-		z[8] = q_zo - heg/2;
+		z[8] = graphics::FLOOR_Z;
 		z[9] = q_xo;
 		z[10] = q_yo;
 		z[11] = graphics::FLOOR_Z;
 	}
 
-	void PathSimBox::printZ()
+	void PathSimBox::printZ() const
 	{
 		std::cout << "---Sam Tan's output---\nStatus: " << status << "\n          Z:\n-----------------------";
 		std::cout <<
@@ -386,7 +381,7 @@ namespace core {
 			"\n23| p_n  | " << z[23] << std::endl;
 	}
 
-	void PathSimBox::printConstants()
+	void PathSimBox::printConstants() const
 	{
 		std::cout << "\nConstants:" <<
 			"\nm    | " << m    <<

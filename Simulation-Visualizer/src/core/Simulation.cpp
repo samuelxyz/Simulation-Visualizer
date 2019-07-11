@@ -688,6 +688,13 @@ namespace core {
 					float r = (toggle) ? rCenter + dr : rCenter - dr;
 					if (e->containsPoint(camera.getPosition() + r*mouseRay))
 					{
+						//// now definitely hovering, but where's the front of the object?
+						//// zigzag back and forth to find the edge
+						//bool outward = false;
+						//float searchPos;
+						//for (float step = 0.4f; step > 0.04f)
+
+
 						rClosest = r;
 						closestE = e;
 						break;

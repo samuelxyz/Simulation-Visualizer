@@ -19,11 +19,11 @@ int window()
 	window.setSimulation(&simulation);
 	globalSim = &simulation;
 
-	simulation.setTarget(new entity::Box("Box1",
-		glm::vec3(0.0f, 0.0f, 1.0f), core::QUAT_IDENTITY, glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(0.0f)
-	));
-	simulation.add(new entity::Cylinder("Cylinder1",
-		glm::vec3(5.0f, 5.0f, 1.0f)));
+	//simulation.setTarget(new entity::Box("Box1",
+	//	glm::vec3(0.0f, 0.0f, 1.0f), core::QUAT_IDENTITY, glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(0.0f)
+	//));
+	simulation.setTarget(new entity::Cylinder("Cylinder1",
+		glm::vec3(0.0f, 0.0f, 1.0f)));
 
 	//simulation.add(new entity::Sphere("Sphere1",
 	//	glm::vec3(3.0f, 3.0f, 1.1f), core::QUAT_IDENTITY, glm::vec3(0.0f), glm::vec3(0.0f)

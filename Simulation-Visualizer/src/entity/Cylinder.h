@@ -27,6 +27,9 @@ namespace entity {
 		virtual void render(graphics::Renderer& renderer) const;
 		virtual void renderShadow(graphics::Renderer& renderer, const glm::vec3& cameraPos) const override;
 		virtual float getBoundingRadius() const;
+
+		float getRadius() const { return radius; }
+		float getHeight() const { return height; }
 	};
 
 }

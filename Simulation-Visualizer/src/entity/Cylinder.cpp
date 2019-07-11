@@ -1,5 +1,6 @@
 #include "core/stdafx.h"
 #include "Cylinder.h"
+#include "core/PathSimCylinder.h"
 
 namespace entity {
 
@@ -18,9 +19,7 @@ namespace entity {
 
 	core::PathSim * Cylinder::createPathSim() const
 	{
-		// TODO
-		// return new core::PathSimCylinder;
-		return nullptr;
+		 return new core::PathSimCylinder;
 	}
 
 	bool Cylinder::containsPoint(glm::vec3 worldPoint) const
