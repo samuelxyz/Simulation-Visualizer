@@ -39,9 +39,13 @@ namespace entity {
 		Entity::renderShadow(renderer, cameraPos, 1.0f);
 	}
 
-	float Sphere::getBoundingRadius() const
+	float Sphere::getOuterBoundingRadius() const
 	{
 		return radius;
 	}
 
+	float Sphere::getInnerBoundingRadius() const
+	{
+		return radius;
+	}
 }

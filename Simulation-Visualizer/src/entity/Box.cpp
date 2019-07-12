@@ -57,7 +57,7 @@ namespace entity {
 		visualBox.orientation = orientation;
 
 		float height = position.z - graphics::FLOOR_Z;
-		visualBox.shadeFactor = std::max(0.4f - (height/getBoundingRadius() * 0.15f), 0.1f);
+		visualBox.shadeFactor = std::max(0.4f - (height/getOuterBoundingRadius() * 0.15f), 0.1f);
 
 		visualBox.render(renderer);
 	}
@@ -67,7 +67,7 @@ namespace entity {
 		Entity::renderShadow(renderer, cameraPos, 1.155f);
 	}
 
-	float Box::getBoundingRadius() const
+	float Box::getOuterBoundingRadius() const
 	{
 		// this makes some assumptions, might be overestimate, 
 		// but it's pretty fast
@@ -76,5 +76,12 @@ namespace entity {
 				std::max(std::abs(xMin), std::abs(xMax)),
 				std::max(std::abs(yMin), std::abs(yMax))
 			),	std::max(std::abs(zMin), std::abs(zMax)));
+	}
+
+	float Box::getInnerBoundingRadius() const
+	{
+		return std::min(std::min(
+			getSizeX(), getSizeY()), getSizeZ()
+		) / 2.0f;
 	}
 }

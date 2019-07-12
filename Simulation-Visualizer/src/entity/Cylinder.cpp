@@ -54,7 +54,7 @@ namespace entity {
 		visualCylinder.orientation = orientation;
 
 		float height = position.z - graphics::FLOOR_Z;
-		visualCylinder.shadeFactor = std::max(0.4f - (height/getBoundingRadius() * 0.15f), 0.1f);
+		visualCylinder.shadeFactor = std::max(0.4f - (height/getOuterBoundingRadius() * 0.15f), 0.1f);
 
 		visualCylinder.render(renderer);
 	}
@@ -64,10 +64,15 @@ namespace entity {
 		Entity::renderShadow(renderer, cameraPos, 1.132f);
 	}
 
-	float Cylinder::getBoundingRadius() const
+	float Cylinder::getOuterBoundingRadius() const
 	{
 		// makes assumptions, may be overestimate, but it's fast
 		return std::max(height, 2.0f * radius) * 0.707f;
+	}
+
+	float Cylinder::getInnerBoundingRadius() const
+	{
+		return std::min(height/2.0f, radius);
 	}
 
 

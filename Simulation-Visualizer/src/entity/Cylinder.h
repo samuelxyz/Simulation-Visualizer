@@ -26,7 +26,8 @@ namespace entity {
 		virtual bool intersectsFloor() const override;
 		virtual void render(graphics::Renderer& renderer) const;
 		virtual void renderShadow(graphics::Renderer& renderer, const glm::vec3& cameraPos) const override;
-		virtual float getBoundingRadius() const;
+		virtual float getOuterBoundingRadius() const override;
+		virtual float getInnerBoundingRadius() const override;
 
 		float getRadius() const { return radius; }
 		float getHeight() const { return height; }

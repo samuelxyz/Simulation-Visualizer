@@ -579,7 +579,7 @@ namespace core {
 		//	float srOfMin = 0.0f;
 		//	for (const entity::Entity* e : entities)
 		//	{
-		//		float sr = e->getBoundingRadius();
+		//		float sr = e->getOuterBoundingRadius();
 		//		srSq.push_back(sr*sr);
 		//
 		//		float rSq = glm::length2(e->getPosition() - camera.getPosition());
@@ -631,7 +631,7 @@ namespace core {
 		//	for (const entity::Entity* e : entities)
 		//	{
 		//		float rCenter = glm::length(e->getPosition() - camera.getPosition());
-		//		float sr = e->getBoundingRadius();
+		//		float sr = e->getOuterBoundingRadius();
 		//
 		//		if (glm::length2(camera.getPosition() + rCenter*mouseRay - e->getPosition()) > sr*sr)
 		//			continue; // we're nowhere near e
@@ -660,6 +660,7 @@ namespace core {
 		// Algorithm: "Restricted II"
 		// For each entity, checks for proximity, then "hitscans" outward 
 		// in both directions from where the entity "center" is along mouse ray
+		// Then finds the surface of the object closest to the camera
 		// Much faster than "Restricted I" when hovering over entities
 		// Much much faster than "Original Hitscan" when not hovering near entities
 
@@ -673,7 +674,8 @@ namespace core {
 			for (const entity::Entity* e : entities)
 			{
 				float rCenter = glm::length(e->getPosition() - camera.getPosition());
-				float sr = e->getBoundingRadius();
+				float sr = e->getOuterBoundingRadius();
+				float step = e->getInnerBoundingRadius()/30.0f;
 
 				if (rCenter - sr > rClosest)
 					continue; // closer entity already found
@@ -683,20 +685,54 @@ namespace core {
 
 				// start from center location and spread forward/backward to check for hits
 				bool toggle = true;
-				for (float dr = 0.05f; dr < sr; dr += (toggle)? 0.05f : 0.0f)
+				for (float dr = step; dr < sr; dr += (toggle)? step : 0.0f)
 				{
 					float r = (toggle) ? rCenter + dr : rCenter - dr;
 					if (e->containsPoint(camera.getPosition() + r*mouseRay))
 					{
-						//// now definitely hovering, but where's the front of the object?
-						//// zigzag back and forth to find the edge
-						//bool outward = false;
-						//float searchPos;
-						//for (float step = 0.4f; step > 0.04f)
+						// now definitely hovering, but where's the front of the object?
+						// zigzag back and forth to find the edge
 
+						//step *= 10.0f;
+						//
+						//r -= step;
+						//while (e->containsPoint(camera.getPosition() + r*mouseRay))
+						//	r -= step;
+						//
+						//step /= 4.0f;
+						//r += step;
+						//while (!(e->containsPoint(camera.getPosition() + r*mouseRay)))
+						//	r += step;
+						//
+						//step /= 4.0f;
+						//r -= step;
+						//while (e->containsPoint(camera.getPosition() + r*mouseRay))
+						//	r -= step;
+						//
+						//step /= 4.0f;
+						//r += step;
+						//while (!(e->containsPoint(camera.getPosition() + r*mouseRay)))
+						//	r += step;
 
-						rClosest = r;
-						closestE = e;
+						// condensed version of the above:
+						step *= 40.0f;
+						bool searchAway = false;
+						for (int i = 0; i < 4; ++i)
+						{
+							step /= 4.0f;
+							r += (searchAway)? step : -step;
+							while (searchAway != (e->containsPoint(camera.getPosition() + r*mouseRay)))
+								r += (searchAway) ? step : -step;
+							searchAway = !searchAway;
+						}
+						
+						// and see if it's the closest point on any entity thus far
+						r -= step;
+						if (r < rClosest)
+						{
+							rClosest = r;
+							closestE = e;
+						}
 						break;
 					}
 					toggle = !toggle;
@@ -734,7 +770,7 @@ namespace core {
 		//	if (e->containsPoint(centerTestPos))
 		//		return e;
 		//
-		//	float sr = e->getBoundingRadius();
+		//	float sr = e->getOuterBoundingRadius();
 		//	float close = dist - sr;
 		//	float far = dist + sr;
 		//
