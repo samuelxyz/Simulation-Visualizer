@@ -49,7 +49,7 @@ namespace core {
 			// record the resulting timestep
 			glm::vec3 velocity(z[0], z[1], z[2]);
 			glm::vec3 position(q_xo, q_yo, q_zo);
-			position += velocity*core::TIME_STEP;
+			position += velocity*core::TIME_STEP; // applying kinematic map stepping basically
 			//glm::quat orientation(
 			//	static_cast<float>(q0_o), 
 			//	static_cast<float>(q1_o), 
@@ -58,16 +58,16 @@ namespace core {
 			double& w_x = z[3];
 			double& w_y = z[4];
 			double& w_z = z[5];
-			double q0 = -(2.0*((h*q1_o*w_x)/2.0 - q0_o + (h*q2_o*w_y)/2.0 + (h*q3_o*w_z)/2.0))/std::sqrt(h*h*w_x*w_x + h*h*w_y*w_y + h*h*w_z*w_z + 4.0);
-			double q1 = (2.0*(q1_o + (h*q0_o*w_x)/2.0 + (h*q3_o*w_y)/2.0 - (h*q2_o*w_z)/2.0))/std::sqrt(h*h*w_x*w_x + h*h*w_y*w_y + h*h*w_z*w_z + 4.0);
-			double q2 = (2.0*(q2_o - (h*q3_o*w_x)/2.0 + (h*q0_o*w_y)/2.0 + (h*q1_o*w_z)/2.0))/std::sqrt(h*h*w_x*w_x + h*h*w_y*w_y + h*h*w_z*w_z + 4.0);
-			double q3 = (2.0*(q3_o + (h*q2_o*w_x)/2.0 - (h*q1_o*w_y)/2.0 + (h*q0_o*w_z)/2.0))/std::sqrt(h*h*w_x*w_x + h*h*w_y*w_y + h*h*w_z*w_z + 4.0);
+			double q0 = -(2.0*((h*q1_o*w_x)/2.0 - q0_o + (h*q2_o*w_y)/2.0 + (h*q3_o*w_z)/2.0))/std::sqrt(h_sq*w_x*w_x + h_sq*w_y*w_y + h_sq*w_z*w_z + 4.0);
+			double q1 = (2.0*(q1_o + (h*q0_o*w_x)/2.0 + (h*q3_o*w_y)/2.0 - (h*q2_o*w_z)/2.0))/std::sqrt(h_sq*w_x*w_x + h_sq*w_y*w_y + h_sq*w_z*w_z + 4.0);
+			double q2 = (2.0*(q2_o - (h*q3_o*w_x)/2.0 + (h*q0_o*w_y)/2.0 + (h*q1_o*w_z)/2.0))/std::sqrt(h_sq*w_x*w_x + h_sq*w_y*w_y + h_sq*w_z*w_z + 4.0);
+			double q3 = (2.0*(q3_o + (h*q2_o*w_x)/2.0 - (h*q1_o*w_y)/2.0 + (h*q0_o*w_z)/2.0))/std::sqrt(h_sq*w_x*w_x + h_sq*w_y*w_y + h_sq*w_z*w_z + 4.0);
 			glm::quat orientation(
 				static_cast<float>(q0),
 				static_cast<float>(q1),
 				static_cast<float>(q2),
 				static_cast<float>(q3));
-			glm::vec3 angVelocity(z[3], z[4], z[5]);
+			glm::vec3 angVelocity(w_x, w_y, w_z);
 			//if (std::isnormal(glm::length2(angVelocity)))
 			//	orientation = glm::normalize(
 			//		glm::angleAxis(

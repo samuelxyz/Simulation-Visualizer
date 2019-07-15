@@ -13,6 +13,15 @@ namespace core {
 	{
 	}
 
+	Simulation::~Simulation()
+	{
+		// deleting nullptr does nothing so that's fine
+		for (entity::Entity* e : entities)
+			delete e;
+
+		delete pathSim;
+	}
+
 	Simulation::Environment::Environment()
 		: floor()
 	{
@@ -39,7 +48,8 @@ namespace core {
 		recordTimestep(pathSim->target);
 
 		int successes = 0;
-		bool usePath = false; // start with freefall since it's fast to compute
+		//bool usePath = false; // start with freefall since it's fast to compute
+		bool usePath = true; // maybe this will help
 		bool lastPathSuccessful = true;
 		bool lastFreefallSuccessful = true;
 		while (successes < numSteps)
@@ -100,7 +110,8 @@ namespace core {
 		recordTimestep(pathSim->target);
 
 		int successes = 0;
-		bool usePath = false; // start with freefall since it's fast to compute
+		//bool usePath = false; // start with freefall since it's fast to compute
+		bool usePath = true; // maybe this will help
 		bool lastPathSuccessful = true;
 		bool lastFreefallSuccessful = true;
 
@@ -197,13 +208,33 @@ namespace core {
 		}
 	}
 
-	Simulation::~Simulation()
+	void Simulation::scrollTimeline(int scr)
 	{
-		// deleting nullptr does nothing so that's fine
-		for (entity::Entity* e : entities)
-			delete e;
+		parameters.currentStep -= scr;
+		if (scr != 0)
+			parameters.timePaused = true;
 
-		delete pathSim;
+		// now clamp
+		if (parameters.currentStep >= static_cast<int>(timeline.size()))
+			parameters.currentStep = timeline.size() - 1;
+		else if (parameters.currentStep < 0)
+			parameters.currentStep = 0;
+	}
+
+	void Simulation::startStop()
+	{
+		if (!parameters.loopPlayback && parameters.playbackSpeed > 0 && parameters.currentStep == timeline.size() - 1)
+		{
+			parameters.timePaused = false;
+			parameters.currentStep = 0;
+		}
+		else if (!parameters.loopPlayback && parameters.playbackSpeed < 0 && parameters.currentStep == 0)
+		{
+			parameters.timePaused = false;
+			parameters.currentStep = timeline.size() - 1;
+		}
+		else
+			parameters.timePaused = !parameters.timePaused;
 	}
 
 	void Simulation::update()
@@ -323,10 +354,42 @@ namespace core {
 
 		if (ImGui::Begin("Simulation"))
 		{
+			// Timestep calculation control
+			{
+				ImGui::Text("Calculate Steps:");
+				ImGui::InputInt("##CalculateStepsNum", &calculateStepsNum);
+				if (ImGui::IsItemHovered())
+				{
+					calculateStepsNum += static_cast<int>(ImGui::GetIO().MouseWheel);
+					ImGui::SetTooltip("Scroll to adjust");
+				}
+				if (calculateStepsNum < 0)
+					calculateStepsNum = 0;
+				ImGui::SameLine();
+				if (ImGui::ArrowButton("##CalculateStepsButton", ImGuiDir_Right))
+				{
+					addSteps(timeline, calculateStepsNum);
+					parameters.timePaused = false;
+					parameters.loopPlayback = false;
+				}
+				if (ImGui::IsItemHovered())
+					ImGui::SetTooltip("Calculate");
+				if (ImGui::Button("Calculate Until Stop"))
+				{
+					addStepsUntilEnd(timeline);
+					parameters.timePaused = false;
+					parameters.loopPlayback = false;
+				}
+				if (ImGui::IsItemHovered())
+					ImGui::SetTooltip("Maximum 1000 steps");
+				ImGui::Checkbox("Log Output", &(parameters.logOutput));
+			}
+
+			ImGui::Separator();
 			// Parameter checkboxes
 			{
 				//ImGui::Checkbox("Enable Gravity", &(parameters.gravityEnabled));
-				ImGui::Checkbox("Pause Time", &(parameters.timePaused));
+				ImGui::Checkbox("Pause Playback", &(parameters.timePaused));
 				ImGui::Checkbox("Loop Playback", &(parameters.loopPlayback));
 			}
 			// Playback controls
@@ -352,6 +415,8 @@ namespace core {
 					parameters.timePaused = true;
 					parameters.currentStep = 0;
 				}
+				if (ImGui::IsItemHovered())
+					ImGui::SetTooltip("Go to beginning of timeline");
 				ImGui::Text("Playback Speed:");
 				ImGui::InputFloat("##PlaybackSpeedNum", &(parameters.playbackSpeed));
 				if (ImGui::IsItemHovered())
@@ -359,6 +424,7 @@ namespace core {
 					static constexpr float factor = 0.1f;
 					float scr = ImGui::GetIO().MouseWheel;
 					parameters.playbackSpeed += scr * factor;
+					ImGui::SetTooltip("Scroll to adjust");
 				}
 				ImGui::Text("Elapsed Time: %.3f s", timeline.timeOf(parameters.currentStep));
 			}
@@ -371,6 +437,8 @@ namespace core {
 				ImGui::BeginGroup();
 				ImGui::SliderInt("##CurrentTimestepNum", &(parameters.currentStep), 0, 
 					static_cast<int>(timeline.size())-1, numStepsString.c_str());
+				if (ImGui::IsItemHovered())
+					ImGui::SetTooltip("Scroll to move through timeline");
 
 				// Fine adjustment buttons
 				ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
@@ -391,40 +459,10 @@ namespace core {
 				if (ImGui::IsItemHovered())
 				{
 					int scr = static_cast<int>(ImGui::GetIO().MouseWheel);
-					parameters.currentStep -= scr;
-					if (scr != 0)
-						parameters.timePaused = true;
-					
-					// now clamp
-					if (parameters.currentStep >= static_cast<int>(timeline.size()))
-						parameters.currentStep = timeline.size() - 1;
-					else if (parameters.currentStep < 0)
-						parameters.currentStep = 0;
+					scrollTimeline(scr);
 				}
 			}
-			// Timestep calculation control
-			{
-				ImGui::Text("Calculate Steps:");
-				ImGui::InputInt("##CalculateStepsNum", &calculateStepsNum);
-				if (ImGui::IsItemHovered())
-					calculateStepsNum += static_cast<int>(ImGui::GetIO().MouseWheel);
-				if (calculateStepsNum < 0)
-					calculateStepsNum = 0;
-				ImGui::SameLine();
-				if (ImGui::ArrowButton("##CalculateStepsButton", ImGuiDir_Right))
-				{
-					addSteps(timeline, calculateStepsNum);
-					parameters.timePaused = false;
-					parameters.loopPlayback = false;
-				}
-				if (ImGui::Button("Calculate Until Stop"))
-				{
-					addStepsUntilEnd(timeline);
-					parameters.timePaused = false;
-					parameters.loopPlayback = false;
-				}
-				ImGui::Checkbox("Log Output", &(parameters.logOutput));
-			}
+			
 			{
 				ImGui::Separator();
 				ImGui::Text("FPS: %.0f", fps);
@@ -467,6 +505,16 @@ namespace core {
 					for (entity::Entity* e : entities)
 					{
 						ImGui::Checkbox(e->getName().c_str(), &(e->shouldShow.gui));
+						ImGui::SameLine();
+						if (pathSim->target == e)
+							ImGui::TextColored(graphics::COLOR_WHITE, "(Active)");
+						else
+						{
+							if (ImGui::ArrowButton((std::string("##setActive") + e->getName()).c_str(), ImGuiDir_Right))
+								setTarget(e, false);
+							if (ImGui::IsItemHovered())
+								ImGui::SetTooltip("Set Active");
+						}
 					}
 					ImGui::EndChild();
 				}
@@ -506,28 +554,25 @@ namespace core {
 	void Simulation::add(entity::Entity* e)
 	{
 		entities.push_back(e);
-
-		if (timeline.empty())
-		{
-			// initialize timeline
-			recordTimestep(e);
-		}
 	}
 
-	void Simulation::setTarget(entity::Entity* e)
+	void Simulation::setTarget(entity::Entity* e, bool autoAdd)
 	{
 		// Add to this->entities if not already present
-		if (std::find(entities.begin(), entities.end(), e) == entities.end())
+		if (autoAdd && std::find(entities.begin(), entities.end(), e) == entities.end())
 			add(e);
+
+		if (pathSim != nullptr)
+			delete pathSim;
 
 		pathSim = e->createPathSim();
 		pathSim->setTarget(e);
+		timeline.clear();
+			recordTimestep(e);
 	}
 
 	const entity::Entity* const Simulation::getFocusedEntity(const graphics::Camera& camera) const
 	{
-		// ideally this would maybe have something to do with the mouse position but this is fine for now
-
 		const entity::Entity* target = getHoveredEntity(camera);
 		if (target != nullptr)
 			return target;
@@ -673,6 +718,10 @@ namespace core {
 			//float rClosest = graphics::RENDER_DISTANCE;
 			for (const entity::Entity* e : entities)
 			{
+				// must be visible
+				if (!(e->shouldShow.body))
+					continue;
+
 				float rCenter = glm::length(e->getPosition() - camera.getPosition());
 				float sr = e->getOuterBoundingRadius();
 				float step = e->getInnerBoundingRadius()/30.0f;
@@ -788,9 +837,12 @@ namespace core {
 	{
 		for (entity::Entity* e : entities)
 		{
-			e->render(renderer);
-			if (parameters.showShadows && parameters.showEnvironment)
-				e->renderShadow(renderer, cameraPos);
+			if (e->shouldShow.body)
+			{
+				e->render(renderer);
+				if (parameters.showShadows && parameters.showEnvironment)
+					e->renderShadow(renderer, cameraPos);
+			}
 		}
 	}
 

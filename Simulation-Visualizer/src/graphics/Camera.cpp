@@ -1,8 +1,9 @@
 #include "core/stdafx.h"
 
 #include "graphics/Camera.h"
-#include "graphics/Renderer.h"
+#include "core/Simulation.h"
 #include "entity/Entity.h"
+#include "graphics/Window.h"
 
 namespace graphics {
 
@@ -341,7 +342,7 @@ namespace graphics {
 
 			position = targetPos - toTarget;
 		}
-		else // plain scrolling changes field of view
+		else if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) // ctrl+scroll changes field of view
 		{
 			fov -= scrollSensitivity * yoffset;
 
@@ -349,6 +350,10 @@ namespace graphics {
 				fov = fovMin;
 			if (fov > fovMax)
 				fov = fovMax;
+		}
+		else // plain scrolling scrolls the simulation timeline
+		{
+			Window::getSimulation(window)->scrollTimeline(static_cast<int>(yoffset));
 		}
 	}
 

@@ -60,7 +60,12 @@ namespace core {
 		void renderGUIOverlay(graphics::Renderer& renderer, const graphics::Camera& camera) const;
 
 		void add(entity::Entity*);
-		void setTarget(entity::Entity*);
+		void setTarget(entity::Entity*, bool autoAdd = true);
+
+		// Returns with the following priority:
+		// - Hovered entity
+		// - Onscreen entity nearest to the camera
+		// - (Entity)nullptr
 		const entity::Entity* const getFocusedEntity(const graphics::Camera& camera) const;
 		const entity::Entity* const getHoveredEntity(const graphics::Camera& camera) const;
 
@@ -69,6 +74,9 @@ namespace core {
 		void recordTimestep(entity::Entity*);
 		// Returns true on success
 		bool addFreefallStep(entity::Entity*);
+
+		void scrollTimeline(int scr);
+		void startStop();
 
 	private:
 		void renderEntities(graphics::Renderer&, const glm::vec3& cameraPos) const;

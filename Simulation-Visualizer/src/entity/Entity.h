@@ -57,8 +57,9 @@ namespace entity {
 		void applyWrenchImpulse(glm::vec3 worldPos, glm::vec3 impulse);
 
 	public:
-		mutable struct GuiBools
+		mutable struct VisibilitySettings
 		{
+			bool body;
 			bool gui;
 			bool label;
 			bool positionMarker;

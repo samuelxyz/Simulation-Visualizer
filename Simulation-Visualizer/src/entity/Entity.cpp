@@ -15,7 +15,7 @@ namespace entity {
 		: entityName(entityName), position(position), orientation(orientation),
 		velocity(velocity), angVelocity(angVel),
 		mass(mass), rotInertia(rotInertia), typeName(typeName),
-		shouldShow { false, false, false, false, false }
+		shouldShow { true, false, false, false, false, false }
 	{
 	}
 
@@ -81,7 +81,8 @@ namespace entity {
 	{
 		if (ImGui::Begin((typeName + ": " + entityName).c_str()))
 		{
-			ImGui::Checkbox("Show label", &shouldShow.label);
+			ImGui::Checkbox("Show entity", &shouldShow.body);
+			ImGui::Checkbox("Always show label", &shouldShow.label);
 
 			ImGui::Separator();
 
@@ -99,7 +100,10 @@ namespace entity {
 			}
 			ImGui::Separator();
 			{
-				ImGui::Text("Velocity: %.3f m/s", glm::length(velocity)); 
+				ImGui::Text("Velocity:"); ImGui::SameLine();
+				ImGui::Text("%.3f m/s", glm::length(velocity));
+				if (ImGui::IsItemHovered())
+					ImGui::SetTooltip("Magnitude");
 
 				ImGui::InputFloat3("##InputVelocity", &velocity.x); 
 				ImGui::SameLine();
@@ -112,7 +116,10 @@ namespace entity {
 			}
 			ImGui::Separator();
 			{
-				ImGui::Text("Angular velocity: %.3f rad/s", glm::length(angVelocity));
+				ImGui::Text("Angular velocity:"); ImGui::SameLine();
+				ImGui::Text("%.3f rad/s", glm::length(angVelocity));
+				if (ImGui::IsItemHovered())
+					ImGui::SetTooltip("Magnitude");
 
 				ImGui::InputFloat3("##InputAngVelocity", &angVelocity.x);
 				ImGui::SameLine();
@@ -131,29 +138,43 @@ namespace entity {
 				ImGui::SameLine();
 				ImGui::PushItemWidth(45.0f);
 				ImGui::InputFloat("rad##RotateAngleInput", &angle);
+				if (ImGui::IsItemHovered())
+					ImGui::SetTooltip("Rotation angle");
 				ImGui::PopItemWidth();
 				ImGui::InputFloat3("##RotateAxisInput", &axis.x);
+				if (ImGui::IsItemHovered())
+					ImGui::SetTooltip("Rotation axis");
 				ImGui::SameLine();
 				if (ImGui::ArrowButton("##RotateButton", ImGuiDir_Right))
 				{
 					orientation = glm::normalize(glm::angleAxis(angle, axis) * orientation);
 				}
+				if (ImGui::IsItemHovered())
+					ImGui::SetTooltip("Apply");
 			}
 			{
 				static glm::vec3 linImpulse(0.0f);
 				ImGui::Text("Apply impulse:");
+				if (ImGui::IsItemHovered())
+					ImGui::SetTooltip("kg*m/s");
 				ImGui::InputFloat3("##linImpulseInput", &linImpulse.x);
 				ImGui::SameLine();
 				if (ImGui::ArrowButton("##linImpulseButton", ImGuiDir_Right))
 					applyLinearImpulse(linImpulse);
+				if (ImGui::IsItemHovered())
+					ImGui::SetTooltip("Apply");
 			}
 			{
 				static glm::vec3 angImpulse(0.0f);
 				ImGui::Text("Apply angular impulse:");
+				if (ImGui::IsItemHovered())
+					ImGui::SetTooltip("kg*m^2/s");
 				ImGui::InputFloat3("##angImpulseInput", &angImpulse.x);
 				ImGui::SameLine();
 				if (ImGui::ArrowButton("##angImpulse", ImGuiDir_Right))
 					applyAngularImpulse(angImpulse);
+				if (ImGui::IsItemHovered())
+					ImGui::SetTooltip("Apply");
 			}
 		}
 		ImGui::End();
@@ -212,8 +233,10 @@ namespace entity {
 		position.x += velocity.x * core::TIME_STEP;
 		position.y += velocity.y * core::TIME_STEP;
 		position.z += velocity.z * core::TIME_STEP - 0.5f * core::GRAVITY * core::TIME_STEP * core::TIME_STEP;
+		// d = v_o t + 1/2 a t^2
 
 		velocity.z -= core::GRAVITY * core::TIME_STEP;
+		// v = v_o + a t
 
 		if (std::isnormal(glm::length2(angVelocity)))
 			orientation = glm::normalize(

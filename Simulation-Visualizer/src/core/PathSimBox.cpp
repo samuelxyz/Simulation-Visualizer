@@ -72,10 +72,10 @@ namespace core {
 
 		double& p_n = z[23];
 
-		double q0 = -(2.0*((h*q1_o*w_x)/2.0 - q0_o + (h*q2_o*w_y)/2.0 + (h*q3_o*w_z)/2.0))/std::sqrt(h*h*w_x*w_x + h*h*w_y*w_y + h*h*w_z*w_z + 4.0);
-		double q1 = (2.0*(q1_o + (h*q0_o*w_x)/2.0 + (h*q3_o*w_y)/2.0 - (h*q2_o*w_z)/2.0))/std::sqrt(h*h*w_x*w_x + h*h*w_y*w_y + h*h*w_z*w_z + 4.0);
-		double q2 = (2.0*(q2_o - (h*q3_o*w_x)/2.0 + (h*q0_o*w_y)/2.0 + (h*q1_o*w_z)/2.0))/std::sqrt(h*h*w_x*w_x + h*h*w_y*w_y + h*h*w_z*w_z + 4.0);
-		double q3 = (2.0*(q3_o + (h*q2_o*w_x)/2.0 - (h*q1_o*w_y)/2.0 + (h*q0_o*w_z)/2.0))/std::sqrt(h*h*w_x*w_x + h*h*w_y*w_y + h*h*w_z*w_z + 4.0);
+		double q0 = -(2.0*((h*q1_o*w_x)/2.0 - q0_o + (h*q2_o*w_y)/2.0 + (h*q3_o*w_z)/2.0))/std::sqrt(h_sq*w_x*w_x + h_sq*w_y*w_y + h_sq*w_z*w_z + 4.0);
+		double q1 = (2.0*(q1_o + (h*q0_o*w_x)/2.0 + (h*q3_o*w_y)/2.0 - (h*q2_o*w_z)/2.0))/std::sqrt(h_sq*w_x*w_x + h_sq*w_y*w_y + h_sq*w_z*w_z + 4.0);
+		double q2 = (2.0*(q2_o - (h*q3_o*w_x)/2.0 + (h*q0_o*w_y)/2.0 + (h*q1_o*w_z)/2.0))/std::sqrt(h_sq*w_x*w_x + h_sq*w_y*w_y + h_sq*w_z*w_z + 4.0);
+		double q3 = (2.0*(q3_o + (h*q2_o*w_x)/2.0 - (h*q1_o*w_y)/2.0 + (h*q0_o*w_z)/2.0))/std::sqrt(h_sq*w_x*w_x + h_sq*w_y*w_y + h_sq*w_z*w_z + 4.0);
 
 		double q_x = q_xo+h*v_x;
 		double q_y = q_yo+h*v_y;
@@ -177,10 +177,10 @@ namespace core {
 
 		double& p_n = z[23];
 
-		double q0 = -(2.0*((h*q1_o*w_x)/2.0 - q0_o + (h*q2_o*w_y)/2.0 + (h*q3_o*w_z)/2.0))/std::sqrt(h*h*w_x*w_x + h*h*w_y*w_y + h*h*w_z*w_z + 4.0);
-		double q1 = (2.0*(q1_o + (h*q0_o*w_x)/2.0 + (h*q3_o*w_y)/2.0 - (h*q2_o*w_z)/2.0))/std::sqrt(h*h*w_x*w_x + h*h*w_y*w_y + h*h*w_z*w_z + 4.0);
-		double q2 = (2.0*(q2_o - (h*q3_o*w_x)/2.0 + (h*q0_o*w_y)/2.0 + (h*q1_o*w_z)/2.0))/std::sqrt(h*h*w_x*w_x + h*h*w_y*w_y + h*h*w_z*w_z + 4.0);
-		double q3 = (2.0*(q3_o + (h*q2_o*w_x)/2.0 - (h*q1_o*w_y)/2.0 + (h*q0_o*w_z)/2.0))/std::sqrt(h*h*w_x*w_x + h*h*w_y*w_y + h*h*w_z*w_z + 4.0);
+		double q0 = -(2.0*((h*q1_o*w_x)/2.0 - q0_o + (h*q2_o*w_y)/2.0 + (h*q3_o*w_z)/2.0))/std::sqrt(h_sq*w_x*w_x + h_sq*w_y*w_y + h_sq*w_z*w_z + 4.0);
+		double q1 = (2.0*(q1_o + (h*q0_o*w_x)/2.0 + (h*q3_o*w_y)/2.0 - (h*q2_o*w_z)/2.0))/std::sqrt(h_sq*w_x*w_x + h_sq*w_y*w_y + h_sq*w_z*w_z + 4.0);
+		double q2 = (2.0*(q2_o - (h*q3_o*w_x)/2.0 + (h*q0_o*w_y)/2.0 + (h*q1_o*w_z)/2.0))/std::sqrt(h_sq*w_x*w_x + h_sq*w_y*w_y + h_sq*w_z*w_z + 4.0);
+		double q3 = (2.0*(q3_o + (h*q2_o*w_x)/2.0 - (h*q1_o*w_y)/2.0 + (h*q0_o*w_z)/2.0))/std::sqrt(h_sq*w_x*w_x + h_sq*w_y*w_y + h_sq*w_z*w_z + 4.0);
 
 		double q_x = q_xo+h*v_x;
 		double q_y = q_yo+h*v_y;
@@ -302,12 +302,12 @@ namespace core {
 
 		Eigen::MatrixXd J3 = Eigen::MatrixXd::Zero(28, 24);
 		J3.topRows(24).setIdentity();
-		double N_J3 = std::pow(h*h*w_x*w_x + h*h*w_y*w_y + h*h*w_z*w_z + 4, 1.5);
+		double N_J3 = std::pow(h_sq*w_x*w_x + h_sq*w_y*w_y + h_sq*w_z*w_z + 4, 1.5);
 		J3.block<4, 3>(24, 3) <<
-			-(h*(q1_o*h*h*w_y*w_y - q2_o*w_x*h*h*w_y + q1_o*h*h*w_z*w_z - q3_o*w_x*h*h*w_z + 2*q0_o*w_x*h + 4*q1_o))/N_J3, -(h*(q2_o*h*h*w_x*w_x - q1_o*w_y*h*h*w_x + q2_o*h*h*w_z*w_z - q3_o*w_y*h*h*w_z + 2*q0_o*w_y*h + 4*q2_o))/N_J3, -(h*(q3_o*h*h*w_x*w_x - q1_o*w_z*h*h*w_x + q3_o*h*h*w_y*w_y - q2_o*w_z*h*h*w_y + 2*q0_o*w_z*h + 4*q3_o))/N_J3,
-			(h*(q0_o*h*h*w_y*w_y - q3_o*w_x*h*h*w_y + q0_o*h*h*w_z*w_z + q2_o*w_x*h*h*w_z - 2*q1_o*w_x*h + 4*q0_o))/N_J3, (h*(q3_o*h*h*w_x*w_x - q0_o*w_y*h*h*w_x + q3_o*h*h*w_z*w_z + q2_o*w_y*h*h*w_z - 2*q1_o*w_y*h + 4*q3_o))/N_J3, -(h*(q2_o*h*h*w_x*w_x + q0_o*w_z*h*h*w_x + q2_o*h*h*w_y*w_y + q3_o*w_z*h*h*w_y + 2*q1_o*w_z*h + 4*q2_o))/N_J3,
-			-(h*(q3_o*h*h*w_y*w_y + q0_o*w_x*h*h*w_y + q3_o*h*h*w_z*w_z + q1_o*w_x*h*h*w_z + 2*q2_o*w_x*h + 4*q3_o))/N_J3, (h*(q0_o*h*h*w_x*w_x + q3_o*w_y*h*h*w_x + q0_o*h*h*w_z*w_z - q1_o*w_y*h*h*w_z - 2*q2_o*w_y*h + 4*q0_o))/N_J3, (h*(q1_o*h*h*w_x*w_x + q3_o*w_z*h*h*w_x + q1_o*h*h*w_y*w_y - q0_o*w_z*h*h*w_y - 2*q2_o*w_z*h + 4*q1_o))/N_J3,
-			(h*(q2_o*h*h*w_y*w_y + q1_o*w_x*h*h*w_y + q2_o*h*h*w_z*w_z - q0_o*w_x*h*h*w_z - 2*q3_o*w_x*h + 4*q2_o))/N_J3, -(h*(q1_o*h*h*w_x*w_x + q2_o*w_y*h*h*w_x + q1_o*h*h*w_z*w_z + q0_o*w_y*h*h*w_z + 2*q3_o*w_y*h + 4*q1_o))/N_J3, (h*(q0_o*h*h*w_x*w_x - q2_o*w_z*h*h*w_x + q0_o*h*h*w_y*w_y + q1_o*w_z*h*h*w_y - 2*q3_o*w_z*h + 4*q0_o))/N_J3;
+			-(h*(q1_o*h_sq*w_y*w_y - q2_o*w_x*h_sq*w_y + q1_o*h_sq*w_z*w_z - q3_o*w_x*h_sq*w_z + 2*q0_o*w_x*h + 4*q1_o))/N_J3, -(h*(q2_o*h_sq*w_x*w_x - q1_o*w_y*h_sq*w_x + q2_o*h_sq*w_z*w_z - q3_o*w_y*h_sq*w_z + 2*q0_o*w_y*h + 4*q2_o))/N_J3, -(h*(q3_o*h_sq*w_x*w_x - q1_o*w_z*h_sq*w_x + q3_o*h_sq*w_y*w_y - q2_o*w_z*h_sq*w_y + 2*q0_o*w_z*h + 4*q3_o))/N_J3,
+			(h*(q0_o*h_sq*w_y*w_y - q3_o*w_x*h_sq*w_y + q0_o*h_sq*w_z*w_z + q2_o*w_x*h_sq*w_z - 2*q1_o*w_x*h + 4*q0_o))/N_J3, (h*(q3_o*h_sq*w_x*w_x - q0_o*w_y*h_sq*w_x + q3_o*h_sq*w_z*w_z + q2_o*w_y*h_sq*w_z - 2*q1_o*w_y*h + 4*q3_o))/N_J3, -(h*(q2_o*h_sq*w_x*w_x + q0_o*w_z*h_sq*w_x + q2_o*h_sq*w_y*w_y + q3_o*w_z*h_sq*w_y + 2*q1_o*w_z*h + 4*q2_o))/N_J3,
+			-(h*(q3_o*h_sq*w_y*w_y + q0_o*w_x*h_sq*w_y + q3_o*h_sq*w_z*w_z + q1_o*w_x*h_sq*w_z + 2*q2_o*w_x*h + 4*q3_o))/N_J3, (h*(q0_o*h_sq*w_x*w_x + q3_o*w_y*h_sq*w_x + q0_o*h_sq*w_z*w_z - q1_o*w_y*h_sq*w_z - 2*q2_o*w_y*h + 4*q0_o))/N_J3, (h*(q1_o*h_sq*w_x*w_x + q3_o*w_z*h_sq*w_x + q1_o*h_sq*w_y*w_y - q0_o*w_z*h_sq*w_y - 2*q2_o*w_z*h + 4*q1_o))/N_J3,
+			(h*(q2_o*h_sq*w_y*w_y + q1_o*w_x*h_sq*w_y + q2_o*h_sq*w_z*w_z - q0_o*w_x*h_sq*w_z - 2*q3_o*w_x*h + 4*q2_o))/N_J3, -(h*(q1_o*h_sq*w_x*w_x + q2_o*w_y*h_sq*w_x + q1_o*h_sq*w_z*w_z + q0_o*w_y*h_sq*w_z + 2*q3_o*w_y*h + 4*q1_o))/N_J3, (h*(q0_o*h_sq*w_x*w_x - q2_o*w_z*h_sq*w_x + q0_o*h_sq*w_y*w_y + q1_o*w_z*h_sq*w_y - 2*q3_o*w_z*h + 4*q0_o))/N_J3;
 
 		Eigen::SparseMatrix<double> J = Eigen::SparseView<Eigen::MatrixXd>(J1*J2*J3, 1.0).cast<double>();
 		J.makeCompressed();

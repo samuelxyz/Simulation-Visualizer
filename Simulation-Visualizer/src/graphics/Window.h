@@ -48,7 +48,6 @@ namespace graphics {
 			mutable std::array<graphics::VisualBox, 3> axes;
 			mutable graphics::VisualBox cursorDot;
 		} guiOverlay;
-		//glm::mat4 guiVPMatrix;
 		core::Simulation* simulation;
 
 		struct MouseTracker
@@ -92,6 +91,8 @@ namespace graphics {
 		static void handleMouseMotion(GLFWwindow*, double xpos, double ypos);
 		static void handleMouseButton(GLFWwindow*, int button, int action, int mods);
 		static void handleScroll(GLFWwindow*, double xoffset, double yoffset);
+
+		static core::Simulation* getSimulation(GLFWwindow*);
 
 	private:
 

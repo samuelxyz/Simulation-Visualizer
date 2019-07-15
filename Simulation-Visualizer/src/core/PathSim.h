@@ -16,6 +16,7 @@ namespace core
 
 		static constexpr double g = static_cast<double>(core::GRAVITY);
 		static constexpr double h = static_cast<double>(core::TIME_STEP);
+		static constexpr double h_sq = h*h;
 		static constexpr double PATH_INFINITY = 1e20;
 
 		// cache

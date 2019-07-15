@@ -281,6 +281,22 @@ namespace graphics {
 		if (simulation != nullptr)
 			simulation->renderGUI(camera);
 
+		if (ImGui::Begin("General"))
+		{
+			ImGui::TextUnformatted("Degrees        Radians");
+			static float deg = 0.0f, rad = 0.0f;
+			ImGui::PushItemWidth(64.0f);
+			if (ImGui::InputFloat("##DegInput", &deg, 0.0f, 0.0f, "%.4f"))
+				rad = glm::radians(deg);
+			ImGui::SameLine();
+			ImGui::TextUnformatted("<->");
+			ImGui::SameLine();
+			if (ImGui::InputFloat("##RadInput", &rad, 0.0f, 0.0f, "%.5f"))
+				deg = glm::degrees(rad);
+			ImGui::PopItemWidth();
+		}
+		ImGui::End();
+
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}
@@ -383,7 +399,11 @@ namespace graphics {
 		if (guiMouseCheck(glfwWindow))
 			return;
 
-		if (button == GLFW_MOUSE_BUTTON_LEFT || button == GLFW_MOUSE_BUTTON_RIGHT)
+		if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_RELEASE)
+		{
+			getWindow(glfwWindow)->simulation->startStop();
+		}
+		else if (button == GLFW_MOUSE_BUTTON_LEFT || button == GLFW_MOUSE_BUTTON_RIGHT)
 		{
 			Window* window = getWindow(glfwWindow);
 
@@ -442,6 +462,11 @@ namespace graphics {
 		if (window != nullptr && window->initialized)
 			window->camera.handleScroll(static_cast<float>(yoffset), glfwWindow,
 				window->simulation->getFocusedEntity(window->camera));
+	}
+
+	core::Simulation * Window::getSimulation(GLFWwindow* glfwWindow)
+	{
+		return (getWindow(glfwWindow)->simulation);
 	}
 
 	Window* Window::getWindow(GLFWwindow* glfwWindow)
