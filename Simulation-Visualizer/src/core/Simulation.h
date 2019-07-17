@@ -49,6 +49,7 @@ namespace core {
 		} environment;
 		Parameters parameters;
 		Timeline timeline;
+		bool showAddEntityWindow;
 
 	public:
 		Simulation();
@@ -56,7 +57,7 @@ namespace core {
 
 		void update();
 		void render(graphics::Renderer& renderer, const glm::vec3& cameraPos) const;
-		void renderGUI(const graphics::Camera& camera);
+		void renderGUI(graphics::Renderer&, const graphics::Camera& camera);
 		void renderGUIOverlay(graphics::Renderer& renderer, const graphics::Camera& camera) const;
 
 		void add(entity::Entity*);
@@ -82,6 +83,7 @@ namespace core {
 		void renderEntities(graphics::Renderer&, const glm::vec3& cameraPos) const;
 		void renderEnvironment(graphics::Renderer&) const;
 		void renderContactPoint(graphics::Renderer&, const graphics::Camera& camera) const;
+		void renderAddEntityGUI(graphics::Renderer&, const graphics::Camera&);
 	};
 
 }

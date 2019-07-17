@@ -72,7 +72,7 @@ namespace graphics {
 		void startGUI();
 		void update();
 		void render(); // includes our GUI
-		void renderGUI(); // ImGui
+		//void renderGUI(); // ImGui
 
 		void directRender(Renderable& renderable);
 		void directRender(const graphics::Triangle& tri);

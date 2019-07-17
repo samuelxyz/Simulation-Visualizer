@@ -266,20 +266,21 @@ namespace graphics {
 		//		graphics::ColoredVertex {testColor, glm::vec3(2.0f, 20.0f, 0.0f)},
 		//} };
 		//renderer.submit(testGuiTriangle);
-		renderer.renderAndClearAll();
 
 		//glEnable(GL_DEPTH_TEST);
 
 		// TODO: I think the problem with multiple Renderers is in the bind() calls in Renderer::draw()
 
-	}
+	//}
 
-	void Window::renderGUI()
-	{
+	//void Window::renderGUI()
+	//{
 		camera.renderGUI();
 
 		if (simulation != nullptr)
-			simulation->renderGUI(camera);
+			simulation->renderGUI(renderer, camera);
+
+		static bool showDemoWindow = false;
 
 		if (ImGui::Begin("General"))
 		{
@@ -294,9 +295,16 @@ namespace graphics {
 			if (ImGui::InputFloat("##RadInput", &rad, 0.0f, 0.0f, "%.5f"))
 				deg = glm::degrees(rad);
 			ImGui::PopItemWidth();
+
+			ImGui::Checkbox("Show Demo Window", &showDemoWindow);
 		}
+
+		if (showDemoWindow)
+			ImGui::ShowDemoWindow();
+
 		ImGui::End();
 
+		renderer.renderAndClearAll();
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}

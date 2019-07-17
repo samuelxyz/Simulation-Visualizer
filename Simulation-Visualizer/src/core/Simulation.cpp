@@ -4,12 +4,13 @@
 #include "graphics/Camera.h"
 #include "graphics/content/VisualSphere.h"
 #include "core/PathSim.h"
-#include "entity/Entity.h"
+#include "entity/Box.h"
+#include "entity/Cylinder.h"
 
 namespace core {
 
 	Simulation::Simulation()
-		: pathSim(nullptr), entities(), environment(), parameters(), timeline()
+		: pathSim(nullptr), entities(), environment(), parameters(), timeline(), showAddEntityWindow(false)
 	{
 	}
 
@@ -417,11 +418,9 @@ namespace core {
 			if (parameters.showEnvironment)
 				renderEnvironment(renderer);
 		}
-
-
 	}
 
-	void Simulation::renderGUI(const graphics::Camera& camera)
+	void Simulation::renderGUI(graphics::Renderer& renderer, const graphics::Camera& camera)
 	{
 		// FPS calculations
 		static auto previous = std::chrono::steady_clock::now();
@@ -589,9 +588,10 @@ namespace core {
 			// Entity checkboxes
 			ImGui::Separator();
 			{
-				ImGui::Text("Show Entity Information:");
+				ImGui::Text("Show Information For:");
 				{
-					ImGui::BeginChild("Entity Scroll Pane");
+					ImGui::BeginChild("Entity Scroll Pane", ImVec2(0.0f, -26.0f));
+					ImGui::Indent();
 					for (entity::Entity* e : entities)
 					{
 						ImGui::Checkbox(e->getName().c_str(), &(e->shouldShow.gui));
@@ -612,9 +612,15 @@ namespace core {
 					}
 					ImGui::EndChild();
 				}
+				//ImGui::Separator();
+				if (ImGui::Button("New Entity"))
+					showAddEntityWindow = true;
 			}
 		}
 		ImGui::End();
+
+		if (showAddEntityWindow)
+			renderAddEntityGUI(renderer, camera);
 
 		for (entity::Entity* e : entities)
 		{
@@ -848,6 +854,126 @@ namespace core {
 		camera.renderLabel(now.contactPoint, true, "PathSimContactPointLabel", 
 			fmt::sprintf("(%.3f, %.3f, %.3f)", now.contactPoint.x, now.contactPoint.y, now.contactPoint.z), 
 			graphics::COLOR_CONTACT);
+	}
+
+	void Simulation::renderAddEntityGUI(graphics::Renderer& renderer, const graphics::Camera& camera)
+	{
+		if (ImGui::Begin("Add Entity", &showAddEntityWindow))
+		{
+			ImGui::PushItemWidth(-15.0f);
+
+			static entity::Entity* preview = nullptr;
+			float makeNewPreview = false;
+
+			static const char* typeNames[] = { "Box", "Cylinder" };
+			static int selectedType = 0;
+			ImGui::TextUnformatted("Select Entity Type:");
+			static char nameBuf[64] = "NewBox";
+			std::string defaultName("New");
+			if (ImGui::Combo("##SelectType", &selectedType, typeNames, IM_ARRAYSIZE(typeNames)))
+			{
+				makeNewPreview = true;
+				if (0 <= selectedType && selectedType <= IM_ARRAYSIZE(typeNames))
+					defaultName += typeNames[selectedType];
+				else
+					defaultName += "Entity";
+
+				strcpy_s<64>(nameBuf, "New");
+				strcpy_s<64>(nameBuf, defaultName.c_str());
+			}
+
+			if (preview == nullptr && 0 <= selectedType && selectedType <= IM_ARRAYSIZE(typeNames))
+			{
+					makeNewPreview = true;
+			}
+
+			static glm::vec3 oldPreviewPos(0.0f);
+			glm::vec3 previewPos = camera.getPosition() + camera.getLookVec() * 6.0f;
+
+			if (previewPos != oldPreviewPos)
+			{
+				makeNewPreview = true;
+				oldPreviewPos = previewPos;
+			}
+
+
+			ImGui::TextUnformatted("Entity Name:");
+			ImGui::InputText("##InputName", nameBuf, 64);
+
+			static float boxDims[] = { 1.0f, 1.0f, 1.0f };
+			static float cylDims[] = { 1.0f, 1.0f };
+
+			switch (selectedType)
+			{
+			case 0: // box
+				ImGui::TextUnformatted("Length/Width/Height:");
+				if (ImGui::InputFloat3("m##InputBoxDims", boxDims))
+					makeNewPreview = true;
+				break;
+			case 1: // cylinder
+				ImGui::TextUnformatted("Height/Radius:");
+				if (ImGui::InputFloat2("m##InputCylDims", cylDims))
+					makeNewPreview = true;
+				break;
+			}
+
+			static float mass = 1.0f;
+			ImGui::TextUnformatted("Mass:");
+			ImGui::InputFloat("kg##InputMass", &mass);
+
+			static float momIn[] = { 1.0f, 1.0f, 1.0f };
+			ImGui::TextUnformatted("Principal moments");
+			ImGui::TextUnformatted("of inertia (kg*m^2):");
+			ImGui::InputFloat3("##InputInertia", momIn);
+
+			// make & render preview
+			if (makeNewPreview)
+			{
+				delete preview;
+				glm::mat3 inertia = glm::identity<glm::mat3>();
+				for (int i = 0; i < 3; ++i)
+					inertia[i][i] = momIn[i];
+				switch (selectedType)
+				{
+				case 0: // box
+					preview = new entity::Box(std::string(nameBuf), 
+						previewPos, core::QUAT_IDENTITY, glm::vec3(0.0f), glm::vec3(0.0f), 
+						mass, inertia, -boxDims[0]/2.0f, boxDims[0]/2.0f, 
+						-boxDims[1]/2.0f, boxDims[1]/2.0f, -boxDims[2]/2.0f, boxDims[2]/2.0f
+					);
+					break;
+				case 1: // cylinder
+					preview = new entity::Cylinder(std::string(nameBuf),
+						previewPos, core::QUAT_IDENTITY, glm::vec3(0.0f), glm::vec3(0.0f),
+						mass, inertia, cylDims[0], cylDims[1]
+					);
+					break;
+				}
+			}
+
+			if (preview != nullptr)
+			{
+				preview->render(renderer);
+				preview->renderLabel(camera);
+				if (parameters.showShadows)
+					preview->renderShadow(renderer, camera.getPosition());
+			}
+
+			ImGui::Separator();
+			if (ImGui::Button("Cancel"))
+			{
+				showAddEntityWindow = false;
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("OK"))
+			{
+				add(preview);
+				preview = nullptr;
+				showAddEntityWindow = false;
+			}
+			ImGui::PopItemWidth();
+			ImGui::End();
+		}
 	}
 
 

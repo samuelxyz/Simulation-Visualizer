@@ -73,7 +73,9 @@ namespace graphics {
 		if (ImGui::Begin("Camera"))
 		{
 			ImGui::Text("Position:");
+			ImGui::PushItemWidth(-1.0f);
 			ImGui::InputFloat3("##InputPositionSlider", &(position.x));
+			ImGui::PopItemWidth();
 			ImGui::Text("Pitch: %+.3f (%.1f deg)", pitch, glm::degrees(pitch));
 			ImGui::Text("Yaw:   %+.3f (%.1f deg)", yaw, glm::degrees(yaw));
 			ImGui::Separator();
@@ -83,7 +85,9 @@ namespace graphics {
 				std::string fovStr("%.3f ");
 				std::string fovDeg = fmt::sprintf("(%+05.1f deg)", glm::degrees(fov));
 				fovStr += std::string(fovDeg);
+				ImGui::PushItemWidth(-1.0f);
 				ImGui::SliderFloat("##FOV", &fov, fovMin, fovMax, fovStr.c_str() );
+				ImGui::PopItemWidth();
 			}
 
 			ImGui::Separator();

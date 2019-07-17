@@ -35,7 +35,7 @@ int window()
 
 		window.update();
 		window.render();
-		window.renderGUI();
+		//window.renderGUI();
 
 		window.swapBuffers();
 		glfwPollEvents();
