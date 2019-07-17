@@ -41,42 +41,65 @@ namespace core {
 	{
 	}
 
-	int Simulation::addSteps(core::Timeline& timeline, int numSteps)
+	int Simulation::addSteps(core::Timeline& timeline, int numStepsToAdd)
 	{
+		START_TIMING;
+
 		// start from current state, replacing any existing version of events
 		timeline.erase(timeline.begin() + parameters.currentStep, timeline.end());
 		recordTimestep(pathSim->target);
 
 		int successes = 0;
 		//bool usePath = false; // start with freefall since it's fast to compute
-		bool usePath = true; // maybe this will help
-		bool lastPathSuccessful = true;
-		bool lastFreefallSuccessful = true;
-		while (successes < numSteps)
+		bool usePath = true; // maybe this will help things behave themselves
+		bool pathStreaking = false;
+		bool pathMightWork = true;
+		bool freefallMightWork = true;
+
+		while (successes < numStepsToAdd)
 		{
 			if (usePath)
 			{
 				// try a path step
 				pathSim->target->loadState(timeline.back());
-				pathSim->captureTargetState();
+				pathSim->captureTargetState(!pathStreaking); // if we're in a streak then no need to update guesses
+
 				if (parameters.logOutput)
 				{
 					pathSim->printZ();
 					pathSim->printCache();
 				}
+
 				if (pathSim->addStep(timeline, parameters.logOutput))
 				{
-					lastPathSuccessful = true;
+					pathStreaking = true;
+
+					// Alright this step is finished! Next step, anything might happen
+					pathMightWork = true;
+					freefallMightWork = true;
+
+					if (parameters.logOutput)
+						std::cout << "PATH step success" << std::endl;
 					++successes;
 				}
 				else
 				{
 					// path not successful
-					lastPathSuccessful = false;
-					if (lastFreefallSuccessful)
+					pathStreaking = false; // there's gonna be a gap in PATH streak so new guesses next time
+					pathMightWork = false; // for next loop
+					if (freefallMightWork)
+					{
+						if (parameters.logOutput)
+							std::cout << "PATH failed, switching to freefall" << std::endl;
 						usePath = false; // switch to freefall
+					}
 					else
+					{
+						if (parameters.logOutput)
+							std::cout << "PATH failed, freefall failed previously, stopping calculations" <<
+								"\nCalculation time: " << STOP_TIMING_AND_GET_MICROSECONDS / 1e6f << " s" << std::endl;
 						return successes; // neither method is working
+					}
 				}
 			}
 			else
@@ -84,20 +107,37 @@ namespace core {
 				// try a freefall step
 				if (addFreefallStep(pathSim->target))
 				{
-					lastFreefallSuccessful = true;
+					// Alright this step is finished! Next step, anything might happen
+					pathMightWork = true;
+					freefallMightWork = true;
+
+					if (parameters.logOutput)
+						std::cout << "Freefall step success" << std::endl;
 					++successes;
 				}
 				else
 				{
 					// freefall not successful
-					lastFreefallSuccessful = false;
-					if (lastPathSuccessful)
+					freefallMightWork = false; // for next loop
+					if (pathMightWork)
+					{
+						if (parameters.logOutput)
+							std::cout << "Freefall step failed, switching to PATH" << std::endl;
 						usePath = true; // switch to path
+					}
 					else
+					{
+						if (parameters.logOutput)
+							std::cout << "Freefall step failed, PATH failed previously, stopping calculations" <<
+								"\nCalculation time: " << STOP_TIMING_AND_GET_MICROSECONDS / 1e6f << " s" << std::endl;
 						return successes; // neither method is working
+					}
 				}
 			}
 		}
+		if (parameters.logOutput)
+			std::cout << "Finished calculations" <<
+				"\nCalculation time: " << STOP_TIMING_AND_GET_MICROSECONDS / 1e6f << " s" << std::endl;
 		return successes;
 	}
 
@@ -105,15 +145,18 @@ namespace core {
 	{
 		static constexpr int max = 1000;
 
+		START_TIMING;
+
 		// start from current state, replacing any existing version of events
 		timeline.erase(timeline.begin() + parameters.currentStep, timeline.end());
 		recordTimestep(pathSim->target);
 
 		int successes = 0;
 		//bool usePath = false; // start with freefall since it's fast to compute
-		bool usePath = true; // maybe this will help
-		bool lastPathSuccessful = true;
-		bool lastFreefallSuccessful = true;
+		bool usePath = true; // maybe this will help things behave themselves
+		bool pathStreaking = false;
+		bool pathMightWork = true;
+		bool freefallMightWork = true;
 
 		while (true)
 		{
@@ -121,25 +164,44 @@ namespace core {
 			{
 				// try a path step
 				pathSim->target->loadState(timeline.back());
-				pathSim->captureTargetState();
+				pathSim->captureTargetState(!pathStreaking); // if we're in a streak then no need to update guesses
+
 				if (parameters.logOutput)
 				{
 					pathSim->printZ();
 					pathSim->printCache();
 				}
+
 				if (pathSim->addStep(timeline, parameters.logOutput))
 				{
-					lastPathSuccessful = true;
+					pathStreaking = true;
+
+					// Alright this step is finished! Next step, anything might happen
+					pathMightWork = true;
+					freefallMightWork = true;
+
+					if (parameters.logOutput)
+						std::cout << "PATH step success" << std::endl;
 					++successes;
 				}
 				else
 				{
 					// path not successful
-					lastPathSuccessful = false;
-					if (lastFreefallSuccessful)
+					pathStreaking = false; // there's gonna be a gap in PATH streak so new guesses next time
+					pathMightWork = false; // for next loop
+					if (freefallMightWork)
+					{
+						if (parameters.logOutput)
+							std::cout << "PATH failed, switching to freefall" << std::endl;
 						usePath = false; // switch to freefall
+					}
 					else
+					{
+						if (parameters.logOutput)
+							std::cout << "PATH failed, freefall failed previously, stopping calculations" <<
+								"\nCalculation time: " << STOP_TIMING_AND_GET_MICROSECONDS / 1e6f << " s" << std::endl;
 						return successes; // neither method is working
+					}
 				}
 			}
 			else
@@ -147,27 +209,55 @@ namespace core {
 				// try a freefall step
 				if (addFreefallStep(pathSim->target))
 				{
-					lastFreefallSuccessful = true;
+					// Alright this step is finished! Next step, anything might happen
+					pathMightWork = true;
+					freefallMightWork = true;
+
+					if (parameters.logOutput)
+						std::cout << "Freefall step success" << std::endl;
 					++successes;
 				}
 				else
 				{
 					// freefall not successful
-					lastFreefallSuccessful = false;
-					if (lastPathSuccessful)
+					freefallMightWork = false; // for next loop
+					if (pathMightWork)
+					{
+						if (parameters.logOutput)
+							std::cout << "Freefall step failed, switching to PATH" << std::endl;
 						usePath = true; // switch to path
+					}
 					else
+					{
+						if (parameters.logOutput)
+							std::cout << "Freefall step failed, PATH failed previously, stopping calculations" <<
+								"\nCalculation time: " << STOP_TIMING_AND_GET_MICROSECONDS / 1e6f << " s" << std::endl;
 						return successes; // neither method is working
+					}
 				}
 			}
 
-			if (glm::length2(timeline.back().velocity) < 1e-6f &&
+			if (successes > 5 && // 5 is arbitrary but probably pretty good for the purpose
+				glm::length2(timeline.back().velocity) < 1e-6f &&
 				glm::length2(timeline.back().angVelocity) < 1e-6f)
+			{
+				if (parameters.logOutput)
+					std::cout << "Motion seems to have ended, stopping calculations" <<
+						"\nCalculation time: " << STOP_TIMING_AND_GET_MICROSECONDS / 1e6f << " s" << std::endl;
 				return successes; // everything stopped, we're done
+			}
 
 			if (successes > max)
+			{
+				if (parameters.logOutput)
+					std::cout << "Maximum step limit reached, stopping calculations" <<
+						"\nCalculation time: " << STOP_TIMING_AND_GET_MICROSECONDS / 1e6f << " s" << std::endl;
 				return successes;
+			}
 		}
+		if (parameters.logOutput)
+			std::cout << "I don't even know how you got to this point, it's after a while(true) with no breaks" <<
+				"\nAnyway, calculation time: " << STOP_TIMING_AND_GET_MICROSECONDS / 1e6f << " s" << std::endl;
 		return successes;
 	}
 
@@ -272,7 +362,7 @@ namespace core {
 						parameters.playbackTime = backTime;
 				}
 
-				// User must have changed the currentStep slider through ImGui. 
+				// User must have changed the currentStep slider through ImGui or scrolling. 
 				// Update playbackTime accordingly:
 				parameters.playbackTime = parameters.currentStep * core::TIME_STEP;
 			}
@@ -511,7 +601,11 @@ namespace core {
 						else
 						{
 							if (ImGui::ArrowButton((std::string("##setActive") + e->getName()).c_str(), ImGuiDir_Right))
+							{
 								setTarget(e, false);
+								for (entity::Entity* ee : entities)
+									ee->shouldShow.body = (ee == e); // make everything else invisible
+							}
 							if (ImGui::IsItemHovered())
 								ImGui::SetTooltip("Set Active");
 						}
@@ -580,6 +674,9 @@ namespace core {
 		// this is modified from Camera::toScreenSpace()
 		for (entity::Entity* e : entities)
 		{
+			if (!e->shouldShow.body)
+				continue;
+
 			glm::vec4 pos4 = glm::vec4(e->getPosition(), 1.0f);
 			glm::vec4 screenPos = camera.getVPMatrix(true) * pos4;
 			screenPos.z += 0.18f; // idk why but without this it's a bit off
@@ -610,108 +707,10 @@ namespace core {
 	{
 		glm::vec3 mouseRay = camera.getMouseRay();
 
-		//// Algorithm: "Original hitscan"
-		//// Hitscans along mouse ray, through entire distance range
-		//// where an entity might plausibly be
-		//const entity::Entity* result1 = [&]() -> const entity::Entity* {
-		//	auto startTime = std::chrono::steady_clock::now();
-		//	static int tickCount = 0; ++tickCount;
-		//
-		//	std::vector<float> srSq; // cached shadow radius of each entity
-		//	float rMaxSq = 0.0f;
-		//	float rMinSq = graphics::RENDER_DISTANCE*graphics::RENDER_DISTANCE;
-		//	float srOfMax = 0.0f; // shadow radii of closest and farthest entities
-		//	float srOfMin = 0.0f;
-		//	for (const entity::Entity* e : entities)
-		//	{
-		//		float sr = e->getOuterBoundingRadius();
-		//		srSq.push_back(sr*sr);
-		//
-		//		float rSq = glm::length2(e->getPosition() - camera.getPosition());
-		//		if (rSq > rMaxSq)
-		//		{
-		//			rMaxSq = rSq;
-		//			srOfMax = sr;
-		//		}
-		//		if (rSq < rMinSq)
-		//		{
-		//			rMinSq = rSq;
-		//			srOfMin = sr;
-		//		}
-		//	}
-		//
-		//	float rMax = std::sqrtf(rMaxSq) + srOfMax;
-		//
-		//	for (float r = std::sqrtf(rMinSq) - srOfMin; r < rMax; r += 0.05f)
-		//	{
-		//		glm::vec3 testPos = camera.getPosition() + r*mouseRay;
-		//		for (unsigned int i = 0; i < entities.size(); ++i)
-		//			if (glm::length2(entities[i]->getPosition() - testPos) < srSq[i])
-		//				if (entities[i]->containsPoint(testPos))
-		//				{
-		//					auto finish = std::chrono::steady_clock::now();
-		//					if (tickCount % 60 == 0)
-		//						std::cout << "Original (!): " <<
-		//						std::chrono::duration_cast<std::chrono::microseconds>(finish-startTime).count();
-		//					return entities[i];
-		//				}
-		//	}
-		//	auto finish = std::chrono::steady_clock::now();
-		//	if (tickCount % 60 == 0)
-		//		std::cout << "Original (.): " << 
-		//		std::chrono::duration_cast<std::chrono::microseconds>(finish-startTime).count();
-		//	return nullptr;
-		//}();
-
-		//// Algorithm: "Restricted Hitscan"
-		//// For each entity: checks for proximity, then hitscans through shadow sphere
-		//// Much much faster than "Original Hitscan" when not hovering near entities
-		//const entity::Entity* result2 = [&]() -> const entity::Entity* {
-		//	auto startTime = std::chrono::steady_clock::now();
-		//	static int tickCount = 0; ++tickCount;
-		//
-		//	const entity::Entity* closestE = nullptr;
-		//	//float rClosest = std::numeric_limits<float>::max();
-		//	float rClosest = graphics::RENDER_DISTANCE;
-		//	for (const entity::Entity* e : entities)
-		//	{
-		//		float rCenter = glm::length(e->getPosition() - camera.getPosition());
-		//		float sr = e->getOuterBoundingRadius();
-		//
-		//		if (glm::length2(camera.getPosition() + rCenter*mouseRay - e->getPosition()) > sr*sr)
-		//			continue; // we're nowhere near e
-		//
-		//		float min = rCenter - sr;
-		//		float max = rCenter + sr;
-		//		for (float r = min; r < rClosest && r < max; r += 0.05f)
-		//		{
-		//			if (e->containsPoint(camera.getPosition() + r*mouseRay))
-		//			{
-		//				rClosest = r;
-		//				closestE = e;
-		//				break;
-		//			}
-		//		}
-		//	}
-		//
-		//	auto finish = std::chrono::steady_clock::now();
-		//	if (tickCount % 60 == 0)
-		//		std::cout << " Restricted: " <<
-		//		std::chrono::duration_cast<std::chrono::microseconds>(finish-startTime).count() <<
-		//		" @" << closestE;
-		//	return closestE;
-		//}();
-
 		// Algorithm: "Restricted II"
 		// For each entity, checks for proximity, then "hitscans" outward 
 		// in both directions from where the entity "center" is along mouse ray
 		// Then finds the surface of the object closest to the camera
-		// Much faster than "Restricted I" when hovering over entities
-		// Much much faster than "Original Hitscan" when not hovering near entities
-
-		//const entity::Entity* result3 = [&]() -> const entity::Entity* {
-			//auto startTime = std::chrono::steady_clock::now();
-			//static int tickCount = 0; ++tickCount;
 
 			const entity::Entity* closestE = nullptr;
 			float rClosest = std::numeric_limits<float>::max();
@@ -788,48 +787,7 @@ namespace core {
 				}
 			}
 
-			//auto finish = std::chrono::steady_clock::now();
-			//if (tickCount % 60 == 0)
-			//	std::cout << " Restricted ii: " <<
-			//	std::chrono::duration_cast<std::chrono::microseconds>(finish-startTime).count() <<
-			//	" @" << closestE << std::endl;
 			return closestE;
-		//}();
-
-
-		// This alternate method can be faster if there are only a few objects spaced far apart,
-		// but otherwise it's slower so I'm not using it.
-		// Sorts entities by proximity, then hitscans through each plausible range in order.
-		//
-		//// List sorted by closest entity first
-		//std::vector<entity::Entity*> distanceList { entities };
-		//std::sort(distanceList.begin(), distanceList.end(),
-		//	[&camera](const entity::Entity* a, const entity::Entity* b)
-		//	{
-		//		return glm::length2(a->getPosition() - camera.getPosition()) <
-		//			glm::length2(b->getPosition() - camera.getPosition());
-		//	}
-		//);
-		//for (auto e : distanceList)
-		//{
-		//	float dist = glm::length(e->getPosition() - camera.getPosition());
-		//
-		//	// quick test first: test middle of the range.
-		//	glm::vec3 centerTestPos = camera.getPosition() + dist*mouseRay;
-		//	if (e->containsPoint(centerTestPos))
-		//		return e;
-		//
-		//	float sr = e->getOuterBoundingRadius();
-		//	float close = dist - sr;
-		//	float far = dist + sr;
-		//
-		//	for (float r = close; r < far; r += 0.05f)
-		//	{
-		//		glm::vec3 testPos = camera.getPosition() + r*mouseRay;
-		//		if (e->containsPoint(testPos))
-		//			return e;
-		//	}
-		//}
 
 	}
 
@@ -840,7 +798,7 @@ namespace core {
 			if (e->shouldShow.body)
 			{
 				e->render(renderer);
-				if (parameters.showShadows && parameters.showEnvironment)
+				if (parameters.showShadows && parameters.showEnvironment && e->shouldShow.shadow)
 					e->renderShadow(renderer, cameraPos);
 			}
 		}

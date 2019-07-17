@@ -6,13 +6,27 @@ namespace core {
 
 	PathSim::PathSim()
 		: p_x(0.0), p_y(0.0), p_z(0.0), p_xt(0.0), p_yt(0.0), p_zt(0.0),
-		mu(0.5), e_o(0.5), e_r(0.5), e_t(0.5)
+		mu(0.5), e_o(0.5), e_r(0.5), e_t(0.5), status(0)
 	{
 		// arrays will be initialized in derived class constructors
 		// Do not call any virtual functions (like n()) here.
 		// When this constructor is called, the derived part 
 		// of the object does not yet exist
 	}
+
+	const std::array<std::string, 11> PathSim::statusCodes = {
+			"Not yet started",
+			"Solution found",
+			"No progress",
+			"Major iteration limit",
+			"Cumulative iteration limit",
+			"Time limit",
+			"User interrupt",
+			"Bound error",
+			"Domain error",
+			"Infeasible",
+			"Internal error"
+	};
 
 	PathSim::~PathSim()
 	{
@@ -98,10 +112,11 @@ namespace core {
 				printCache();
 		}
 
+		status = 0;
 		return success;
 	}
 
-	void PathSim::captureTargetState()
+	void PathSim::captureTargetState(bool updateGuesses)
 	{
 		// cache
 		q_xo = target->getPosition().x;

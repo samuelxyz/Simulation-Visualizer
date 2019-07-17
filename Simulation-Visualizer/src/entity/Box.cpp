@@ -71,11 +71,13 @@ namespace entity {
 	{
 		// this makes some assumptions, might be overestimate, 
 		// but it's pretty fast
-
+/*
 		return 1.732f * std::max(std::max(
 				std::max(std::abs(xMin), std::abs(xMax)),
 				std::max(std::abs(yMin), std::abs(yMax))
-			),	std::max(std::abs(zMin), std::abs(zMax)));
+			),	std::max(std::abs(zMin), std::abs(zMax)));*/
+
+		return 1.732f;
 	}
 
 	float Box::getInnerBoundingRadius() const

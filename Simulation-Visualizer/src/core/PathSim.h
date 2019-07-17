@@ -42,6 +42,8 @@ namespace core
 		double* lower_bounds;
 		double* upper_bounds;
 
+		static const std::array<std::string, 11> statusCodes;
+
 		PathSim();
 		virtual ~PathSim();
 		// number of unknowns. This would be static except it also has to be virtual
@@ -57,7 +59,7 @@ namespace core
 		// Does not update target entity
 		virtual bool addStep(core::Timeline& timeline, bool log = true);
 		// Updates cache only. z should be updated in subclass overrides
-		virtual void captureTargetState();
+		virtual void captureTargetState(bool updateGuesses = true);
 		virtual void printZ() const = 0;
 		virtual void printF() const;
 		void printCache() const;

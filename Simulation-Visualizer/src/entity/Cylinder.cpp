@@ -67,7 +67,8 @@ namespace entity {
 	float Cylinder::getOuterBoundingRadius() const
 	{
 		// makes assumptions, may be overestimate, but it's fast
-		return std::max(height, 2.0f * radius) * 0.707f;
+		//return std::max(height, 2.0f * radius) * 0.707f
+		return 1.4f;
 	}
 
 	float Cylinder::getInnerBoundingRadius() const

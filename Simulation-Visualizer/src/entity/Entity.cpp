@@ -15,7 +15,8 @@ namespace entity {
 		: entityName(entityName), position(position), orientation(orientation),
 		velocity(velocity), angVelocity(angVel),
 		mass(mass), rotInertia(rotInertia), typeName(typeName),
-		shouldShow { true, false, false, false, false, false }
+		shouldShow { true, false, false, false, false, false, true },
+		guiVars { 0.0f, glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.0f) }
 	{
 	}
 
@@ -82,6 +83,7 @@ namespace entity {
 		if (ImGui::Begin((typeName + ": " + entityName).c_str()))
 		{
 			ImGui::Checkbox("Show entity", &shouldShow.body);
+			ImGui::Checkbox("Show Shadow", &shouldShow.shadow);
 			ImGui::Checkbox("Always show label", &shouldShow.label);
 
 			ImGui::Separator();
@@ -132,47 +134,44 @@ namespace entity {
 			}
 			ImGui::Separator();
 			{
-				static float angle = 0;
-				static glm::vec3 axis;
 				ImGui::Text("Rotate:");
 				ImGui::SameLine();
 				ImGui::PushItemWidth(45.0f);
-				ImGui::InputFloat("rad##RotateAngleInput", &angle);
+				ImGui::InputFloat("rad##RotateAngleInput", &guiVars.applyRotateAngle);
 				if (ImGui::IsItemHovered())
 					ImGui::SetTooltip("Rotation angle");
 				ImGui::PopItemWidth();
-				ImGui::InputFloat3("##RotateAxisInput", &axis.x);
+				ImGui::InputFloat3("##RotateAxisInput", &guiVars.applyRotateAxis.x);
 				if (ImGui::IsItemHovered())
 					ImGui::SetTooltip("Rotation axis");
 				ImGui::SameLine();
 				if (ImGui::ArrowButton("##RotateButton", ImGuiDir_Right))
 				{
-					orientation = glm::normalize(glm::angleAxis(angle, axis) * orientation);
+					orientation = glm::normalize(
+						glm::angleAxis(guiVars.applyRotateAngle, guiVars.applyRotateAxis) * orientation);
 				}
 				if (ImGui::IsItemHovered())
 					ImGui::SetTooltip("Apply");
 			}
 			{
-				static glm::vec3 linImpulse(0.0f);
 				ImGui::Text("Apply impulse:");
 				if (ImGui::IsItemHovered())
 					ImGui::SetTooltip("kg*m/s");
-				ImGui::InputFloat3("##linImpulseInput", &linImpulse.x);
+				ImGui::InputFloat3("##linImpulseInput", &guiVars.applyLinImpulse.x);
 				ImGui::SameLine();
 				if (ImGui::ArrowButton("##linImpulseButton", ImGuiDir_Right))
-					applyLinearImpulse(linImpulse);
+					applyLinearImpulse(guiVars.applyLinImpulse);
 				if (ImGui::IsItemHovered())
 					ImGui::SetTooltip("Apply");
 			}
 			{
-				static glm::vec3 angImpulse(0.0f);
 				ImGui::Text("Apply angular impulse:");
 				if (ImGui::IsItemHovered())
 					ImGui::SetTooltip("kg*m^2/s");
-				ImGui::InputFloat3("##angImpulseInput", &angImpulse.x);
+				ImGui::InputFloat3("##angImpulseInput", &guiVars.applyAngImpulse.x);
 				ImGui::SameLine();
 				if (ImGui::ArrowButton("##angImpulse", ImGuiDir_Right))
-					applyAngularImpulse(angImpulse);
+					applyAngularImpulse(guiVars.applyAngImpulse);
 				if (ImGui::IsItemHovered())
 					ImGui::SetTooltip("Apply");
 			}

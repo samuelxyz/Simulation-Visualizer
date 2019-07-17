@@ -65,6 +65,7 @@ namespace entity {
 			bool positionMarker;
 			bool velocityVector;
 			bool angVelocityVector;
+			bool shadow;
 		} shouldShow;
 
 	protected:
@@ -77,6 +78,14 @@ namespace entity {
 		glm::vec3 angVelocity;
 		float mass;
 		glm::mat3 rotInertia;
+
+		struct GuiVars
+		{
+			float applyRotateAngle;
+			glm::vec3 applyRotateAxis;
+			glm::vec3 applyLinImpulse;
+			glm::vec3 applyAngImpulse;
+		} guiVars;
 	};
 }
 

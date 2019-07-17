@@ -8,6 +8,12 @@
 #define DO_CUBE_TEST
 #endif
 
+#define START_TIMING \
+auto startTime = std::chrono::steady_clock::now()
+#define STOP_TIMING_AND_GET_MICROSECONDS \
+std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now()-startTime).count()
+
+
 namespace core {
 	// Value used for simulation
 	static constexpr float TIME_STEP = 1e-2f, GRAVITY = 9.80665f;

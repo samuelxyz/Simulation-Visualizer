@@ -332,9 +332,9 @@ namespace core {
 		return 0;
 	}
 
-	void PathSimBox::captureTargetState()
+	void PathSimBox::captureTargetState(bool updateGuesses)
 	{
-		PathSim::captureTargetState(); // update cache
+		PathSim::captureTargetState(updateGuesses); // update cache
 
 		// variables
 		z[0] = v_xo;
@@ -343,17 +343,21 @@ namespace core {
 		z[3] = w_xo;
 		z[4] = w_yo;
 		z[5] = w_zo;
-		z[6] = q_xo;
-		z[7] = q_yo;
-		z[8] = graphics::FLOOR_Z;
-		z[9] = q_xo;
-		z[10] = q_yo;
-		z[11] = graphics::FLOOR_Z;
+		if (updateGuesses)
+		{
+			z[6] = q_xo;
+			z[7] = q_yo;
+			z[8] = graphics::FLOOR_Z;
+			z[9] = q_xo;
+			z[10] = q_yo;
+			z[11] = graphics::FLOOR_Z;
+		}
 	}
 
 	void PathSimBox::printZ() const
 	{
-		std::cout << "---Sam Tan's output---\nStatus: " << status << "\n          Z:\n-----------------------";
+		std::cout << "---Sam Tan's output---\nStatus: " << status << " (" << statusCodes[status] << ")" <<
+			"\n          Z:\n-----------------------";
 		std::cout <<
 			"\n0 | v_x  | " << z[0]  <<
 			"\n1 | v_y  | " << z[1]  <<
