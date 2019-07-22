@@ -210,7 +210,7 @@ namespace core {
 		double ry = R12*a1_x + R22*a1_y + R32*a1_z - R12*q_x - R22*q_y - R32*q_z;
 		double rz = R13*a1_x + R23*a1_y + R33*a1_z - R13*q_x - R23*q_y - R33*q_z;
 
-		Eigen::MatrixXd J1(21,42);
+		Eigen::MatrixXd J1 = Eigen::MatrixXd::Zero(21,42);
 		J1 << -m, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 			0, -m, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, -m, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -233,7 +233,7 @@ namespace core {
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
 
-		Eigen::MatrixXd J2(42, 25);
+		Eigen::MatrixXd J2 = Eigen::MatrixXd::Zero(42, 25);
 		J2.topLeftCorner<21,21>().setIdentity();
 		J2.block<9,4>(21, 21) << 
 			 2*q0,  2*q1, -2*q2, -2*q3,
@@ -258,7 +258,7 @@ namespace core {
 
 		J2.bottomLeftCorner<3, 3>() = h*Eigen::Matrix3d::Identity();
 
-		Eigen::MatrixXd J3(25, 21);
+		Eigen::MatrixXd J3 = Eigen::MatrixXd::Zero(25, 21);
 		J3.topRows(21).setIdentity();
 		double N_J3 = std::pow(h_sq*w_x*w_x + h_sq*w_y*w_y + h_sq*w_z*w_z + 4, 1.5);
 		J3.block<4, 3>(21, 3) << 
