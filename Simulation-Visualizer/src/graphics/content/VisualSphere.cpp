@@ -43,8 +43,8 @@ namespace graphics {
 		graphics::ColoredVertex southPole { colorMinusZ, toWorldFrame(glm::vec3(0.0f, 0.0f, -radius), true) };
 
 		// decide mesh resolution
-		int numRings = static_cast<int>(std::max(10 * radius, 6.0f )); // ~number of latitude lines
-		int numNodes = static_cast<int>(std::max(30 * radius, 12.0f)); // ~number of longitude lines
+		int numRings = static_cast<int>(std::max(20 * radius, 12.0f )); // ~number of latitude lines
+		int numNodes = static_cast<int>(std::max(60 * radius, 24.0f)); // ~number of longitude lines
 
 		// this is to calculate stuff that's the same across every ring, but differs across nodes on each ring
 		struct RepeatedNodeData {
@@ -64,15 +64,21 @@ namespace graphics {
 			float longitude = core::TWO_PI * n / numNodes;
 
 			glm::vec4 colorFactor;
-			if (longitude < core::HALF_PI)
-				colorFactor = glm::mix(colorPlusX, colorPlusY, longitude/core::HALF_PI);
-			else if (longitude < core::PI)
-				colorFactor = glm::mix(colorPlusY, colorMinusX, longitude/core::HALF_PI - 1);
-			else if (longitude < core::HALF_PI + core::PI)
-				colorFactor = glm::mix(colorMinusX, colorMinusY, longitude/core::HALF_PI - 2);
+			if (style == Style::MULTICOLOR)
+			{
+				if (longitude < core::HALF_PI)
+					colorFactor = graphics::colorMix(colorPlusX, colorPlusY, longitude/core::HALF_PI);
+				else if (longitude < core::PI)
+					colorFactor = graphics::colorMix(colorPlusY, colorMinusX, longitude/core::HALF_PI - 1);
+				else if (longitude < core::HALF_PI + core::PI)
+					colorFactor = graphics::colorMix(colorMinusX, colorMinusY, longitude/core::HALF_PI - 2);
+				else
+					colorFactor = graphics::colorMix(colorMinusY, colorPlusX, longitude/core::HALF_PI - 3);
+			}
 			else
-				colorFactor = glm::mix(colorMinusY, colorPlusX, longitude/core::HALF_PI - 3);
-			
+			{
+				colorFactor = this->color;
+			}
 			repeatedNodeData.emplace_back(longitude, colorFactor);
 		}
 
@@ -86,7 +92,11 @@ namespace graphics {
 			float z = radius * std::sin(latitude);
 			float ringRadius = radius * std::cos(latitude);
 
-			glm::vec4 zColorFactor = glm::mix(colorPlusZ, colorMinusZ, (r+1.0f)/(numRings+1.0f));
+			glm::vec4 zColorFactor;
+			if (style == Style::MULTICOLOR)
+				zColorFactor = graphics::colorMix(colorPlusZ, colorMinusZ, (r+1.0f)/(numRings+1.0f));
+			else
+				zColorFactor = this->color;
 
 			for (int n = 0; n < numNodes; ++n)
 			{
@@ -94,7 +104,7 @@ namespace graphics {
 					ringRadius * std::sin(repeatedNodeData[n].longitude), z);
 
 				vertices.emplace_back(
-					glm::mix(repeatedNodeData[n].colorFactor, zColorFactor, std::abs(latitudeNormalized)),
+					graphics::colorMix(repeatedNodeData[n].colorFactor, zColorFactor, std::abs(latitudeNormalized)),
 					toWorldFrame(position, true));
 			}
 		}

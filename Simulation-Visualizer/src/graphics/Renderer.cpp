@@ -5,13 +5,12 @@
  *      Author: Samuel Tan
  */
 
+#include "core/stdafx.h"
 #include "core/Definitions.h"
 #include "graphics/Renderer.h"
 #include "graphics/IndexBuffer.h"
 #include "graphics/VertexArray.h"
-
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
+#include "graphics/content/VisualSphere.h"
 
 namespace graphics
 {
@@ -37,6 +36,44 @@ namespace graphics
 	  glClear(GL_DEPTH_BUFFER_BIT);
   }
 
+  void Renderer::setDepthWritingEnabled(bool enable)
+  {
+	  static bool cache = true;
+
+	  if (enable != cache)
+	  {
+		  cache = enable;
+		  glDepthMask(enable ? GL_TRUE : GL_FALSE);
+	  }
+  }
+
+  // Use zero or omit color for multicolor mode
+  void Renderer::renderMarkerDot(const glm::vec3& pos, 
+	  const glm::vec4& color)
+  {
+	  graphics::VisualSphere
+	  {
+		  pos, core::QUAT_IDENTITY, MARKER_DOT_RADIUS,
+		  glm::length2(color) == 0.0f ?
+		  VisualEntity::Style::MULTICOLOR : VisualEntity::Style::SOLID_COLOR,
+		  color
+	  }.render(*this);
+  }
+
+  void Renderer::setDepthTestEnabled(bool enable)
+  {
+	  static bool cache = true;
+
+	  if (enable != cache)
+	  {
+		  cache = enable;
+		  if (enable)
+			  glEnable(GL_DEPTH_TEST);
+		  else
+			  glDisable(GL_DEPTH_TEST);
+	  }
+  }
+
   void Renderer::draw(GLenum mode, const VertexArray& va,
       const IndexBuffer& ib, const ShaderProgram& sp)
   {
@@ -53,9 +90,12 @@ namespace graphics
 	  shaderProgram.setUniformMat4f("u_VPMatrix", VPMatrix);
   }
 
-  void Renderer::renderAndClearAll()
+  void Renderer::renderAndClearAll(bool enableDepthTest, bool enableDepthWriting)
   {
-    //clearScreen();
+	setDepthTestEnabled(enableDepthTest);
+	if (enableDepthTest)
+		setDepthWritingEnabled(enableDepthWriting);
+
     tBatch.renderAndClearAll();
   }
 

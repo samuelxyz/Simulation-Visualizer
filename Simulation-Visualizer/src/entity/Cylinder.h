@@ -22,10 +22,11 @@ namespace entity {
 
 		virtual core::PathSim* createPathSim() const override;
 
-		virtual bool containsPoint(glm::vec3 worldPoint) const;
+		virtual bool containsPoint(glm::vec3 worldPoint, bool useCachedOrientation = false) const;
 		virtual bool intersectsFloor() const override;
+		virtual glm::vec3 guessECP() const override;
 		virtual void render(graphics::Renderer& renderer) const;
-		virtual void renderShadow(graphics::Renderer& renderer, const glm::vec3& cameraPos) const override;
+		virtual void renderShadow(graphics::Renderer& renderer) const override;
 		virtual float getOuterBoundingRadius() const override;
 		virtual float getInnerBoundingRadius() const override;
 

@@ -66,7 +66,9 @@ namespace graphics {
 
 		glEnable(GL_MULTISAMPLE);
 
-		glEnable(GL_DEPTH_TEST);
+		//glEnable(GL_DEPTH_TEST);
+
+		//glEnable(GL_FRAMEBUFFER_SRGB);
 
 		//glClearColor(0.2f, 0.4f, 0.3f, 1.0f);
 		glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
@@ -248,40 +250,24 @@ namespace graphics {
 		renderer.updateCamera(camera.getVPMatrix());
 
 		if (simulation != nullptr)
+		{
+			simulation->renderGUI(renderer, camera);
 			simulation->render(renderer, camera.getPosition());
-		renderer.renderAndClearAll();
+		}
 
-		// GUI WIP code
-		
-		//glDisable(GL_DEPTH_TEST);
+		// overlays
 		renderer.clearDepth();
-		guiOverlay.render(*this, renderer);
 		if (simulation != nullptr)
 			simulation->renderGUIOverlay(renderer, camera);
-
-		//glm::vec4 testColor(1.0f, 0.0f, 1.0f, 1.0f);
-		//graphics::Triangle testGuiTriangle { {
-		//		graphics::ColoredVertex {testColor, glm::vec3(2.0f, 2.0f, 0.0f)},
-		//		graphics::ColoredVertex {testColor, glm::vec3(20.0f, 2.0f, 0.0f)},
-		//		graphics::ColoredVertex {testColor, glm::vec3(2.0f, 20.0f, 0.0f)},
-		//} };
-		//renderer.submit(testGuiTriangle);
-
-		//glEnable(GL_DEPTH_TEST);
+		guiOverlay.render(*this, renderer);
+		renderer.renderAndClearAll(true, true);
 
 		// TODO: I think the problem with multiple Renderers is in the bind() calls in Renderer::draw()
-
-	//}
-
-	//void Window::renderGUI()
-	//{
-		camera.renderGUI();
-
-		if (simulation != nullptr)
-			simulation->renderGUI(renderer, camera);
+		// So just working around it by reusing the same Renderer multiple times xd
 
 		static bool showDemoWindow = false;
 
+		camera.renderGUI();
 		if (ImGui::Begin("General"))
 		{
 			ImGui::TextUnformatted("Degrees        Radians");
@@ -300,33 +286,12 @@ namespace graphics {
 		}
 
 		if (showDemoWindow)
-			ImGui::ShowDemoWindow();
+			ImGui::ShowDemoWindow(&showDemoWindow);
 
 		ImGui::End();
 
-		renderer.renderAndClearAll();
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-	}
-
-	void Window::directRender(Renderable & renderable)
-	{
-		renderable.render(renderer);
-	}
-
-	void Window::directRender(const graphics::Triangle& tri)
-	{
-		renderer.submit(tri);
-	}
-
-	void Window::directRender(const graphics::Quad& quad)
-	{
-		renderer.submit(quad);
-	}
-
-	void Window::directRender(const graphics::CenteredPoly& cp)
-	{
-		renderer.submit(cp);
 	}
 
 	void Window::swapBuffers()

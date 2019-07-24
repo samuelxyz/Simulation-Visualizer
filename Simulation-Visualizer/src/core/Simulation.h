@@ -33,6 +33,7 @@ namespace core {
 			float playbackSpeed;
 			bool loopPlayback;
 			bool logOutput;
+			bool logCalcTime;
 			Parameters();
 		};
 
@@ -42,6 +43,8 @@ namespace core {
 		static constexpr unsigned int FPS_TRACKER_SMOOTHING = 30u;
 
 		std::vector<entity::Entity*> entities;
+		// for previews, etc. Will not be updated or otherwise interactable
+		std::vector<entity::Entity*> entitiesVisualOnly;
 		struct Environment
 		{
 			graphics::CenteredPoly floor;
@@ -56,8 +59,11 @@ namespace core {
 		~Simulation();
 
 		void update();
+		// Calls Renderer::renderAndClearAll()
 		void render(graphics::Renderer& renderer, const glm::vec3& cameraPos) const;
+		// May contribute an extra entity to Simulation's render list. Call before Simulation::render()
 		void renderGUI(graphics::Renderer&, const graphics::Camera& camera);
+		// Entity vectors, markers, contact points, etc
 		void renderGUIOverlay(graphics::Renderer& renderer, const graphics::Camera& camera) const;
 
 		void add(entity::Entity*);
@@ -70,7 +76,7 @@ namespace core {
 		const entity::Entity* const getFocusedEntity(const graphics::Camera& camera) const;
 		const entity::Entity* const getHoveredEntity(const graphics::Camera& camera) const;
 
-		int addSteps(core::Timeline& timeline, int numSteps);
+		int addSteps(core::Timeline& timeline, int numSteps, bool breakOnConstantMotion = false);
 		int addStepsUntilEnd(core::Timeline& timeline);
 		void recordTimestep(entity::Entity*);
 		// Returns true on success
@@ -80,7 +86,8 @@ namespace core {
 		void startStop();
 
 	private:
-		void renderEntities(graphics::Renderer&, const glm::vec3& cameraPos) const;
+		void renderEntities(graphics::Renderer&) const;
+		void renderShadows(graphics::Renderer&, const glm::vec3& cameraPos) const;
 		void renderEnvironment(graphics::Renderer&) const;
 		void renderContactPoint(graphics::Renderer&, const graphics::Camera& camera) const;
 		void renderAddEntityGUI(graphics::Renderer&, const graphics::Camera&);

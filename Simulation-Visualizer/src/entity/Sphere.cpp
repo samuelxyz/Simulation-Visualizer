@@ -34,9 +34,9 @@ namespace entity {
 		visualSphere.render(renderer);
 	}
 
-	void Sphere::renderShadow(graphics::Renderer & renderer, const glm::vec3 & cameraPos) const
+	void Sphere::renderShadow(graphics::Renderer & renderer) const
 	{
-		Entity::renderShadow(renderer, cameraPos, 1.0f);
+		Entity::renderShadow(renderer, 1.0f, position);
 	}
 
 	float Sphere::getOuterBoundingRadius() const

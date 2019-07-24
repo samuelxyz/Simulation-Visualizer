@@ -37,9 +37,9 @@ namespace graphics {
 		{
 		public:
 			GUIOverlay(graphics::Camera& camera);
-			virtual ~GUIOverlay();
+			~GUIOverlay();
 
-			virtual void render(const Window& window, graphics::Renderer& renderer) const;
+			void render(const Window& window, graphics::Renderer& renderer) const;
 
 		private:
 			graphics::Camera& camera;
@@ -71,13 +71,7 @@ namespace graphics {
 
 		void startGUI();
 		void update();
-		void render(); // includes our GUI
-		//void renderGUI(); // ImGui
-
-		void directRender(Renderable& renderable);
-		void directRender(const graphics::Triangle& tri);
-		void directRender(const graphics::Quad& quad);
-		void directRender(const graphics::CenteredPoly& cp);
+		void render(); // for everything render-related
 
 		void swapBuffers();
 		void getDimensions(int* widthOut, int* heightOut);

@@ -25,6 +25,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include "glm/gtx/quaternion.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 #include <Eigen/Dense>
 #include <Eigen/SparseCore>
 #include <fmt/printf.h>

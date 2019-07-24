@@ -20,13 +20,16 @@ namespace entity {
 
 		virtual core::PathSim* createPathSim() const = 0;
 
-		glm::vec3 toLocalFrame(glm::vec3 worldVec) const;
-		glm::vec3 toWorldFrame(glm::vec3 localVec) const;
-		virtual bool containsPoint(glm::vec3 worldPoint) const = 0;
+		glm::vec3 toLocalFrame(glm::vec3 worldVec, bool useCachedOrientation = false) const;
+		glm::vec3 toWorldFrame(glm::vec3 localVec, bool useCachedOrientation = false) const;
+		virtual bool containsPoint(glm::vec3 worldPoint, bool useCachedOrientation = false) const = 0;
 
 		virtual void render(graphics::Renderer& renderer) const = 0;
-		void renderShadow(graphics::Renderer& renderer, const glm::vec3& cameraPos, float shadowSizeMultiplier) const;
-		virtual void renderShadow(graphics::Renderer& renderer, const glm::vec3& cameraPos) const = 0;
+
+		// refPoint determines the size/darkness of the shadow. To get default behavior, use this->position
+		void renderShadow(graphics::Renderer& renderer, float shadowSizeMultiplier, const glm::vec3& refPoint) const;
+		void renderShadow(graphics::Renderer&, const glm::vec2& centerPos, float radius, float centerA) const;
+		virtual void renderShadow(graphics::Renderer& renderer) const = 0;
 		virtual void renderGUI();
 		void renderLabel(const graphics::Camera& camera) const;
 		void renderPositionMarker(graphics::Renderer& renderer, const graphics::Camera& camera) const;
@@ -48,6 +51,7 @@ namespace entity {
 		// radius of the largest sphere that will fit inside the entity
 		virtual float getInnerBoundingRadius() const = 0;
 
+		virtual glm::vec3 guessECP() const = 0;
 		virtual bool intersectsFloor() const = 0;
 		void loadState(core::Timestep&);
 

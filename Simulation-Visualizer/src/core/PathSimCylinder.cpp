@@ -304,11 +304,14 @@ namespace core {
 		
 		if (updateGuesses)
 		{
-			z[6] = q_xo;
-			z[7] = q_yo;
-			z[8] = graphics::FLOOR_Z;
-			z[9] = q_xo;
-			z[10] = q_yo;
+			// guess contact point by finding lowest point
+			glm::vec3 guess = target->guessECP();
+
+			z[6] = guess.x;
+			z[7] = guess.y;
+			z[8] = guess.z;
+			z[9] = guess.x;
+			z[10] = guess.y;
 			z[11] = graphics::FLOOR_Z;
 		}
 	}

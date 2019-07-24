@@ -37,7 +37,7 @@ namespace graphics {
 		}
 
 		// make two faces in local frame
-		int numNodes = static_cast<int>(std::max(30 * radius, 12.0f));
+		int numNodes = static_cast<int>(std::max(60 * radius, 24.0f));
 		float zTop = height * 0.5f;
 
 		// apply shading
@@ -49,7 +49,6 @@ namespace graphics {
 		// for faces
 		float multTop = (orient * core::VECTOR_UP).z;
 		// multBottom would be equivalent to -multTop
-
 		colorPlusZ = glm::mix(colorPlusZ, COLOR_BLACK,
 			((std::cos(core::mapRange(multTop, -1.0f, 1.0f, 0.0f, core::PI)) + 1.0f)/2.0f)
 			* shadeFactor);
@@ -87,14 +86,21 @@ namespace graphics {
 			float longitude = core::TWO_PI * i / numNodes;
 
 			glm::vec4 color;
-			if (longitude < core::HALF_PI)
-				color = glm::mix(colorPlusX, colorPlusY, longitude/core::HALF_PI);
-			else if (longitude < core::PI)
-				color = glm::mix(colorPlusY, colorMinusX, longitude/core::HALF_PI - 1);
-			else if (longitude < core::HALF_PI + core::PI)
-				color = glm::mix(colorMinusX, colorMinusY, longitude/core::HALF_PI - 2);
+			if (style == Style::MULTICOLOR)
+			{
+				if (longitude < core::HALF_PI)
+					color = graphics::colorMix(colorPlusX, colorPlusY, longitude/core::HALF_PI);
+				else if (longitude < core::PI)
+					color = graphics::colorMix(colorPlusY, colorMinusX, longitude/core::HALF_PI - 1);
+				else if (longitude < core::HALF_PI + core::PI)
+					color = graphics::colorMix(colorMinusX, colorMinusY, longitude/core::HALF_PI - 2);
+				else
+					color = graphics::colorMix(colorMinusY, colorPlusX, longitude/core::HALF_PI - 3);
+			}
 			else
-				color = glm::mix(colorMinusY, colorPlusX, longitude/core::HALF_PI - 3);
+			{
+				color = this->color;
+			}
 
 			// apply shading
 			color = glm::mix(color, COLOR_BLACK,

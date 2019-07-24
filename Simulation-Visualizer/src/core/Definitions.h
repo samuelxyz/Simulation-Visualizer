@@ -13,10 +13,12 @@ auto startTime = std::chrono::steady_clock::now()
 #define STOP_TIMING_AND_GET_MICROSECONDS \
 std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now()-startTime).count()
 
+#define USE_RMS_COLOR_BLEND
 
 namespace core {
 	// Value used for simulation
 	static constexpr float TIME_STEP = 1e-2f, GRAVITY = 9.80665f;
+	static constexpr float FLOOR_Z = 0.0f;
 
 	static constexpr float
 		PI = 3.141592653589793f,
@@ -103,23 +105,25 @@ namespace graphics {
 	};
 
 	static const glm::vec4
-		COLOR_RED			{ 1.0f, 0.0f, 0.0f, 1.0f },
-		COLOR_GREEN			{ 0.0f, 1.0f, 0.0f, 1.0f },
-		COLOR_BLUE			{ 0.0f, 0.0f, 1.0f, 1.0f },
-		COLOR_CYAN			{ 0.0f, 1.0f, 1.0f, 1.0f },
-		COLOR_MAGENTA		{ 1.0f, 0.0f, 1.0f, 1.0f },
-		COLOR_YELLOW		{ 1.0f, 1.0f, 0.0f, 1.0f },
-		COLOR_WHITE			{ 1.0f, 1.0f, 1.0f, 1.0f },
-		COLOR_BLACK			{ 0.0f, 0.0f, 0.0f, 1.0f },
-		COLOR_TRANSPARENT	{ 0.0f };
+		COLOR_RED { 1.0f, 0.0f, 0.0f, 1.0f },
+		COLOR_GREEN { 0.0f, 1.0f, 0.0f, 1.0f },
+		COLOR_BLUE { 0.0f, 0.0f, 1.0f, 1.0f },
+		COLOR_CYAN { 0.0f, 1.0f, 1.0f, 1.0f },
+		COLOR_MAGENTA { 1.0f, 0.0f, 1.0f, 1.0f },
+		COLOR_YELLOW { 1.0f, 1.0f, 0.0f, 1.0f },
+		COLOR_WHITE { 1.0f, 1.0f, 1.0f, 1.0f },
+		COLOR_BLACK { 0.0f, 0.0f, 0.0f, 1.0f },
+		COLOR_TRANSPARENT { 0.0f },
+		COLOR_PINK { 1.0f, 0.5f, 0.75f, 1.0f };
 
 	// theme colors
 	static const glm::vec4&
 		COLOR_NONE { COLOR_TRANSPARENT },
-		COLOR_DEFAULT {COLOR_NONE},
+		COLOR_DEFAULT { COLOR_NONE },
 		COLOR_VELOCITY { COLOR_CYAN },
 		COLOR_ANGVEL { COLOR_MAGENTA },
 		COLOR_CONTACT { COLOR_RED },
+		COLOR_NO_CONTACT { COLOR_PINK },
 		COLOR_ORBIT { COLOR_GREEN };
 
 	typedef std::array<ColoredVertex, 3> Triangle;
@@ -137,11 +141,21 @@ namespace graphics {
 	static constexpr float RENDER_DISTANCE = 100.0f;
 
 	// height of the visual "floor" in the visualization
-	static constexpr float FLOOR_Z = 0.0f;
-	static constexpr float SMALL_DISTANCE = 2e-4f;
-	static float calcShadowZ(const glm::vec3& cameraPos)
-	{
-		return FLOOR_Z + SMALL_DISTANCE * std::abs(cameraPos.z);
-	}
+	static constexpr float FLOOR_Z = core::FLOOR_Z;
 	static constexpr float MARKER_DOT_RADIUS = 0.04f;
+
+	static glm::vec4 colorMix(const glm::vec4& x, const glm::vec4& y, float a)
+	{
+#ifndef USE_RMS_COLOR_BLEND
+		return glm::mix(x, y, a);
+#else
+		// using correct gamma stuff maybe? @minutephysics
+		glm::vec4 result(0.0f);
+		for (int i = 0; i < 4; ++i)
+		{
+			result[i] = std::sqrt((x[i]*x[i]*(1-a) + y[i]*y[i]*a));
+		}
+		return result;
+#endif
+	}
 }

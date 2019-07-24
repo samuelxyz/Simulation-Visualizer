@@ -24,23 +24,29 @@ namespace entity {
 	{
 	}
 
-	glm::vec3 Entity::toLocalFrame(glm::vec3 worldVec) const
+	glm::vec3 Entity::toLocalFrame(glm::vec3 worldVec, bool useCachedOrientation) const
 	{
-		//return glm::inverse(glm::toMat3(orientation)) * (worldVec - position);
-		return glm::transpose(glm::toMat3(orientation)) * (worldVec - position);
-		// inverse == transpose for rotation matrices
+		static glm::mat3 matrix = glm::transpose(glm::toMat3(orientation));
+		if (!useCachedOrientation)
+			matrix = glm::transpose(glm::toMat3(orientation));
+
+		return matrix * (worldVec - position);
 	}
 
-	glm::vec3 Entity::toWorldFrame(glm::vec3 localVec) const
+	glm::vec3 Entity::toWorldFrame(glm::vec3 localVec, bool useCachedOrientation) const
 	{
-		//return glm::rotate(orientation, localVec) + position;
-		return glm::toMat3(orientation) * localVec + position;
+		static glm::mat3 matrix = glm::toMat3(orientation);
+		if (!useCachedOrientation)
+			matrix = glm::toMat3(orientation);
+
+		return matrix * localVec + position;
 	}
 
-	void Entity::renderShadow(graphics::Renderer & renderer, const glm::vec3& cameraPos, float shadowSizeMultiplier) const
+	void Entity::renderShadow(graphics::Renderer & renderer,
+		float shadowSizeMultiplier, const glm::vec3& refPoint) const
 	{
-		float baseRadius = getOuterBoundingRadius() * shadowSizeMultiplier;
-		float height = position.z - graphics::calcShadowZ(cameraPos);
+		float baseRadius = shadowSizeMultiplier;
+		float height = refPoint.z - graphics::FLOOR_Z;
 
 		if (height < -baseRadius)
 			return;
@@ -51,36 +57,40 @@ namespace entity {
 		else
 			scaleFactor = std::cos(height/baseRadius * core::PI);
 
-		//static float randomness = 0.0f; // avoid shadow z-fighting
-		//randomness += graphics::SMALL_DISTANCE;
-		//if (randomness > graphics::SMALL_DISTANCE * 10)
-		//	randomness = 0.0f;
-
-		glm::vec4 transparent(0.0f);
-		glm::vec4 centerColor = graphics::COLOR_BLACK;
+		float centerA;
 		// shadow darkness
 		if (height > 0.0f)
 			//centerColor.a = std::min(0.8f*baseRadius*baseRadius/(height*height+1), 1.0f);
 			//centerColor.a = std::min(baseRadius/(0.4f*height), std::abs(1.0f - 0.2f*height/baseRadius));
-			centerColor.a = std::max(0.0f, 1.0f - 0.2f*height/baseRadius);
+			centerA = std::max(0.0f, 1.0f - 0.2f*height/baseRadius);
 		else
-			centerColor.a = scaleFactor;
-		glm::vec3 center(position.x, position.y, graphics::calcShadowZ(cameraPos)/* + randomness*/);
-		glm::vec3 radius(baseRadius*scaleFactor, 0.0f, 0.0f); // penumbra gets bigger with distance
+			centerA = scaleFactor;
+		float radius = baseRadius*scaleFactor; // penumbra gets bigger with distance
 
+		renderShadow(renderer, glm::vec2(refPoint.x, refPoint.y), radius*1.05f, centerA*0.25f);
+		renderShadow(renderer, glm::vec2(refPoint.x, refPoint.y), radius*0.95f, centerA*0.75f);
+	}
+
+	void Entity::renderShadow(graphics::Renderer& renderer, 
+		const glm::vec2 & centerPos, float radius, float centerA) const
+	{
+		glm::vec4 transparent(0.0f);
+		glm::vec4 centerColor = graphics::COLOR_BLACK;
+		centerColor.a = centerA;
+		glm::vec3 center(centerPos.x, centerPos.y, graphics::FLOOR_Z);
+		glm::vec3 radiusVec(radius, 0.0f, 0.0f);
 		graphics::CenteredPoly shadow;
 		shadow.emplace_back(centerColor, center);
 		for (float angle = 0.0f; angle < 6.3f; angle += core::QUARTER_PI/2.0f)
 		{
-			shadow.emplace_back(transparent, center + glm::rotateZ(radius, angle));
+			shadow.emplace_back(transparent, center + glm::rotateZ(radiusVec, angle));
 		}
-
 		renderer.submit(shadow);
 	}
 
 	void Entity::renderGUI()
 	{
-		if (ImGui::Begin((typeName + ": " + entityName).c_str()))
+		if (ImGui::Begin((typeName + ": " + entityName).c_str(), &(shouldShow.gui)))
 		{
 			ImGui::Checkbox("Show entity", &shouldShow.body);
 			ImGui::Checkbox("Show Shadow", &shouldShow.shadow);
@@ -187,9 +197,7 @@ namespace entity {
 
 	void Entity::renderPositionMarker(graphics::Renderer& renderer, const graphics::Camera& camera) const
 	{
-		graphics::VisualSphere sphere(position, core::QUAT_IDENTITY, graphics::MARKER_DOT_RADIUS);
-
-		sphere.render(renderer);
+		renderer.renderMarkerDot(position);
 
 		camera.renderLabel(position, true, typeName + entityName + "PositionMarkerLabel",
 			fmt::sprintf("(%.3f, %.3f, %.3f)", position.x, position.y, position.z), 
@@ -200,7 +208,7 @@ namespace entity {
 	{
 		static constexpr float thickness = 0.01f;
 
-		 graphics::VisualBox box(position, velocity,
+		graphics::VisualBox box(position, velocity,
 			thickness, core::VECTOR_UP,
 			graphics::VisualEntity::Style::SOLID_COLOR, graphics::COLOR_VELOCITY);
 

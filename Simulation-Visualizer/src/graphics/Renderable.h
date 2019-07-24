@@ -6,5 +6,6 @@ namespace graphics {
 	{
 	public:
 		virtual void render(Renderer& renderer) const = 0;
+		virtual ~Renderable() = default;
 	};
 }
