@@ -1,8 +1,5 @@
 #pragma once
 #include "core/Definitions.h"
-extern "C" {
-#include "path_standalone/Standalone_Path.h"
-}
 
 namespace entity {
 	class Entity;
@@ -12,6 +9,10 @@ namespace entity {
 namespace graphics {
 	class Renderer;
 	class Camera;
+}
+
+namespace io {
+	class MouseDragTarget;
 }
 
 namespace core {
@@ -73,8 +74,9 @@ namespace core {
 		// - Hovered entity
 		// - Onscreen entity nearest to the camera
 		// - (Entity)nullptr
-		const entity::Entity* const getFocusedEntity(const graphics::Camera& camera) const;
-		const entity::Entity* const getHoveredEntity(const graphics::Camera& camera) const;
+		entity::Entity* getFocusedEntity(const graphics::Camera& camera);
+		entity::Entity* getHoveredEntity(const graphics::Camera& camera);
+		io::MouseDragTarget* getLeftMouseDragTarget(const graphics::Camera& camera);
 
 		int addSteps(core::Timeline& timeline, int numSteps, bool breakOnConstantMotion = false);
 		int addStepsUntilEnd(core::Timeline& timeline);

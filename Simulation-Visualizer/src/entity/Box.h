@@ -22,7 +22,7 @@ namespace entity {
 		virtual core::PathSim* createPathSim() const override;
 
 		virtual bool containsPoint(glm::vec3 worldPoint, bool useCachedOrientation = false) const;
-		virtual bool intersectsFloor() const override;
+		virtual float getLowestPointZ() const override;
 		virtual glm::vec3 guessECP() const override;
 		virtual void render(graphics::Renderer& renderer) const;
 		virtual void renderShadow(graphics::Renderer& renderer) const override;

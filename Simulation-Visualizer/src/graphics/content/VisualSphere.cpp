@@ -3,8 +3,8 @@
 
 namespace graphics {
 
-	VisualSphere::VisualSphere(glm::vec3 position, glm::quat orientation, 
-		float radius, Style style, glm::vec4 color, float shadeFactor)
+	VisualSphere::VisualSphere(const glm::vec3& position, const glm::quat& orientation, 
+		float radius, Style style, const glm::vec4& color, float shadeFactor)
 		: VisualEntity(position, orientation, style, color, shadeFactor), radius(radius)
 	{
 	}

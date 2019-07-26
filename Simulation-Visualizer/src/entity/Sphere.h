@@ -20,7 +20,7 @@ namespace entity {
 		virtual ~Sphere();
 
 		virtual bool containsPoint(glm::vec3 worldPoint) const;
-		virtual bool intersectsFloor() const override;
+		virtual float getLowestPointZ() const override;
 		virtual void render(graphics::Renderer& renderer) const;
 		virtual void renderShadow(graphics::Renderer& renderer) const override;
 

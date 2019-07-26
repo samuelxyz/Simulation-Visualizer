@@ -32,7 +32,7 @@ namespace entity {
 		
 	}
 
-	bool Cylinder::intersectsFloor() const
+	float Cylinder::getLowestPointZ() const
 	{
 		// Theta is the angle between cylinder axis and world Z-axis
 
@@ -43,7 +43,7 @@ namespace entity {
 		// vertical distance between cylinder center and lowest point on tilted cylinder
 		float greatestDZ = height * 0.5f * cosTheta + radius * sinTheta;
 
-		return position.z - greatestDZ <= graphics::FLOOR_Z;
+		return position.z - greatestDZ;
 	}
 
 	glm::vec3 Cylinder::guessECP() const

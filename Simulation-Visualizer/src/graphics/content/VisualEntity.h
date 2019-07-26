@@ -17,9 +17,9 @@ namespace graphics {
 		float shadeFactor;
 
 	public:
-		VisualEntity(glm::vec3 position = glm::vec3(0.0f),
-			glm::quat orientation = core::QUAT_IDENTITY,
-			Style style = Style::MULTICOLOR, glm::vec4 color = glm::vec4(0.0f),
+		VisualEntity(const glm::vec3& position = glm::vec3(0.0f),
+			const glm::quat& orientation = core::QUAT_IDENTITY,
+			Style style = Style::MULTICOLOR, const glm::vec4& color = glm::vec4(0.0f),
 			float shadeFactor = 0.0f
 		);
 		virtual ~VisualEntity();

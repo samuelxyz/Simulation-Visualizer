@@ -1,6 +1,9 @@
 #include "core/stdafx.h"
 #include "PathSim.h"
 #include "entity/Entity.h"
+extern "C" {
+#include "path_standalone/Standalone_Path.h"
+}
 
 namespace core {
 

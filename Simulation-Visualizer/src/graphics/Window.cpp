@@ -1,7 +1,7 @@
 #include "core/stdafx.h"
 #include "graphics/Window.h"
-#include "core/Definitions.h"
 #include "graphics/content/VisualSphere.h"
+#include "io/MouseHandler.h"
 #include "entity/Entity.h"
 
 #include <imgui/imgui_impl_glfw.h>
@@ -21,7 +21,6 @@ namespace graphics {
 
 		glfwWindowHint(GLFW_SAMPLES, 4);
 		glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
-		//glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 		glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
 
 		/* Create a windowed mode window and its OpenGL context */
@@ -35,7 +34,6 @@ namespace graphics {
 		}
 
 		glfwSetFramebufferSizeCallback(glfwWindow, handleResize);
-		glfwSetKeyCallback(glfwWindow, handleKey);
 		glfwSetCursorPosCallback(glfwWindow, handleMouseMotion);
 		glfwSetMouseButtonCallback(glfwWindow, handleMouseButton);
 		glfwSetScrollCallback(glfwWindow, handleScroll);
@@ -66,11 +64,6 @@ namespace graphics {
 
 		glEnable(GL_MULTISAMPLE);
 
-		//glEnable(GL_DEPTH_TEST);
-
-		//glEnable(GL_FRAMEBUFFER_SRGB);
-
-		//glClearColor(0.2f, 0.4f, 0.3f, 1.0f);
 		glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
 	}
 
@@ -150,7 +143,8 @@ namespace graphics {
 		}
 
 		static int dotTimer = 15;
-		if (window.mouseTracker.orbitingEntity != nullptr)
+		entity::Entity* orbitingEntity = window.mouseHandler.getOrbitingEntity();
+		if (orbitingEntity != nullptr)
 		{
 			// render dot on focused entity
 			if (dotTimer > 0)
@@ -159,13 +153,13 @@ namespace graphics {
 			glm::vec4 color = graphics::COLOR_ORBIT;
 			color.a = 0.8f - dotTimer/20.0f;
 
-			graphics::VisualSphere dot(window.mouseTracker.orbitingEntity->getPosition(),
+			graphics::VisualSphere dot(orbitingEntity->getPosition(),
 				core::QUAT_IDENTITY, (dotTimer/1.5f + 1.0f) * graphics::MARKER_DOT_RADIUS,
 				graphics::VisualEntity::Style::SOLID_COLOR, color);
 
 			dot.render(renderer);
 
-			window.camera.renderLabel(window.mouseTracker.orbitingEntity->getPosition(), 
+			window.camera.renderLabel(orbitingEntity->getPosition(), 
 				true, "CameraOrbitingMarkerLabel", "Orbiting", graphics::COLOR_DEFAULT, graphics::PIVOT_RIGHT);
 		}
 		else
@@ -180,7 +174,7 @@ namespace graphics {
 		camera(DEFAULT_WIDTH, DEFAULT_HEIGHT, glm::vec3(-5.0f, -2.0f, 10.0f), -1.2f, 0.16f),
 		guiOverlay(camera),
 		simulation(nullptr),
-		mouseTracker { 0.0f, 0.0f, false, nullptr, false}
+		mouseHandler(*this)
 	{
 
 		glfwSetWindowUserPointer(glfwWindow, this);
@@ -321,148 +315,31 @@ namespace graphics {
 		glViewport(0, 0, width, height);
 	}
 
-	// replaced by camera.pollKeys()
-	void Window::handleKey(GLFWwindow* glfwWindow, int key, int scancode, int action,
-		int mods)
-	{
-		//if (ImGui::GetIO().WantCaptureKeyboard)
-		//	return;
-
-		//Window* window = getWindow(glfwWindow);
-		//if (window != nullptr && window->initialized)
-		//	window->camera.handleKey(key, action);
-	}
-
 	void Window::handleMouseMotion(GLFWwindow* glfwWindow, double xpos, double ypos)
 	{
-		if (guiMouseCheck(glfwWindow))
-			return;
-
 		Window* window = getWindow(glfwWindow);
-
-		if (window != nullptr && window->initialized && window->mouseTracker.dragging && 
-			(glfwGetMouseButton(glfwWindow, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS ||
-				glfwGetMouseButton(glfwWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS))
-		{
-			int windowHeight;
-			window->getDimensions(nullptr, &windowHeight);
-
-			float x = static_cast<float>(xpos);
-			float y = windowHeight - static_cast<float>(ypos);
-
-			float dx = x - window->mouseTracker.prevX;
-			float dy = y - window->mouseTracker.prevY;
-
-			window->mouseTracker.isJustClickAndNotDrag = false;
-
-			if (glfwGetMouseButton(glfwWindow, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
-				window->camera.handleLeftMouseMotion(dx, dy);
-			if (glfwGetMouseButton(glfwWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
-				window->camera.handleRightMouseMotion(dx, dy, 
-					window->mouseTracker.orbitingEntity);
-
-			window->mouseTracker.prevX = x;
-			window->mouseTracker.prevY = y;
-		}
+		if (window != nullptr && window->initialized)
+			window->mouseHandler.handleMouseMotionCallback(glfwWindow, xpos, ypos);
 	}
 
 	void Window::handleMouseButton(GLFWwindow* glfwWindow, int button, int action,
 		int mods)
 	{
-		if (guiMouseCheck(glfwWindow))
-			return;
-
-		if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_RELEASE)
-		{
-			getWindow(glfwWindow)->simulation->startStop();
-		}
-		else if (button == GLFW_MOUSE_BUTTON_LEFT || button == GLFW_MOUSE_BUTTON_RIGHT)
-		{
-			Window* window = getWindow(glfwWindow);
-
-			if (window == nullptr || !(window->initialized))
-				return;
-
-			if (action == GLFW_PRESS)
-			{
-				// track dragging
-				double xd, yd;
-				glfwGetCursorPos(glfwWindow, &xd, &yd);
-				int windowHeight;
-				window->getDimensions(nullptr, &windowHeight);
-				window->mouseTracker.prevY = windowHeight - static_cast<float>(yd);
-				window->mouseTracker.prevX = static_cast<float>(xd);
-
-				window->mouseTracker.dragging = true;
-				window->mouseTracker.isJustClickAndNotDrag = true;
-
-				// start orbiting
-				if (button == GLFW_MOUSE_BUTTON_RIGHT)
-					window->mouseTracker.orbitingEntity = window->simulation->getFocusedEntity(window->camera);
-			}
-			else // action == GLFW_RELEASE
-			{
-				// stop tracking dragging
-				if (button == GLFW_MOUSE_BUTTON_LEFT && 
-					glfwGetMouseButton(glfwWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE)
-					window->mouseTracker.dragging = false;
-
-				// show entity GUI
-				if (button == GLFW_MOUSE_BUTTON_LEFT && window->mouseTracker.isJustClickAndNotDrag)
-				{
-					const entity::Entity* hovered = window->simulation->getHoveredEntity(window->camera);
-					if (hovered != nullptr)
-						hovered->shouldShow.gui = !(hovered->shouldShow.gui); // toggle
-				}
-
-				// stop orbiting
-				if (button == GLFW_MOUSE_BUTTON_RIGHT)
-				{
-					window->mouseTracker.orbitingEntity = nullptr;
-					if (glfwGetMouseButton(glfwWindow, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE)
-						window->mouseTracker.dragging = false;
-				}
-			}
-		}
+		Window* window = getWindow(glfwWindow);
+		if (window != nullptr && window->initialized)
+			window->mouseHandler.handleMouseButtonCallback(glfwWindow, button, action, mods);
 	}
 
 	void Window::handleScroll(GLFWwindow* glfwWindow, double xoffset, double yoffset)
 	{
-		if (guiMouseCheck(glfwWindow))
-			return;
-
 		Window* window = getWindow(glfwWindow);
 		if (window != nullptr && window->initialized)
-			window->camera.handleScroll(static_cast<float>(yoffset), glfwWindow,
-				window->simulation->getFocusedEntity(window->camera));
-	}
-
-	core::Simulation * Window::getSimulation(GLFWwindow* glfwWindow)
-	{
-		return (getWindow(glfwWindow)->simulation);
+			window->mouseHandler.handleScrollCallback(glfwWindow, xoffset, yoffset);
 	}
 
 	Window* Window::getWindow(GLFWwindow* glfwWindow)
 	{
 		return (Window*)glfwGetWindowUserPointer(glfwWindow);
-	}
-
-	bool Window::guiMouseCheck(GLFWwindow* window)
-	{
-		if (ImGui::GetIO().WantCaptureMouse)
-		{
-			if (ImGui::GetCurrentContext()->HoveredWindow != nullptr &&
-				(ImGui::GetCurrentContext()->HoveredWindow->Flags & ImGuiWindowFlags_NoBackground))
-				// we are hovering over a label, doesn't count
-				return false;
-			else if (ImGui::GetCurrentContext()->ActiveIdWindow != nullptr &&
-				(ImGui::GetCurrentContext()->ActiveIdWindow->Flags & ImGuiWindowFlags_NoBackground))
-				// same here
-				return false;
-			else
-				return true;
-		}
-		return false;
 	}
 
 } /* namespace graphics */

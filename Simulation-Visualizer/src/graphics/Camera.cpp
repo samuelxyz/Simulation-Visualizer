@@ -206,26 +206,23 @@ namespace graphics {
 	{
 	}
 
-	void Camera::handleLeftMouseMotion(float xoffset, float yoffset, bool constrainPitch)
+	bool Camera::handleLeftMouseDrag(graphics::Camera& camera, const glm::vec2& dx)
 	{
 		float sensitivity = mouseSensitivity * (fov / core::QUARTER_PI);
+		float xoffset = dx.x;
+		float yoffset = dx.y;
 
 		xoffset *= sensitivity /* * std::cos(pitch) */; // at high pitches it's less sensitive
 		yoffset *= sensitivity;
 
-		rotate(-yoffset, xoffset, constrainPitch);
+		rotate(-yoffset, xoffset, true);
+		return true;
 	}
 
-	void Camera::handleRightMouseMotion(float xoffset, float yoffset, const entity::Entity* const focusedEntity, bool constrainPitch)
+	void Camera::orbit(const glm::vec3 targetPos, float xoffset, float yoffset, bool constrainPitch)
 	{
 		// Tricky tricky. For the right effect, we want to orbit around the target when considering yaw.
 		// However, when considering pitch we want to orbit around the center of the screen.
-
-		glm::vec3 targetPos;
-		if (focusedEntity == nullptr)
-			targetPos = getPosition() + getLookVec();
-		else
-			targetPos = focusedEntity->getPosition();
 
 		if (glm::length2(targetPos - position) < 1e-6f)
 			return;
@@ -315,25 +312,26 @@ namespace graphics {
 		}
 	}
 
-	void Camera::handleScroll(float yoffset, GLFWwindow* window, const entity::Entity* const focusedEntity)
+	// returns true if it "consumes the scroll event"
+	bool Camera::handleScroll(float yoffset, GLFWwindow* window, const entity::Entity* target)
 	{
 		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) 
 		{ 
-			glm::vec3 targetPos;
-			if (focusedEntity == nullptr)
-				targetPos = getPosition() + getLookVec();
-			else
-				targetPos = focusedEntity->getPosition();
-
 			// move in and out from target
 			constexpr static float stepSize = 4.0f;
+
+			glm::vec3 targetPos;
+			if (target != nullptr)
+				targetPos = target->getPosition();
+			else
+				targetPos = getPosition() + getLookVec();
 
 			glm::vec3 toTarget = targetPos - position;
 			
 			float radius = glm::length(toTarget);
 
 			if (radius < 1e-6f)
-				return;
+				return true;
 
 			if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
 				yoffset *= 5.0f;
@@ -345,6 +343,7 @@ namespace graphics {
 			toTarget *= newRadius / radius;
 
 			position = targetPos - toTarget;
+			return true;
 		}
 		else if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) // ctrl+scroll changes field of view
 		{
@@ -354,11 +353,10 @@ namespace graphics {
 				fov = fovMin;
 			if (fov > fovMax)
 				fov = fovMax;
+
+			return true;
 		}
-		else // plain scrolling scrolls the simulation timeline
-		{
-			Window::getSimulation(window)->scrollTimeline(static_cast<int>(yoffset));
-		}
+		return false;
 	}
 
 	void Camera::rotate(float dpitch, float dyaw, bool constrainPitch)

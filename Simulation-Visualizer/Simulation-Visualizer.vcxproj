@@ -148,6 +148,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\io\DragHandle.cpp" />
+    <ClCompile Include="src\io\MouseHandler.cpp" />
     <ClCompile Include="src\core\PathSimCylinder.cpp" />
     <ClCompile Include="src\entity\Cylinder.cpp" />
     <ClCompile Include="Dependencies\fmt\src\format.cc" />
@@ -282,6 +284,10 @@
     <ClCompile Include="src\graphics\content\VisualCylinder.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\io\DragHandle.h" />
+    <ClInclude Include="src\io\DragHandleTarget.h" />
+    <ClInclude Include="src\io\MouseHandler.h" />
+    <ClInclude Include="src\io\MouseDragTarget.h" />
     <ClInclude Include="src\core\PathSimCylinder.h" />
     <ClInclude Include="src\entity\Cylinder.h" />
     <ClInclude Include="Dependencies\imgui\imgui\imconfig.h" />

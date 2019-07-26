@@ -12,7 +12,7 @@
 #include <GL/glew.h>
 #include <unordered_map>
 
-#include "glm/glm.hpp"
+#include "glm/mat4x4.hpp"
 
 namespace graphics
 {

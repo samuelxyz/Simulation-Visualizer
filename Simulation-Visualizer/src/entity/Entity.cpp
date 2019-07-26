@@ -254,12 +254,25 @@ namespace entity {
 			);
 	}
 
+	bool Entity::intersectsFloor() const
+	{
+		return getLowestPointZ() <= core::FLOOR_Z;
+	}
+
 	void Entity::loadState(core::Timestep& timestep)
 	{
 		position = timestep.position;
 		orientation = timestep.orientation;
 		velocity = timestep.velocity;
 		angVelocity = timestep.angVelocity;
+	}
+
+	void Entity::displace(const glm::vec3 & dx)
+	{
+		position += dx;
+		float lowestZ = getLowestPointZ();
+		if (lowestZ < core::FLOOR_Z)
+			position.z += core::FLOOR_Z - lowestZ;
 	}
 
 	void Entity::applyLinearImpulse(glm::vec3 impulse)
@@ -279,5 +292,13 @@ namespace entity {
 		applyLinearImpulse(impulse);
 		applyAngularImpulse(glm::cross(worldPos - position, impulse));
 	}
+
+	bool Entity::handleRightMouseDrag(graphics::Camera & camera, const glm::vec2 & dx)
+	{
+		camera.orbit(getPosition(), dx.x, dx.y);
+		return true;
+	}
+
+
 
 }

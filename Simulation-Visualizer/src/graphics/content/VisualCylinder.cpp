@@ -3,8 +3,8 @@
 
 namespace graphics {
 
-	VisualCylinder::VisualCylinder(glm::vec3 position, glm::quat orientation,
-		float radius, float height, Style style, glm::vec4 color, float shadeFactor)
+	VisualCylinder::VisualCylinder(const glm::vec3& position, const glm::quat& orientation,
+		float radius, float height, Style style, const glm::vec4& color, float shadeFactor)
 		: VisualEntity(position, orientation, style, color, shadeFactor), radius(radius), height(height)
 	{
 	}

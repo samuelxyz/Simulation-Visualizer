@@ -4,16 +4,16 @@
 
 namespace graphics {
 
-	VisualBox::VisualBox(glm::vec3 position, glm::quat orientation, 
+	VisualBox::VisualBox(const glm::vec3& position, const glm::quat& orientation, 
 		float xMin, float xMax, float yMin, float yMax, float zMin, float zMax,
-		Style style, glm::vec4 color, float shadeFactor)
+		Style style, const glm::vec4& color, float shadeFactor)
 		: VisualEntity(position, orientation, style, color, shadeFactor),
 		xMin(xMin), xMax(xMax), yMin(yMin), yMax(yMax), zMin(zMin), zMax(zMax)
 	{
 	}
 
-	VisualBox::VisualBox(glm::vec3 start, glm::vec3 length, float thickness, glm::vec3 up,
-		Style style, glm::vec4 color, float shadeFactor)
+	VisualBox::VisualBox(const glm::vec3& start, const glm::vec3& length, float thickness, 
+		const glm::vec3& up, Style style, const glm::vec4& color, float shadeFactor)
 		: VisualEntity(start, core::quatLookAt(length, up), style, color, shadeFactor),
 		xMin(-thickness), xMax(thickness + glm::length(length)), 
 		yMin(-thickness), yMax(thickness), zMin(-thickness), zMax(thickness)

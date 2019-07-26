@@ -21,9 +21,9 @@ namespace entity {
 		return glm::length(worldPoint - position) <= radius;
 	}
 
-	bool Sphere::intersectsFloor() const
+	float Sphere::getLowestPointZ() const
 	{
-		return position.z - radius <= graphics::FLOOR_Z;
+		return position.z - radius;
 	}
 
 	void Sphere::render(graphics::Renderer & renderer) const

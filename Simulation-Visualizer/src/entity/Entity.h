@@ -4,6 +4,7 @@
 
 #include "graphics/Renderable.h"
 #include "core/Simulation.h"
+#include "io/MouseDragTarget.h"
 
 #include <string>
 
@@ -11,7 +12,7 @@
 
 namespace entity {
 
-	class Entity : public graphics::Renderable
+	class Entity : public graphics::Renderable, public io::MouseDragTarget
 	{
 	public:
 		Entity(std::string entityName, glm::vec3 position, glm::quat orientation, glm::vec3 velocity,
@@ -52,13 +53,18 @@ namespace entity {
 		virtual float getInnerBoundingRadius() const = 0;
 
 		virtual glm::vec3 guessECP() const = 0;
-		virtual bool intersectsFloor() const = 0;
+		virtual float getLowestPointZ() const = 0;
+		bool intersectsFloor() const;
+
 		void loadState(core::Timestep&);
+		void displace(const glm::vec3&);
 
 		// world frame
 		void applyLinearImpulse(glm::vec3);
 		void applyAngularImpulse(glm::vec3);
 		void applyWrenchImpulse(glm::vec3 worldPos, glm::vec3 impulse);
+
+		virtual bool handleRightMouseDrag(graphics::Camera& camera, const glm::vec2& dx) override;
 
 	public:
 		mutable struct VisibilitySettings

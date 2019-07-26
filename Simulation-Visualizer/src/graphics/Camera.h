@@ -1,8 +1,8 @@
 #pragma once
 
 #include <glm/gtx/quaternion.hpp>
-
 #include "core/Definitions.h"
+#include "io/MouseDragTarget.h"
 
 namespace entity {
 	class Entity;
@@ -12,7 +12,7 @@ namespace graphics {
 
 	class Renderer;
 
-	class Camera
+	class Camera : public io::MouseDragTarget
 	{
 	private:
 		// Camera Attributes
@@ -37,9 +37,14 @@ namespace graphics {
 
 		glm::mat4& getVPMatrix(bool useCached = false) const;
 		glm::vec3 getPosition() const;
+
+		// unit vector
 		glm::vec3 getLookVec() const;
+
 		// ImGui coordinates
 		glm::vec2 toScreenSpace(const glm::vec3& worldPos) const;
+		
+		// unit vector
 		glm::vec3 getMouseRay() const;
 		bool shouldShowAxes() const { return showAxes; }
 
@@ -54,9 +59,9 @@ namespace graphics {
 		void updateWindowDims(int width, int height);
 		void pollKeys(GLFWwindow* window);
 		void handleKey(int key, int action);
-		void handleLeftMouseMotion(float xoffset, float yoffset, bool constrainPitch = true);
-		void handleRightMouseMotion(float xoffset, float yoffset, const entity::Entity* const focusedEntity, bool constrainPitch = true);
-		void handleScroll(float yoffset, GLFWwindow* window, const entity::Entity* const focusedEntity);
+		virtual bool handleLeftMouseDrag(graphics::Camera&, const glm::vec2&) override;
+		void orbit(const glm::vec3 targetPos, float xoffset, float yoffset, bool constrainPitch = true);
+		bool handleScroll(float yoffset, GLFWwindow* window, const entity::Entity* target);
 
 	private:
 		//glm::quat lookAt(glm::vec3 camPos, glm::vec3 target);

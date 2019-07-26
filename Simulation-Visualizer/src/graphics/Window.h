@@ -1,13 +1,13 @@
 #pragma once
 
+#include "io/MouseHandler.h"
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "core/Definitions.h"
 #include "core/Simulation.h"
-#include "graphics/Renderable.h"
-#include "graphics/Camera.h"
 #include "graphics/content/VisualBox.h"
+#include "graphics/Camera.h"
 
 namespace entity {
 	class Entity;
@@ -49,23 +49,15 @@ namespace graphics {
 			mutable graphics::VisualBox cursorDot;
 		} guiOverlay;
 		core::Simulation* simulation;
-
-		struct MouseTracker
-		{
-			float prevX, prevY;
-			bool dragging;
-			const entity::Entity* orbitingEntity;
-
-			// Whether the mouse has been moved since the last mouse-click-down event
-			bool isJustClickAndNotDrag;
-
-		} mouseTracker;
+		io::MouseHandler mouseHandler;
 
 	public:
 		Window();
 		virtual ~Window();
 
 		void setSimulation(core::Simulation*);
+		core::Simulation* getSimulation() { return simulation; }
+		Camera& getCamera() { return camera; }
 
 		bool shouldClose() const;
 
@@ -81,20 +73,14 @@ namespace graphics {
 			GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
 
 		static void handleResize(GLFWwindow*, int width, int height);
-		static void handleKey(GLFWwindow*, int key, int scancode, int action, int mods);
 		static void handleMouseMotion(GLFWwindow*, double xpos, double ypos);
 		static void handleMouseButton(GLFWwindow*, int button, int action, int mods);
 		static void handleScroll(GLFWwindow*, double xoffset, double yoffset);
-
-		static core::Simulation* getSimulation(GLFWwindow*);
 
 	private:
 
 		// from window user pointer
 		static Window* getWindow(GLFWwindow*);
-
-		// Custom equivalent of ImGui::GetIO().WantCaptureMouse
-		static bool guiMouseCheck(GLFWwindow*);
 
 	};
 

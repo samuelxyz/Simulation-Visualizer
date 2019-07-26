@@ -641,9 +641,9 @@ namespace core {
 			recordTimestep(e);
 	}
 
-	const entity::Entity* const Simulation::getFocusedEntity(const graphics::Camera& camera) const
+	entity::Entity* Simulation::getFocusedEntity(const graphics::Camera& camera)
 	{
-		const entity::Entity* target = getHoveredEntity(camera);
+		entity::Entity* target = getHoveredEntity(camera);
 		if (target != nullptr)
 			return target;
 
@@ -679,7 +679,7 @@ namespace core {
 	}
 
 	// ray-scan entities using mouse position ray thingy
-	const entity::Entity* const Simulation::getHoveredEntity(const graphics::Camera & camera) const
+	entity::Entity* Simulation::getHoveredEntity(const graphics::Camera & camera)
 	{
 		glm::vec3 mouseRay = camera.getMouseRay();
 
@@ -688,10 +688,10 @@ namespace core {
 		// in both directions from where the entity "center" is along mouse ray
 		// Then finds the surface of the object closest to the camera
 
-			const entity::Entity* closestE = nullptr;
+			entity::Entity* closestE = nullptr;
 			float rClosest = std::numeric_limits<float>::max();
 			//float rClosest = graphics::RENDER_DISTANCE;
-			for (const entity::Entity* e : entities)
+			for (entity::Entity* e : entities)
 			{
 				// must be visible
 				if (!(e->shouldShow.body))
@@ -765,6 +765,11 @@ namespace core {
 
 			return closestE;
 
+	}
+
+	io::MouseDragTarget * Simulation::getLeftMouseDragTarget(const graphics::Camera & camera)
+	{
+		return nullptr;
 	}
 
 	void Simulation::renderEntities(graphics::Renderer& renderer) const

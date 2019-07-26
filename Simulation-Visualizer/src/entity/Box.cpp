@@ -31,7 +31,7 @@ namespace entity {
 			std::abs(localPoint.z) <= sizeZ/2;
 	}
 
-	bool Box::intersectsFloor() const
+	float Box::getLowestPointZ() const
 	{
 		float
 			xMax = sizeX/2, xMin = -xMax,
@@ -49,11 +49,15 @@ namespace entity {
 			{xMax, yMax, zMax}
 		};
 
+		float lowestZ = position.z;
 		for (int i = 0; i < 8; ++i)
-			if (toWorldFrame(vertices[i], i != 0).z <= graphics::FLOOR_Z)
-				return true;
+		{
+			float thisZ = toWorldFrame(vertices[i], i != 0).z;
+			if (thisZ < lowestZ)
+				lowestZ = thisZ;
+		}
 
-		return false;
+		return lowestZ;
 	}
 
 	glm::vec3 Box::guessECP() const
