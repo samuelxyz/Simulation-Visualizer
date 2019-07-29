@@ -617,6 +617,10 @@ namespace core {
 				e->renderPositionMarker(renderer, camera); 
 		}
 
+		for (io::DragHandle* d : dragHandles)
+			if (d->target.isDragHandleVisible())
+				d->render(renderer);
+
 		if (parameters.showContactPoint)
 			renderContactPoint(renderer, camera);
 	}
@@ -624,6 +628,9 @@ namespace core {
 	void Simulation::add(entity::Entity* e)
 	{
 		entities.push_back(e);
+
+		for (io::DragHandle& d : e->getDragHandles())
+			addDragHandle(&d);
 	}
 
 	void Simulation::setTarget(entity::Entity* e, bool autoAdd)
@@ -639,6 +646,11 @@ namespace core {
 		pathSim->setTarget(e);
 		timeline.clear();
 			recordTimestep(e);
+	}
+
+	void Simulation::addDragHandle(io::DragHandle * d)
+	{
+		dragHandles.push_back(d);
 	}
 
 	entity::Entity* Simulation::getFocusedEntity(const graphics::Camera& camera)
@@ -769,7 +781,9 @@ namespace core {
 
 	io::MouseDragTarget * Simulation::getLeftMouseDragTarget(const graphics::Camera & camera)
 	{
-		return nullptr;
+		// the only possible candidates are drag handles
+		
+		return getHoveredDragHandle(camera);
 	}
 
 	void Simulation::renderEntities(graphics::Renderer& renderer) const
@@ -964,5 +978,64 @@ namespace core {
 		}
 	}
 
+	io::DragHandle * Simulation::getHoveredDragHandle(const graphics::Camera & camera)
+	{
+		glm::vec3 mouseRay = camera.getMouseRay();
 
+		// Algorithm: "Restricted II" (see getHoveredEntity())
+
+		io::DragHandle* closest = nullptr;
+		float rClosest = std::numeric_limits<float>::max();
+		//float rClosest = graphics::RENDER_DISTANCE;
+		for (io::DragHandle* d : dragHandles)
+		{
+			// must be visible
+			if (!(d->target.isDragHandleVisible()))
+				continue;
+
+			float rCenter = glm::length(d->target.getDragHandlePosition() - camera.getPosition());
+			float br = d->length + d->thickness;
+			float step = (d->thickness)/30.0f;
+
+			if (rCenter - br > rClosest)
+				continue; // closer one already found
+
+			if (glm::length2(camera.getPosition() + rCenter*mouseRay - d->target.getDragHandlePosition()) > br*br)
+				continue; // we're nowhere near it
+
+			// start from center location and spread forward/backward to check for hits
+			bool toggle = true;
+			for (float dr = step; dr < br; dr += (toggle) ? step : 0.0f)
+			{
+				float r = (toggle) ? rCenter + dr : rCenter - dr;
+				if (d->containsPoint(camera.getPosition() + r*mouseRay, dr != step))
+				{
+					// now definitely hovering, but where's the front of the object?
+					// zigzag back and forth to find the edge
+					step *= 40.0f;
+					bool searchAway = false;
+					for (int i = 0; i < 4; ++i)
+					{
+						step /= 4.0f;
+						r += (searchAway) ? step : -step;
+						while (searchAway != (d->containsPoint(camera.getPosition() + r*mouseRay, true)))
+							r += (searchAway) ? step : -step;
+						searchAway = !searchAway;
+					}
+
+					// and see if it's the closest point on any entity thus far
+					r -= step;
+					if (r <= rClosest)
+					{
+						rClosest = r;
+						closest = d;
+					}
+					break;
+				}
+				toggle = !toggle;
+			}
+		}
+
+		return closest;
+	}
 }

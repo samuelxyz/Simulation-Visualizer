@@ -11,7 +11,9 @@ namespace entity {
 		: Entity(entityName, position, orientation, velocity, angVel, mass, rotInertia, "EntityCylinder"),
 		height(height), radius(radius),
 		visualCylinder(position, orientation, radius, height)
-	{}
+	{
+		initializeDragHandles();
+	}
 
 	Cylinder::~Cylinder()
 	{

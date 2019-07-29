@@ -5,14 +5,17 @@
 #include "graphics/Renderable.h"
 #include "core/Simulation.h"
 #include "io/MouseDragTarget.h"
+#include "io/DragHandle.h"
+#include "io/DragHandleTarget.h"
 
 #include <string>
+#include <array>
 
 // Values will be in SI units, radians, etc
 
 namespace entity {
 
-	class Entity : public graphics::Renderable, public io::MouseDragTarget
+	class Entity : public graphics::Renderable, public io::MouseDragTarget, public io::DragHandleTarget
 	{
 	public:
 		Entity(std::string entityName, glm::vec3 position, glm::quat orientation, glm::vec3 velocity,
@@ -57,6 +60,10 @@ namespace entity {
 		bool intersectsFloor() const;
 
 		void loadState(core::Timestep&);
+		virtual void applyDragHandleResult(const glm::vec3&) override;
+		virtual glm::vec3 getDragHandlePosition() const override;
+		virtual bool isDragHandleVisible() const override;
+		std::array<io::DragHandle, 4>& getDragHandles() { return dragHandles; }
 		void displace(const glm::vec3&);
 
 		// world frame
@@ -76,6 +83,7 @@ namespace entity {
 			bool velocityVector;
 			bool angVelocityVector;
 			bool shadow;
+			bool dragHandles;
 		} shouldShow;
 
 	protected:
@@ -96,6 +104,11 @@ namespace entity {
 			glm::vec3 applyLinImpulse;
 			glm::vec3 applyAngImpulse;
 		} guiVars;
+
+		std::array<io::DragHandle, 4> dragHandles;
+
+		// Call this in subclass constructors
+		void initializeDragHandles();
 	};
 }
 

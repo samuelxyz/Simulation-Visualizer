@@ -15,8 +15,15 @@ namespace entity {
 		: entityName(entityName), position(position), orientation(orientation),
 		velocity(velocity), angVelocity(angVel),
 		mass(mass), rotInertia(rotInertia), typeName(typeName),
-		shouldShow { true, false, false, false, false, false, true },
-		guiVars { 0.0f, glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.0f) }
+		shouldShow { true, false, false, false, false, false, true, false },
+		guiVars { 0.0f, glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.0f) },
+		dragHandles 
+	{ 
+		io::DragHandle(*this, glm::vec3(0.0f, 0.0f, 0.0f), graphics::COLOR_WHITE),
+		io::DragHandle(*this, glm::vec3(1.0f, 0.0f, 0.0f), graphics::COLOR_RED),
+		io::DragHandle(*this, glm::vec3(0.0f, 1.0f, 0.0f), graphics::COLOR_GREEN),
+		io::DragHandle(*this, glm::vec3(0.0f, 0.0f, 1.0f), graphics::COLOR_BLUE)
+	}
 	{
 	}
 
@@ -109,6 +116,7 @@ namespace entity {
 				//ImGui::SameLine();
 				ImGui::InputFloat3("m", &position.x);
 				ImGui::Checkbox("Show marker##Position", &(shouldShow.positionMarker));
+				ImGui::Checkbox("Show drag handles", &(shouldShow.dragHandles));
 			}
 			ImGui::Separator();
 			{
@@ -267,6 +275,21 @@ namespace entity {
 		angVelocity = timestep.angVelocity;
 	}
 
+	void Entity::applyDragHandleResult(const glm::vec3 & v)
+	{
+		displace(v);
+	}
+
+	glm::vec3 Entity::getDragHandlePosition() const
+	{
+		return getPosition();
+	}
+
+	bool Entity::isDragHandleVisible() const
+	{
+		return shouldShow.dragHandles;
+	}
+
 	void Entity::displace(const glm::vec3 & dx)
 	{
 		position += dx;
@@ -297,6 +320,12 @@ namespace entity {
 	{
 		camera.orbit(getPosition(), dx.x, dx.y);
 		return true;
+	}
+
+	void Entity::initializeDragHandles()
+	{
+		for (io::DragHandle& d : dragHandles)
+			d.setSize(getInnerBoundingRadius());
 	}
 
 

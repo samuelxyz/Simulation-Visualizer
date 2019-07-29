@@ -133,6 +133,16 @@ namespace graphics {
 		}
 	}
 
+	bool VisualBox::containsPoint(const glm::vec3& worldPos, bool useCachedOrientation) const
+	{
+		glm::vec3 pt = toLocalFrame(worldPos, useCachedOrientation);
+
+		return
+			xMin <= pt.x && pt.x <= xMax &&
+			yMin <= pt.y && pt.y <= yMax &&
+			zMin <= pt.z && pt.z <= zMax;
+	}
+
 
 
 }

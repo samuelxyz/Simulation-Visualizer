@@ -11,9 +11,16 @@ namespace io {
 	class MouseDragTarget
 	{
 	public:
-		// Returns true if it wants to be captured
+		// Return true if this wants to be captured
+		// The drag vector will be in glfw screen coordinates (x right, y downward, from top left corner)
 		virtual bool handleLeftMouseDrag(graphics::Camera&, const glm::vec2&) { return false; }
+
+		// Return true if this wants to be captured
+		// The drag vector will be in glfw screen coordinates (x right, y downward, from top left corner)
 		virtual bool handleMiddleMouseDrag(graphics::Camera&, const glm::vec2&) { return false; } // currently unused
+
+		// Return true if this wants to be captured
+		// The drag vector will be in glfw screen coordinates (x right, y downward, from top left corner)
 		virtual bool handleRightMouseDrag(graphics::Camera&, const glm::vec2&) { return false; }
 	};
 

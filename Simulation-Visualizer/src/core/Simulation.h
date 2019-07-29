@@ -13,6 +13,7 @@ namespace graphics {
 
 namespace io {
 	class MouseDragTarget;
+	struct DragHandle;
 }
 
 namespace core {
@@ -46,6 +47,7 @@ namespace core {
 		std::vector<entity::Entity*> entities;
 		// for previews, etc. Will not be updated or otherwise interactable
 		std::vector<entity::Entity*> entitiesVisualOnly;
+		std::vector<io::DragHandle*> dragHandles;
 		struct Environment
 		{
 			graphics::CenteredPoly floor;
@@ -70,6 +72,8 @@ namespace core {
 		void add(entity::Entity*);
 		void setTarget(entity::Entity*, bool autoAdd = true);
 
+		void addDragHandle(io::DragHandle*);
+
 		// Returns with the following priority:
 		// - Hovered entity
 		// - Onscreen entity nearest to the camera
@@ -93,6 +97,7 @@ namespace core {
 		void renderEnvironment(graphics::Renderer&) const;
 		void renderContactPoint(graphics::Renderer&, const graphics::Camera& camera) const;
 		void renderAddEntityGUI(graphics::Renderer&, const graphics::Camera&);
+		io::DragHandle* getHoveredDragHandle(const graphics::Camera& camera);
 	};
 
 }

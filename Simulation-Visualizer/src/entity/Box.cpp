@@ -11,6 +11,7 @@ namespace entity {
 		sizeX(sizeX), sizeY(sizeY), sizeZ(sizeZ), 
 		visualBox(position, orientation, -sizeX/2, sizeX/2, -sizeY/2, sizeY/2, -sizeZ/2, sizeZ/2)
 	{
+		initializeDragHandles();
 	}
 
 	Box::~Box()

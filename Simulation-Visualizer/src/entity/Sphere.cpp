@@ -10,6 +10,7 @@ namespace entity {
 		radius(radius),
 		visualSphere(position, orientation, radius)
 	{
+		initializeDragHandles();
 	}
 
 	Sphere::~Sphere()

@@ -25,6 +25,9 @@ namespace graphics {
 		virtual ~VisualBox();
 
 		virtual void render(graphics::Renderer& renderer) const override;
+
+		// for DragHandle
+		bool containsPoint(const glm::vec3&, bool useCachedOrientation = false) const;
 	};
 
 }
