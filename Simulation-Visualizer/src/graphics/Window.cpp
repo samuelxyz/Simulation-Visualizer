@@ -81,9 +81,9 @@ namespace graphics {
 			axis.zMax = axisThickness;
 		}
 
-		axes[0].color = graphics::COLOR_RED;
-		axes[1].color = graphics::COLOR_GREEN;
-		axes[2].color = graphics::COLOR_BLUE;
+		axes[0].color = graphics::COLOR_GUI_RED;
+		axes[1].color = graphics::COLOR_GUI_GREEN;
+		axes[2].color = graphics::COLOR_GUI_BLUE;
 
 		axes[1].orientation = glm::angleAxis(core::HALF_PI, glm::vec3(0.0f, 0.0f, 1.0f));
 		axes[2].orientation = glm::angleAxis(core::HALF_PI, glm::vec3(0.0f, -1.0f, 0.0f));
@@ -122,17 +122,17 @@ namespace graphics {
 				if (i == 0)
 				{
 					name = "x";
-					color = &(graphics::COLOR_RED);
+					color = &(graphics::COLOR_GUI_RED);
 				}
 				else if (i == 1)
 				{
 					name = "y";
-					color = &(graphics::COLOR_GREEN);
+					color = &(graphics::COLOR_GUI_GREEN);
 				}
 				else
 				{
 					name = "z";
-					color = &(graphics::COLOR_BLUE);
+					color = &(graphics::COLOR_GUI_BLUE);
 				}
 
 				camera.renderLabel(labelPos3d, true, "labelAxis" + name, name, *color, ImVec2(0.47f, 0.5f));
@@ -245,7 +245,7 @@ namespace graphics {
 
 		if (simulation != nullptr)
 		{
-			simulation->renderGUI(renderer, camera);
+			simulation->renderGUI(renderer, camera, mouseHandler.getLeftDragTracked());
 			simulation->render(renderer, camera.getPosition());
 		}
 

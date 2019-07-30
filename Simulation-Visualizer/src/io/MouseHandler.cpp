@@ -7,8 +7,9 @@
 namespace io {
 
 	MouseHandler::MouseHandler(graphics::Window& window)
-		: window(window), prevMousePos(0.0f), dragging(false), 
+		: window(window), prevMousePos(0.0f), dragging(false),
 		isClickLeft(false), isClickRight(false), isClickMiddle(false),
+		dragStartLeft(0.0f), dragStartRight(0.0f), dragStartMiddle(0.0f),
 		leftDragTracked(nullptr), rightDragTracked(nullptr), middleDragTracked(nullptr)
 	{
 	}
@@ -35,6 +36,8 @@ namespace io {
 				if (button == GLFW_MOUSE_BUTTON_LEFT)
 				{
 					isClickLeft = true;
+					dragStartLeft = mousePos;
+
 					MouseDragTarget* target = window.getSimulation()->getLeftMouseDragTarget(window.getCamera());
 					if (target != nullptr)
 						leftDragTracked = target;
@@ -44,6 +47,8 @@ namespace io {
 				else if (button == GLFW_MOUSE_BUTTON_RIGHT)
 				{
 					isClickRight = true;
+					dragStartRight = mousePos;
+
 					entity::Entity* focusedEntity = window.getSimulation()->getFocusedEntity(window.getCamera());
 					if (focusedEntity != nullptr)
 						rightDragTracked = focusedEntity;
@@ -53,6 +58,7 @@ namespace io {
 				else if (button == GLFW_MOUSE_BUTTON_MIDDLE)
 				{
 					isClickMiddle = true;
+					dragStartMiddle = mousePos;
 					// nothing right now
 				}
 			}
@@ -94,30 +100,31 @@ namespace io {
 			int windowHeight;
 			window.getDimensions(nullptr, &windowHeight);
 
-			float x = static_cast<float>(xpos);
-			float y = windowHeight - static_cast<float>(ypos);
+			glm::vec2 mousePos(static_cast<float>(xpos),
+			windowHeight - static_cast<float>(ypos));
 
-			float dx = x - prevMousePos.x;
-			float dy = y - prevMousePos.y;
+			glm::vec2 dx(mousePos - prevMousePos);
 
 			if (glfwGetMouseButton(glfwWindow, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 			{
-				isClickLeft = false;
-				handleLeftDrag(glm::vec2(dx, dy));
+				if (isClickLeft && glm::length2(mousePos - dragStartLeft) >= dragThresholdSq)
+					isClickLeft = false;
+				handleLeftDrag(dx);
 			}
 			if (glfwGetMouseButton(glfwWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
 			{
-				isClickRight = false;
-				handleRightDrag(glm::vec2(dx, dy));
+				if (isClickRight && glm::length2(mousePos - dragStartRight) >= dragThresholdSq)
+					isClickRight = false;
+				handleRightDrag(dx);
 			}
 			if (glfwGetMouseButton(glfwWindow, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS)
 			{
-				isClickMiddle = false;
-				handleMiddleDrag(glm::vec2(dx, dy));
+				if (isClickMiddle && glm::length2(mousePos - dragStartMiddle) >= dragThresholdSq)
+					isClickMiddle = false;
+				handleMiddleDrag(dx);
 			}
 
-			prevMousePos.x = x;
-			prevMousePos.y = y;
+			prevMousePos = mousePos;
 		}
 	}
 

@@ -20,9 +20,9 @@ namespace entity {
 		dragHandles 
 	{ 
 		io::DragHandle(*this, glm::vec3(0.0f, 0.0f, 0.0f), graphics::COLOR_WHITE),
-		io::DragHandle(*this, glm::vec3(1.0f, 0.0f, 0.0f), graphics::COLOR_RED),
-		io::DragHandle(*this, glm::vec3(0.0f, 1.0f, 0.0f), graphics::COLOR_GREEN),
-		io::DragHandle(*this, glm::vec3(0.0f, 0.0f, 1.0f), graphics::COLOR_BLUE)
+		io::DragHandle(*this, glm::vec3(1.0f, 0.0f, 0.0f), graphics::COLOR_GUI_RED),
+		io::DragHandle(*this, glm::vec3(0.0f, 1.0f, 0.0f), graphics::COLOR_GUI_GREEN),
+		io::DragHandle(*this, glm::vec3(0.0f, 0.0f, 1.0f), graphics::COLOR_GUI_BLUE)
 	}
 	{
 	}

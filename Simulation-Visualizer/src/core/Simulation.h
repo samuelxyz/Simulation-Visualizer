@@ -65,7 +65,7 @@ namespace core {
 		// Calls Renderer::renderAndClearAll()
 		void render(graphics::Renderer& renderer, const glm::vec3& cameraPos) const;
 		// May contribute an extra entity to Simulation's render list. Call before Simulation::render()
-		void renderGUI(graphics::Renderer&, const graphics::Camera& camera);
+		void renderGUI(graphics::Renderer&, const graphics::Camera& camera, const io::MouseDragTarget* leftDragTarget);
 		// Entity vectors, markers, contact points, etc
 		void renderGUIOverlay(graphics::Renderer& renderer, const graphics::Camera& camera) const;
 

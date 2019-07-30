@@ -114,17 +114,28 @@ namespace graphics {
 		COLOR_WHITE { 1.0f, 1.0f, 1.0f, 1.0f },
 		COLOR_BLACK { 0.0f, 0.0f, 0.0f, 1.0f },
 		COLOR_TRANSPARENT { 0.0f },
-		COLOR_PINK { 1.0f, 0.5f, 0.75f, 1.0f };
+		COLOR_PINK { 1.0f, 0.5f, 0.75f, 1.0f },
+
+		// gui colors are slightly brighter so they can always stand out from entities
+		COLOR_GUI_RED { 1.0f, 0.15f, 0.15f, 1.0f },
+		COLOR_GUI_GREEN { 0.15f, 1.0f, 0.15f, 1.0f },
+		COLOR_GUI_BLUE { 0.15f, 0.15f, 1.0f, 1.0f },
+		COLOR_GUI_CYAN { 0.15f, 1.0f, 1.0f, 1.0f },
+		COLOR_GUI_MAGENTA { 1.0f, 0.15f, 1.0f, 1.0f },
+		COLOR_GUI_YELLOW { 1.0f, 1.0f, 0.15f, 1.0f },
+		COLOR_GUI_BLACK { 0.15f, 0.15f, 0.15f, 1.0f },
+		COLOR_GUI_PINK { 1.0f, 0.6f, 0.8f, 1.0f };
+
 
 	// theme colors
 	static const glm::vec4&
 		COLOR_NONE { COLOR_TRANSPARENT },
 		COLOR_DEFAULT { COLOR_NONE },
-		COLOR_VELOCITY { COLOR_CYAN },
-		COLOR_ANGVEL { COLOR_MAGENTA },
-		COLOR_CONTACT { COLOR_RED },
-		COLOR_NO_CONTACT { COLOR_PINK },
-		COLOR_ORBIT { COLOR_GREEN };
+		COLOR_VELOCITY { COLOR_GUI_CYAN },
+		COLOR_ANGVEL { COLOR_GUI_MAGENTA },
+		COLOR_CONTACT { COLOR_GUI_RED },
+		COLOR_NO_CONTACT { COLOR_GUI_PINK },
+		COLOR_ORBIT { COLOR_GUI_GREEN };
 
 	typedef std::array<ColoredVertex, 3> Triangle;
 	typedef std::array<ColoredVertex, 4> Quad; // clockwise or counterclockwise

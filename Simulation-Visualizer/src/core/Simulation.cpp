@@ -383,7 +383,8 @@ namespace core {
 		}
 	}
 
-	void Simulation::renderGUI(graphics::Renderer& renderer, const graphics::Camera& camera)
+	void Simulation::renderGUI(graphics::Renderer& renderer, 
+		const graphics::Camera& camera, const io::MouseDragTarget* leftDragTarget)
 	{
 		// FPS calculations
 		static auto previous = std::chrono::steady_clock::now();
@@ -600,9 +601,19 @@ namespace core {
 			if (e->shouldShow.label)
 				e->renderLabel(camera);
 
-		const entity::Entity* hovered = getHoveredEntity(camera);
-		if (hovered != nullptr && !(hovered->shouldShow.label))
-			hovered->renderLabel(camera);
+		// render the label for hovered entity
+		// UNLESS its drag handle is hovered or dragging
+		const entity::Entity* hoveredE = getHoveredEntity(camera);
+		if (hoveredE != nullptr && !(hoveredE->shouldShow.label))
+		{
+			const io::DragHandle* tracked = dynamic_cast<const io::DragHandle*>(leftDragTarget);
+			if (tracked == nullptr || &(tracked->target) != hoveredE)
+			{
+				const io::DragHandle* hoveredD = getHoveredDragHandle(camera);
+				if (hoveredD == nullptr || &(hoveredD->target) != hoveredE)
+					hoveredE->renderLabel(camera);
+			}
+		}
 	}
 
 	void Simulation::renderGUIOverlay(graphics::Renderer& renderer, const graphics::Camera& camera) const

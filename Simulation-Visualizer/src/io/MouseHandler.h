@@ -25,6 +25,8 @@ namespace io {
 
 		// Whether the mouse has been moved since the last mouse-click-down event
 		bool isClickLeft, isClickRight, isClickMiddle;
+		glm::vec2 dragStartLeft, dragStartRight, dragStartMiddle;
+		static constexpr float dragThresholdSq = 36.0f;
 
 		MouseDragTarget * leftDragTracked, * rightDragTracked, * middleDragTracked;
 		// middleDragTracked is currently unused
@@ -37,6 +39,9 @@ namespace io {
 		void handleScrollCallback(GLFWwindow* glfwWindow, double xoffset, double yoffset);
 
 		entity::Entity* getOrbitingEntity() const;
+		const MouseDragTarget* getLeftDragTracked() const { return leftDragTracked; }
+		const MouseDragTarget* getRightDragTracked() const { return rightDragTracked; }
+		const MouseDragTarget* getMiddleDragTracked() const { return middleDragTracked; }
 
 	private:
 		void handleLeftClick(const glm::vec2& mousePos);
