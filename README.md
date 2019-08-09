@@ -5,4 +5,4 @@ Simulation research project using OpenGL and PATH solver
 
 Simulates and visualizes rigid body dynamics, using a geometrically implicit time-stepping scheme and formulating the physics as a mixed nonlinear complementarity problem.
 
-Written in C++. Uses OpenGL and the [PATH](http://pages.cs.wisc.edu/~ferris/path.html) solver. Interface is made using [Dear ImGui](https://github.com/ocornut/imgui).
+Written in C++. Uses OpenGL, [autodiff](https://autodiff.github.io/), and the [PATH](http://pages.cs.wisc.edu/~ferris/path.html) solver. Interface is made using [Dear ImGui](https://github.com/ocornut/imgui).
