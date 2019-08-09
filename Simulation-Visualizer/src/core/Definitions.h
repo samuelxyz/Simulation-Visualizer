@@ -1,5 +1,6 @@
 #pragma once
 #include "glm/gtx/quaternion.hpp"
+#include "eqn/AutodiffTypes.h"
 #include <vector>
 
 #define LAUNCH_DIRECT
@@ -19,6 +20,7 @@ namespace core {
 	// Value used for simulation
 	static constexpr float TIME_STEP = 1e-2f, GRAVITY = 9.80665f;
 	static constexpr float FLOOR_Z = 0.0f;
+	static constexpr double PATH_INFINITY = 1e20;
 
 	static constexpr float
 		PI = 3.141592653589793f,
@@ -169,4 +171,9 @@ namespace graphics {
 		return result;
 #endif
 	}
+}
+
+namespace eqn {
+	static const autodiff::dual h = core::TIME_STEP;
+	static const autodiff::dual g = core::GRAVITY;
 }

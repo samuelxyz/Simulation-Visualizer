@@ -42,6 +42,8 @@ namespace entity {
 		virtual void update();
 
 		std::string getName() const { return entityName; }
+		std::string getTypeName() const { return typeName; }
+		std::string getFullName() const { return getTypeName() + ": " + getName(); }
 		const glm::vec3& getPosition() const { return position; }
 		const glm::quat& getOrientation() const { return orientation; }
 		const glm::vec3& getVelocity() const { return velocity; }

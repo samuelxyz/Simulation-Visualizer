@@ -19,6 +19,7 @@ namespace entity {
 			float radius = 1.0f);
 		virtual ~Sphere();
 
+		float getRadius() const { return radius; }
 		virtual bool containsPoint(glm::vec3 worldPoint) const;
 		virtual float getLowestPointZ() const override;
 		virtual void render(graphics::Renderer& renderer) const;

@@ -26,6 +26,6 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include "glm/gtx/quaternion.hpp"
 #include "glm/gtc/matrix_transform.hpp"
-#include <Eigen/Dense>
+#include "eqn/AutodiffTypes.h"
 #include <Eigen/SparseCore>
 #include <fmt/printf.h>
