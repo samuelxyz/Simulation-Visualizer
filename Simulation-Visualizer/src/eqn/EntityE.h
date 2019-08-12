@@ -16,7 +16,7 @@ namespace eqn
 	struct EntityE
 	{
 
-		entity::Entity* target;
+		const entity::Entity* target;
 
 		// -----------------------------------------------
 		// Variables updated multiple times per step
@@ -52,7 +52,7 @@ namespace eqn
 		// Setup functions
 		// -----------------------------------------------
 
-		EntityE(entity::Entity* target);
+		EntityE(const entity::Entity* target);
 		virtual ~EntityE() = default;
 		// makes this entity aware of contact impulses from the specified contact
 		void addContact(Contact* c);

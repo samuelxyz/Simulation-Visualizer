@@ -9,7 +9,7 @@ namespace entity {
 namespace eqn {
 	struct EntitySphere : public EntityE
 	{
-		EntitySphere(entity::Sphere* target);
+		EntitySphere(const entity::Sphere* target);
 		virtual ~EntitySphere() = default;
 
 		autodiff::dual radius;

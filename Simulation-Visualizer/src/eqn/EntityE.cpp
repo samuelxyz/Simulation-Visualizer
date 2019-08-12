@@ -8,7 +8,7 @@
 
 namespace eqn {
 
-	EntityE::EntityE(entity::Entity * target)
+	EntityE::EntityE(const entity::Entity * target)
 		: target(target), 
 		m(target->getMass()), M(m * Eigen::Matrix3dual::Identity()), Ib()
 	{
@@ -23,14 +23,10 @@ namespace eqn {
 
 	void EntityE::captureTargetState()
 	{
-		v_o <<
-			target->getVelocity().x, target->getVelocity().y, target->getVelocity().z;
-		w_o <<
-			target->getAngVelocity().x, target->getAngVelocity().y, target->getAngVelocity().z;
-		q_o <<
-			target->getPosition().x, target->getPosition().y, target->getPosition().z;
-		qu_o <<
-			target->getOrientation().w, target->getOrientation().x, target->getOrientation().y, target->getOrientation().z;
+		v_o = dual_cast(target->getVelocity());
+		w_o = dual_cast(target->getAngVelocity());
+		q_o = dual_cast(target->getPosition());
+		qu_o = dual_cast(target->getOrientation());
 
 		// guesses
 		v = v_o;

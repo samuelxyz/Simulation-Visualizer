@@ -2,11 +2,12 @@
 #include "EqnAssembler.h"
 #include "ContactEntity.h"
 #include "ContactFloor.h"
-#include "EntityE.h"
 extern "C" {
 #include "path_standalone/Standalone_Path.h"
 }
 #include "entity/Entity.h"
+#include "TimelineE.h"
+#include "EntityE.h"
 
 namespace eqn {
 
@@ -29,9 +30,7 @@ namespace eqn {
 		n = calculateN();
 		setBounds();
 		allocateArrays();
-		Eigen::VectorXdual Z = initializeZ();
-		for (int i = 0; i < n; ++i)
-			z[i] = static_cast<double>(Z(i));
+		initializeZ();
 
 		structureNeedsRefresh = false;
 	}
@@ -115,7 +114,163 @@ namespace eqn {
 		F = new double[n];
 	}
 
-	Eigen::VectorXdual EquationAssembler::initializeZ()
+	void EquationAssembler::addEntityE(EntityE * e)
+	{
+		entities.push_back(e);
+		structureNeedsRefresh = true;
+	}
+
+	void EquationAssembler::removeEntity(entity::Entity * e)
+	{
+		auto it = std::find_if(entities.begin(), entities.end(), 
+			[e](EntityE* ee){ return ee->target == e; } );
+		assert(it != entities.end() && 
+			"EquationAssembler::removeEntity() tried to remove an EntityE that wasn't already there");
+		entities.erase(it);
+
+		structureNeedsRefresh = true;
+	}
+
+	int EquationAssembler::addSteps(TimelineE& timeline, int currentStep, int numSteps, 
+		bool logOutput, bool logCalcTime, bool breakOnConstantMotion)
+	{
+		if (structureNeedsRefresh)
+		{
+			setup();
+			structureNeedsRefresh = false;
+		}
+
+		START_TIMING;
+
+		// start from current state, replacing any existing version of events
+		timeline.erase(timeline.begin() + currentStep, timeline.end());
+		recordTimestep(timeline, false);
+		initializeZ();
+
+		int successes = 0;
+		int stepsWithAllConstantMotion = 0;
+		
+		successes = [&]() // if this lambda returns negative, indicates failure
+		{ 
+			while (successes < numSteps)
+			{
+				// try a path step
+				//pathSim->target->loadState(timeline.back());
+				//pathSim->captureTargetState(!pathStreaking); // if we're in a streak then no need to update guesses
+
+				if (logOutput)
+				{
+					printZ();
+					printCache();
+				}
+
+				if (step(timeline, logOutput))
+				{
+					if (logOutput)
+						std::cout << "Step success\n";
+					++successes;
+				}
+				else
+				{
+					// path not successful
+					if (logOutput)
+						std::cout << "Step failed, trying again with new guess\n";
+					 // try again with fresh guess
+					initializeZ();
+					if (logOutput)
+					{
+						printZ();
+						printCache();
+					}
+
+					if (step(timeline, logOutput))
+					{
+						// success with new guess
+						if (logOutput)
+							std::cout << "Succeeded with new guess. Continuing\n";
+						++successes;
+
+						continue;
+					}
+					else
+					{
+						if (logOutput)
+							std::cout << "Step still failed, freefall failed previously, stopping calculations\n";
+						return -successes; // Return negative to indicate failure
+					}
+				}
+
+				static constexpr int constantMotionThreshold = 300; // arbitrary but probably pretty good for the purpose
+				if (breakOnConstantMotion && successes > 1)
+				{
+					int last = timeline.size()-1;
+					
+					bool motionConstant = true;
+					// for each entity
+					for (unsigned int i = 0; i < timeline.back().entityData.size(); ++i)
+					{
+						if (timeline[last].entityData[i].v == timeline[last-1].entityData[i].v &&
+							timeline[last].entityData[i].w == timeline[last-1].entityData[i].w)
+						{
+							continue;
+						}
+						else
+						{
+							motionConstant = false;
+							break;
+						}
+					}
+
+					if (motionConstant)
+						++stepsWithAllConstantMotion;
+					else
+						stepsWithAllConstantMotion = 0;
+
+					if (stepsWithAllConstantMotion > constantMotionThreshold)
+					{
+						if (logOutput)
+							std::cout << "Motion seems to have become constant, stopping calculations\n";
+						return successes; // everything stopped, we're done. Return positive
+					}
+				}
+			}
+
+			// reached the end
+			if (logOutput)
+				std::cout << "Finished request of " << numSteps << " steps, stopping calculations\n";
+			return successes;
+		}(); // end lambda
+
+		if (logCalcTime)
+			std::cout << "Calculation time: " << STOP_TIMING_AND_GET_MICROSECONDS / 1e6f;
+		if (logCalcTime || logOutput)
+			std::cout << std::endl;
+		return successes;
+	}
+
+	int EquationAssembler::addStepsUntilEnd(TimelineE& timeline, int currentStep, 
+		bool logOutput, bool logCalcTime)
+	{
+		static constexpr int max = 1000;
+
+		return addSteps(timeline, currentStep, max, logOutput, logCalcTime, true);
+	}
+
+	void EquationAssembler::recordTimestep(eqn::TimelineE & timeline, bool recordContacts)
+	{
+		timeline.emplace_back();
+
+		Timestep& timestep = timeline.back();
+
+		for (EntityE* e : entities)
+			timestep.entityData.emplace_back(e);
+
+		if (recordContacts)
+			for (Contact* c : contacts)
+				timestep.contactData.emplace_back(c);
+	}
+
+	void EquationAssembler::initializeZ()
 	{
 		Eigen::VectorXdual Z(calculateN());
 		int i = 0;
@@ -134,57 +289,70 @@ namespace eqn {
 			i += c->getN();
 		}
 
-		return Z;
+		for (int i = 0; i < n; ++i)
+			z[i] = static_cast<double>(Z(i));
 	}
 
-	bool EquationAssembler::step(bool log)
+	bool EquationAssembler::step(eqn::TimelineE& timeline, bool log)
 	{
-		// take care of once-per-step stuff
-		for (EntityE* e : entities)
-		{
-			
-		}
-
 		pathMain(n, n*n, &status, z, F, lower_bounds, upper_bounds, log);
 
 		bool success = (status == 1);
 
 		if (success)
 		{
-			Eigen::VectorXdual Z(n);
-			for (int i = 0; i < n; ++i)
-				Z(n) = z[n];
+			loadVars();
 			for (EntityE* e : entities)
 			{
 				e->updateCacheVars();
 			}
+
+			recordTimestep(timeline, true);
 		}
 		
 		status = 0;
 		return success;
 	}
 
-	Eigen::VectorXdual EquationAssembler::calculateFunctions(Eigen::VectorXdual& z)
+	void EquationAssembler::loadVars()
 	{
-		// prepare entities and load variables etc
+		loadVars(exportZ());
+	}
+
+	void EquationAssembler::loadVars(Eigen::VectorXdual Z)
+	{
 		int i = 0;
 		for (EntityE* e : entities)
 		{
-			Eigen::Vector6dual nu = z.segment<6>(i);
+			Eigen::Vector6dual nu = Z.segment<6>(i);
 			e->loadVars(nu);
 			i += 6;
 		}
 		for (Contact* c : contacts)
 		{
 			int num = 11+c->getNumContactFuncs();
-			Eigen::VectorXdual v = z.segment(num, i);
+			Eigen::VectorXdual v = Z.segment(num, i);
 			c->loadVars(v);
 			i += num;
 		}
+	}
+
+	Eigen::VectorXdual EquationAssembler::exportZ()
+	{
+		Eigen::VectorXdual Z(n);
+		for (int i = 0; i < n; ++i)
+			Z(n) = z[n];
+		return Z;
+	}
+
+	Eigen::VectorXdual EquationAssembler::calculateFunctions(Eigen::VectorXdual Z)
+	{
+		// prepare entities and load variables etc
+		loadVars(Z);
 
 		// evaluate the functions
 		Eigen::VectorXdual F;
-		i = 0;
+		int i = 0;
 
 		for (EntityE* e : entities)
 		{
@@ -217,11 +385,7 @@ namespace eqn {
 
 	int EquationAssembler::funcEval(int n, double * z, double * F)
 	{
-		Eigen::VectorXdual zVec(n);
-		for (int i = 0; i < n; ++i)
-			zVec(i) = z[i];
-
-		Eigen::VectorXdual fVec = calculateFunctions(zVec);
+		Eigen::VectorXdual fVec = calculateFunctions(exportZ());
 		for (int i = 0; i< n; ++i)
 			F[i] = static_cast<double>(fVec(i));
 
@@ -234,7 +398,7 @@ namespace eqn {
 		for (int i = 0; i < n; ++i)
 			zVec(i) = z[i];
 
-		Eigen::MatrixXdual J_Dense = autodiff::forward::jacobian(calculateFunctions, zVec, zVec);
+		Eigen::MatrixXdual J_Dense = autodiff::forward::jacobian(&calculateFunctions, zVec, zVec);
 		Eigen::SparseMatrix<double> J = Eigen::SparseView<Eigen::MatrixXdual>(J_Dense, 1.0).cast<double>();
 
 		J.makeCompressed();
@@ -291,5 +455,10 @@ namespace eqn {
 	void EquationAssembler::printF() const
 	{
 		std::cout << "printF placeholder" << std::endl;
+	}
+
+	void EquationAssembler::printCache() const
+	{
+		std::cout << "printCache placeholder" << std::endl;
 	}
 }

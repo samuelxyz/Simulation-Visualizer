@@ -19,7 +19,7 @@ namespace entity {
 			float sizeX = 1.0f, float sizeY = 1.0f, float sizeZ = 1.0f);
 		virtual ~Box();
 
-		virtual core::PathSim* createPathSim() const override;
+		//virtual eqn::EntityE* createEntityE() const override;
 
 		virtual bool containsPoint(glm::vec3 worldPoint, bool useCachedOrientation = false) const;
 		virtual float getLowestPointZ() const override;

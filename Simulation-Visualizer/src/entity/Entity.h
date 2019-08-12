@@ -22,7 +22,7 @@ namespace entity {
 			glm::vec3 angVel, float mass, glm::mat3 rotInertia, std::string typeName = "Entity");
 		virtual ~Entity();
 
-		virtual core::PathSim* createPathSim() const = 0;
+		virtual eqn::EntityE* createEntityE() const = 0;
 
 		glm::vec3 toLocalFrame(glm::vec3 worldVec, bool useCachedOrientation = false) const;
 		glm::vec3 toWorldFrame(glm::vec3 localVec, bool useCachedOrientation = false) const;
@@ -61,7 +61,7 @@ namespace entity {
 		virtual float getLowestPointZ() const = 0;
 		bool intersectsFloor() const;
 
-		void loadState(core::Timestep&);
+		void loadState(eqn::EntityETimestepData&);
 		virtual void applyDragHandleResult(const glm::vec3&) override;
 		virtual glm::vec3 getDragHandlePosition() const override;
 		virtual bool isDragHandleVisible() const override;

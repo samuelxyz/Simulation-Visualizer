@@ -158,6 +158,7 @@
     <ClCompile Include="src\eqn\EntitySphere.cpp" />
     <ClCompile Include="src\eqn\EqnAssembler.cpp" />
     <ClCompile Include="src\eqn\ContactFloor.cpp" />
+    <ClCompile Include="src\eqn\TimelineE.cpp" />
     <ClCompile Include="src\io\DragHandle.cpp" />
     <ClCompile Include="src\io\MouseHandler.cpp" />
     <ClCompile Include="src\core\PathSimCylinder.cpp" />

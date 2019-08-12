@@ -1,5 +1,7 @@
 #pragma once
 #include "core/Definitions.h"
+#include "eqn/EqnAssembler.h"
+#include "eqn/TimelineE.h"
 
 namespace entity {
 	class Entity;
@@ -18,8 +20,6 @@ namespace io {
 
 namespace core {
 
-	struct PathSim;
-
 	class Simulation
 	{
 	public:
@@ -31,7 +31,7 @@ namespace core {
 			int currentStep;
 			bool showShadows;
 			bool showEnvironment;
-			bool showContactPoint;
+			bool showContactPoints;
 			float playbackSpeed;
 			bool loopPlayback;
 			bool logOutput;
@@ -39,7 +39,7 @@ namespace core {
 			Parameters();
 		};
 
-		PathSim* pathSim; // needs to be accessed from PATH solver
+		eqn::EquationAssembler eqnA; // needs to be accessed from PATH solver
 
 	private:
 		static constexpr unsigned int FPS_TRACKER_SMOOTHING = 30u;
@@ -54,7 +54,7 @@ namespace core {
 			Environment();
 		} environment;
 		Parameters parameters;
-		Timeline timeline;
+		eqn::TimelineE timeline;
 		bool showAddEntityWindow;
 
 	public:
@@ -70,7 +70,6 @@ namespace core {
 		void renderGUIOverlay(graphics::Renderer& renderer, const graphics::Camera& camera) const;
 
 		void add(entity::Entity*);
-		void setTarget(entity::Entity*, bool autoAdd = true);
 
 		void addDragHandle(io::DragHandle*);
 
@@ -82,11 +81,10 @@ namespace core {
 		entity::Entity* getHoveredEntity(const graphics::Camera& camera);
 		io::MouseDragTarget* getLeftMouseDragTarget(const graphics::Camera& camera);
 
-		int addSteps(core::Timeline& timeline, int numSteps, bool breakOnConstantMotion = false);
-		int addStepsUntilEnd(core::Timeline& timeline);
-		void recordTimestep(entity::Entity*);
-		// Returns true on success
-		bool addFreefallStep(entity::Entity*);
+		//void recordTimestep(entity::Entity*);
+		void loadTimestep(int step);
+		//// Returns true on success
+		//bool addFreefallStep(entity::Entity*);
 
 		void scrollTimeline(int scr);
 		void startStop();
@@ -95,9 +93,12 @@ namespace core {
 		void renderEntities(graphics::Renderer&) const;
 		void renderShadows(graphics::Renderer&, const glm::vec3& cameraPos) const;
 		void renderEnvironment(graphics::Renderer&) const;
-		void renderContactPoint(graphics::Renderer&, const graphics::Camera& camera) const;
+		void renderContactPoints(graphics::Renderer&, const graphics::Camera& camera) const;
 		void renderAddEntityGUI(graphics::Renderer&, const graphics::Camera&);
 		io::DragHandle* getHoveredDragHandle(const graphics::Camera& camera);
+
+		// remove an entity
+		void remove(int entityIndex);
 	};
 
 }

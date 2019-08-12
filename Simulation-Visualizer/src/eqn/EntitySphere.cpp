@@ -4,7 +4,7 @@
 
 namespace eqn
 {
-	EntitySphere::EntitySphere(entity::Sphere* target)
+	EntitySphere::EntitySphere(const entity::Sphere* target)
 		: EntityE(target), radius(target->getRadius())
 	{
 	}

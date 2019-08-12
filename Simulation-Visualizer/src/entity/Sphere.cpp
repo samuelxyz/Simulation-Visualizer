@@ -1,6 +1,7 @@
 #include "core/stdafx.h"
 #include "Sphere.h"
 #include "core/Definitions.h"
+#include "eqn/EntitySphere.h"
 
 namespace entity {
 
@@ -17,6 +18,11 @@ namespace entity {
 	{
 	}
 
+	eqn::EntityE* Sphere::createEntityE() const
+	{
+		return new eqn::EntitySphere(this);
+	}
+
 	bool Sphere::containsPoint(glm::vec3 worldPoint) const
 	{
 		return glm::length(worldPoint - position) <= radius;
@@ -25,6 +31,13 @@ namespace entity {
 	float Sphere::getLowestPointZ() const
 	{
 		return position.z - radius;
+	}
+
+	glm::vec3 Sphere::guessECP() const
+	{
+		glm::vec3 result = position;
+		result.z = core::FLOOR_Z;
+		return result;
 	}
 
 	void Sphere::render(graphics::Renderer & renderer) const

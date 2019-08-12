@@ -1,6 +1,5 @@
 #include "Box.h"
 #include "core/Definitions.h"
-#include "core/PathSimBox.h"
 
 namespace entity {
 
@@ -16,11 +15,6 @@ namespace entity {
 
 	Box::~Box()
 	{
-	}
-
-	core::PathSim* Box::createPathSim() const
-	{
-		return new core::PathSimBox;
 	}
 
 	bool Box::containsPoint(glm::vec3 worldPoint, bool useCachedOrientation) const

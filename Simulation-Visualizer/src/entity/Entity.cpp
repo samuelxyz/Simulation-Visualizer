@@ -97,7 +97,7 @@ namespace entity {
 
 	void Entity::renderGUI()
 	{
-		if (ImGui::Begin((typeName + ": " + entityName).c_str(), &(shouldShow.gui)))
+		if (ImGui::Begin(getFullName().c_str(), &(shouldShow.gui)))
 		{
 			ImGui::Checkbox("Show entity", &shouldShow.body);
 			ImGui::Checkbox("Show Shadow", &shouldShow.shadow);
@@ -267,12 +267,12 @@ namespace entity {
 		return getLowestPointZ() <= core::FLOOR_Z;
 	}
 
-	void Entity::loadState(core::Timestep& timestep)
+	void Entity::loadState(eqn::EntityETimestepData& data)
 	{
-		position = timestep.position;
-		orientation = timestep.orientation;
-		velocity = timestep.velocity;
-		angVelocity = timestep.angVelocity;
+		position = data.q;
+		orientation = data.qu;
+		velocity = data.v;
+		angVelocity = data.w;
 	}
 
 	void Entity::applyDragHandleResult(const glm::vec3 & v)

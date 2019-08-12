@@ -4,13 +4,12 @@
 #include "graphics/Camera.h"
 #include "graphics/content/VisualSphere.h"
 #include "core/PathSim.h"
-#include "entity/Box.h"
-#include "entity/Cylinder.h"
+#include "entity/Sphere.h"
 
 namespace core {
 
 	Simulation::Simulation()
-		: pathSim(nullptr), entities(), environment(), 
+		: eqnA(), entities(), environment(), 
 		parameters(), timeline(), showAddEntityWindow(false)
 	{
 	}
@@ -22,8 +21,6 @@ namespace core {
 			delete e;
 		for (entity::Entity* e : entitiesVisualOnly)
 			delete e;
-
-		delete pathSim;
 	}
 
 	Simulation::Environment::Environment()
@@ -40,207 +37,209 @@ namespace core {
 
 	Simulation::Parameters::Parameters()
 		: timePaused(true), playbackTime(0.0f), currentStep(0),
-		showShadows(true), showEnvironment(true), showContactPoint(true),
+		showShadows(true), showEnvironment(true), showContactPoints(true),
 		playbackSpeed(1.0), loopPlayback(false), logOutput(true), logCalcTime(true)
 	{
 	}
 
-	int Simulation::addSteps(core::Timeline& timeline, int numStepsToAdd, bool breakOnConstantMotion)
+	//int Simulation::addSteps(core::Timeline& timeline, int numStepsToAdd, bool breakOnConstantMotion)
+	//{
+	//	START_TIMING;
+	//
+	//	// start from current state, replacing any existing version of events
+	//	timeline.erase(timeline.begin() + parameters.currentStep, timeline.end());
+	//	recordTimestep(pathSim->target);
+	//
+	//	int successes = 0;
+	//	//bool usePath = false; // start with freefall since it's fast to compute
+	//	bool usePath = true; // maybe this will help things behave themselves
+	//	bool pathStreaking = false;
+	//	bool pathMightWork = true;
+	//	bool freefallMightWork = true;
+	//
+	//	[&]() { // if this lambda returns negative, indicates failure
+	//		while (successes < numStepsToAdd)
+	//		{
+	//			if (usePath)
+	//			{
+	//				// try a path step
+	//				pathSim->target->loadState(timeline.back());
+	//				pathSim->captureTargetState(!pathStreaking); // if we're in a streak then no need to update guesses
+	//
+	//				if (parameters.logOutput)
+	//				{
+	//					pathSim->printZ();
+	//					pathSim->printCache();
+	//				}
+	//
+	//				if (pathSim->addStep(timeline, parameters.logOutput))
+	//				{
+	//					pathStreaking = true;
+	//
+	//					// Alright this step is finished! Next step, anything might happen
+	//					pathMightWork = true;
+	//					freefallMightWork = true;
+	//
+	//					if (parameters.logOutput)
+	//						std::cout << "PATH step success\n";
+	//					++successes;
+	//				}
+	//				else
+	//				{
+	//					// path not successful
+	//					if (parameters.logOutput)
+	//						std::cout << "PATH failed, trying again with new guess\n";
+	//					pathSim->captureTargetState(true); // try again with fresh guess
+	//					if (parameters.logOutput)
+	//					{
+	//						pathSim->printZ();
+	//						pathSim->printCache();
+	//					}
+	//
+	//					if (pathSim->addStep(timeline, parameters.logOutput))
+	//					{
+	//						// success with new guess
+	//						if (parameters.logOutput)
+	//							std::cout << "Succeeded with new guess. Continuing\n";
+	//
+	//						continue;
+	//					}
+	//					else
+	//					{
+	//						pathStreaking = false; // there's gonna be a gap in PATH streak so new guesses next time
+	//						pathMightWork = false; // for next loop
+	//						if (freefallMightWork)
+	//						{
+	//							if (parameters.logOutput)
+	//								std::cout << "PATH still failed, switching to freefall\n";
+	//							usePath = false; // switch to freefall
+	//						}
+	//						else
+	//						{
+	//							if (parameters.logOutput)
+	//								std::cout << "PATH still failed, freefall failed previously, stopping calculations\n";
+	//							return -successes; // neither method is working. Return negative
+	//						}
+	//					}
+	//				}
+	//			}
+	//			else
+	//			{
+	//				// try a freefall step
+	//				if (addFreefallStep(pathSim->target))
+	//				{
+	//					// Alright this step is finished! Next step, anything might happen
+	//					pathMightWork = true;
+	//					freefallMightWork = true;
+	//
+	//					if (parameters.logOutput)
+	//						std::cout << "Freefall step success\n";
+	//					++successes;
+	//				}
+	//				else
+	//				{
+	//					// freefall not successful
+	//					freefallMightWork = false; // for next loop
+	//					if (pathMightWork)
+	//					{
+	//						if (parameters.logOutput)
+	//							std::cout << "Freefall step failed, switching to PATH\n";
+	//						usePath = true; // switch to path
+	//					}
+	//					else
+	//					{
+	//						if (parameters.logOutput)
+	//							std::cout << "Freefall step failed, PATH failed previously, stopping calculations\n";
+	//						return -successes; // neither method is working. Return negative
+	//					}
+	//				}
+	//			}
+	//
+	//			static constexpr int stop = 20; // 20 is arbitrary but probably pretty good for the purpose
+	//			if (breakOnConstantMotion && successes > stop)
+	//			{
+	//				int last = timeline.size() - 1;
+	//				bool constant = true;
+	//				for (int i = 0; i < stop; ++i)
+	//				{
+	//					if (glm::length2(timeline[last-i].velocity - timeline[last-1-i].velocity) > 1e-6f)
+	//					{
+	//						constant = false;
+	//						break;
+	//					}
+	//					if (glm::length2(timeline[last-i].angVelocity - timeline[last-1-i].angVelocity) > 1e-6f)
+	//					{
+	//						constant = false;
+	//						break;
+	//					}
+	//				}
+	//				if (constant)
+	//				{
+	//					if (parameters.logOutput)
+	//						std::cout << "Motion seems to have become constant, stopping calculations\n";
+	//					return successes; // everything stopped, we're done. Return positive
+	//				}
+	//			}
+	//		}
+	//		
+	//		// reached the end
+	//		if (parameters.logOutput)
+	//			std::cout << "Finished request of " << numStepsToAdd << " steps, stopping calculations\n";
+	//		return successes;
+	//	}(); // end lambda
+	//
+	//	if (parameters.logCalcTime)
+	//		std::cout << "Calculation time: " << STOP_TIMING_AND_GET_MICROSECONDS / 1e6f;
+	//	if (parameters.logCalcTime || parameters.logOutput)
+	//		std::cout << std::endl;
+	//	return successes;
+	//}
+
+	//// Does not record contact point
+	//void Simulation::recordTimestep(entity::Entity* e)
+	//{
+	//	timeline.emplace_back(
+	//		e->getPosition(),
+	//		e->getOrientation(),
+	//		e->getVelocity(),
+	//		e->getAngVelocity(),
+	//		e->getPosition()
+	//	);
+	//}
+
+	void Simulation::loadTimestep(int step)
 	{
-		START_TIMING;
-
-		// start from current state, replacing any existing version of events
-		timeline.erase(timeline.begin() + parameters.currentStep, timeline.end());
-		recordTimestep(pathSim->target);
-
-		int successes = 0;
-		//bool usePath = false; // start with freefall since it's fast to compute
-		bool usePath = true; // maybe this will help things behave themselves
-		bool pathStreaking = false;
-		bool pathMightWork = true;
-		bool freefallMightWork = true;
-
-		[&]() { // if this lambda returns negative, indicates failure
-			while (successes < numStepsToAdd)
-			{
-				if (usePath)
-				{
-					// try a path step
-					pathSim->target->loadState(timeline.back());
-					pathSim->captureTargetState(!pathStreaking); // if we're in a streak then no need to update guesses
-
-					if (parameters.logOutput)
-					{
-						pathSim->printZ();
-						pathSim->printCache();
-					}
-
-					if (pathSim->addStep(timeline, parameters.logOutput))
-					{
-						pathStreaking = true;
-
-						// Alright this step is finished! Next step, anything might happen
-						pathMightWork = true;
-						freefallMightWork = true;
-
-						if (parameters.logOutput)
-							std::cout << "PATH step success\n";
-						++successes;
-					}
-					else
-					{
-						// path not successful
-						if (parameters.logOutput)
-							std::cout << "PATH failed, trying again with new guess\n";
-						pathSim->captureTargetState(true); // try again with fresh guess
-						if (parameters.logOutput)
-						{
-							pathSim->printZ();
-							pathSim->printCache();
-						}
-
-						if (pathSim->addStep(timeline, parameters.logOutput))
-						{
-							// success with new guess
-							if (parameters.logOutput)
-								std::cout << "Succeeded with new guess. Continuing\n";
-
-							continue;
-						}
-						else
-						{
-							pathStreaking = false; // there's gonna be a gap in PATH streak so new guesses next time
-							pathMightWork = false; // for next loop
-							if (freefallMightWork)
-							{
-								if (parameters.logOutput)
-									std::cout << "PATH still failed, switching to freefall\n";
-								usePath = false; // switch to freefall
-							}
-							else
-							{
-								if (parameters.logOutput)
-									std::cout << "PATH still failed, freefall failed previously, stopping calculations\n";
-								return -successes; // neither method is working. Return negative
-							}
-						}
-					}
-				}
-				else
-				{
-					// try a freefall step
-					if (addFreefallStep(pathSim->target))
-					{
-						// Alright this step is finished! Next step, anything might happen
-						pathMightWork = true;
-						freefallMightWork = true;
-
-						if (parameters.logOutput)
-							std::cout << "Freefall step success\n";
-						++successes;
-					}
-					else
-					{
-						// freefall not successful
-						freefallMightWork = false; // for next loop
-						if (pathMightWork)
-						{
-							if (parameters.logOutput)
-								std::cout << "Freefall step failed, switching to PATH\n";
-							usePath = true; // switch to path
-						}
-						else
-						{
-							if (parameters.logOutput)
-								std::cout << "Freefall step failed, PATH failed previously, stopping calculations\n";
-							return -successes; // neither method is working. Return negative
-						}
-					}
-				}
-
-				static constexpr int stop = 20; // 20 is arbitrary but probably pretty good for the purpose
-				if (breakOnConstantMotion && successes > stop)
-				{
-					int last = timeline.size() - 1;
-					bool constant = true;
-					for (int i = 0; i < stop; ++i)
-					{
-						if (glm::length2(timeline[last-i].velocity - timeline[last-1-i].velocity) > 1e-6f)
-						{
-							constant = false;
-							break;
-						}
-						if (glm::length2(timeline[last-i].angVelocity - timeline[last-1-i].angVelocity) > 1e-6f)
-						{
-							constant = false;
-							break;
-						}
-					}
-					if (constant)
-					{
-						if (parameters.logOutput)
-							std::cout << "Motion seems to have become constant, stopping calculations\n";
-						return successes; // everything stopped, we're done. Return positive
-					}
-				}
-			}
-			
-			// reached the end
-			if (parameters.logOutput)
-				std::cout << "Finished request of " << numStepsToAdd << " steps, stopping calculations\n";
-			return successes;
-		}(); // end lambda
-
-		if (parameters.logCalcTime)
-			std::cout << "Calculation time: " << STOP_TIMING_AND_GET_MICROSECONDS / 1e6f;
-		if (parameters.logCalcTime || parameters.logOutput)
-			std::cout << std::endl;
-		return successes;
+		// TODO
+		//for (entity::Entity* e : entities)
+		//{
+		//	e->loadState(timeline[step].entityData.get.....)
+		//}
 	}
 
-	int Simulation::addStepsUntilEnd(core::Timeline & timeline)
-	{
-		static constexpr int max = 1000;
-
-		return addSteps(timeline, max, true);
-	}
-
-	// Does not record contact point
-	void Simulation::recordTimestep(entity::Entity* e)
-	{
-		timeline.emplace_back(
-			e->getPosition(),
-			e->getOrientation(),
-			e->getVelocity(),
-			e->getAngVelocity(),
-			e->getPosition()
-		);
-	}
-
-	// Starts from end of timeline
-	// Adds result to end of timeline and returns true if successful
-	// Updates target entity to end of timeline
-	bool Simulation::addFreefallStep(entity::Entity* e)
-	{
-		e->loadState(timeline.back());
-		recordTimestep(e);
-
-		e->update();
-		if (e->intersectsFloor())
-		{
-			// Not gonna work, undo
-			e->loadState(timeline.back());
-			timeline.pop_back();
-			return false;
-		}
-		else
-		{
-			// it's good
-			timeline.pop_back();
-			recordTimestep(e);
-			return true;
-		}
-	}
+	//// Starts from end of timeline
+	//// Adds result to end of timeline and returns true if successful
+	//// Updates target entity to end of timeline
+	//bool Simulation::addFreefallStep(entity::Entity* e)
+	//{
+	//	e->loadState(timeline.back());
+	//	recordTimestep(e);
+	//
+	//	e->update();
+	//	if (e->intersectsFloor())
+	//	{
+	//		// Not gonna work, undo
+	//		e->loadState(timeline.back());
+	//		timeline.pop_back();
+	//		return false;
+	//	}
+	//	else
+	//	{
+	//		// it's good
+	//		timeline.pop_back();
+	//		recordTimestep(e);
+	//		return true;
+	//	}
+	//}
 
 	void Simulation::scrollTimeline(int scr)
 	{
@@ -283,7 +282,7 @@ namespace core {
 			float timeDiff = diff*1e-6f*parameters.playbackSpeed;
 
 			// last calculated time in the timeline. Used for clamping, below
-			float backTime = timeline.backTime();
+			float backTime = timeline.backTime(core::TIME_STEP);
 
 			// if the current step and current time don't match
 			if (std::copysignf(1.0f, parameters.playbackSpeed) * (parameters.playbackTime / core::TIME_STEP - parameters.currentStep) >= 1.0)
@@ -342,7 +341,7 @@ namespace core {
 			parameters.currentStep = step;
 		}
 		if (prevStep != parameters.currentStep)
-			pathSim->target->loadState(timeline[parameters.currentStep]);
+			loadTimestep(parameters.currentStep);
 		prevStep = parameters.currentStep;
 		prevTime = std::chrono::steady_clock::now();
 	}
@@ -421,7 +420,8 @@ namespace core {
 				ImGui::SameLine();
 				if (ImGui::ArrowButton("##CalculateStepsButton", ImGuiDir_Right))
 				{
-					addSteps(timeline, calculateStepsNum);
+					eqnA.addSteps(timeline, parameters.currentStep, calculateStepsNum, 
+						parameters.logOutput, parameters.logCalcTime);
 					parameters.timePaused = false;
 					parameters.loopPlayback = false;
 				}
@@ -429,7 +429,8 @@ namespace core {
 					ImGui::SetTooltip("Calculate the specified number of timesteps");
 				if (ImGui::Button("Auto Calculate"))
 				{
-					addStepsUntilEnd(timeline);
+					eqnA.addStepsUntilEnd(timeline, parameters.currentStep, 
+						parameters.logOutput, parameters.logCalcTime);
 					parameters.timePaused = false;
 					parameters.loopPlayback = false;
 				}
@@ -482,7 +483,7 @@ namespace core {
 					parameters.playbackSpeed += scr * factor;
 					ImGui::SetTooltip("Scroll to adjust");
 				}
-				ImGui::Text("Elapsed Time: %.3f s", timeline.timeOf(parameters.currentStep));
+				ImGui::Text("Elapsed Time: %.3f s", timeline.timeOf(parameters.currentStep, core::TIME_STEP));
 			}
 			// Timestep slider
 			{
@@ -549,7 +550,7 @@ namespace core {
 				ImGui::Unindent();
 				
 				ImGui::PushStyleColor(ImGuiCol_CheckMark, graphics::COLOR_CONTACT);
-				ImGui::Checkbox("Show Contact Point", &(parameters.showContactPoint));
+				ImGui::Checkbox("Show Contact Point", &(parameters.showContactPoints));
 				ImGui::PopStyleColor();
 			}
 			// Entity checkboxes
@@ -559,23 +560,17 @@ namespace core {
 				{
 					ImGui::BeginChild("Entity Scroll Pane", ImVec2(0.0f, -26.0f));
 					ImGui::Indent();
-					for (entity::Entity* e : entities)
+					for (int i = 0; i < entities.size(); ++i)
 					{
-						ImGui::Checkbox(e->getName().c_str(), &(e->shouldShow.gui));
+						entity::Entity* e = entities[i];
+
+						ImGui::Checkbox(e->getFullName().c_str(), &(e->shouldShow.gui));
 						ImGui::SameLine();
-						if (pathSim->target == e)
-							ImGui::TextColored(graphics::COLOR_WHITE, "(Active)");
+
+						if (ImGui::Button(("-##" + e->getFullName()+"RemoveButton").c_str()))
+							remove(i);
 						else
-						{
-							if (ImGui::ArrowButton((std::string("##setActive") + e->getName()).c_str(), ImGuiDir_Right))
-							{
-								setTarget(e, false);
-								for (entity::Entity* ee : entities)
-									ee->shouldShow.body = (ee == e); // make everything else invisible
-							}
-							if (ImGui::IsItemHovered())
-								ImGui::SetTooltip("Set Active");
-						}
+							++i;
 					}
 					ImGui::EndChild();
 				}
@@ -632,8 +627,8 @@ namespace core {
 			if (d->target.isDragHandleVisible())
 				d->render(renderer);
 
-		if (parameters.showContactPoint)
-			renderContactPoint(renderer, camera);
+		if (parameters.showContactPoints)
+			renderContactPoints(renderer, camera);
 	}
 
 	void Simulation::add(entity::Entity* e)
@@ -642,21 +637,19 @@ namespace core {
 
 		for (io::DragHandle& d : e->getDragHandles())
 			addDragHandle(&d);
+
+		// eqnA.add(e->makeEntityE());
 	}
 
-	void Simulation::setTarget(entity::Entity* e, bool autoAdd)
+	void Simulation::remove(int entityIndex)
 	{
-		// Add to this->entities if not already present
-		if (autoAdd && std::find(entities.begin(), entities.end(), e) == entities.end())
-			add(e);
+		entity::Entity* e = entities[entityIndex];
+		entities.erase(entities.begin() + entityIndex);
 
-		if (pathSim != nullptr)
-			delete pathSim;
+		std::remove_if(dragHandles.begin(), dragHandles.end(),
+			[e](io::DragHandle* d) { return &(d->target) == e; });
 
-		pathSim = e->createPathSim();
-		pathSim->setTarget(e);
-		timeline.clear();
-			recordTimestep(e);
+		eqnA.removeEntity(e);
 	}
 
 	void Simulation::addDragHandle(io::DragHandle * d)
@@ -711,82 +704,82 @@ namespace core {
 		// in both directions from where the entity "center" is along mouse ray
 		// Then finds the surface of the object closest to the camera
 
-			entity::Entity* closestE = nullptr;
-			float rClosest = std::numeric_limits<float>::max();
-			//float rClosest = graphics::RENDER_DISTANCE;
-			for (entity::Entity* e : entities)
+		entity::Entity* closestE = nullptr;
+		float rClosest = std::numeric_limits<float>::max();
+		//float rClosest = graphics::RENDER_DISTANCE;
+		for (entity::Entity* e : entities)
+		{
+			// must be visible
+			if (!(e->shouldShow.body))
+				continue;
+
+			float rCenter = glm::length(e->getPosition() - camera.getPosition());
+			float br = e->getOuterBoundingRadius();
+			float step = e->getInnerBoundingRadius()/30.0f;
+
+			if (rCenter - br > rClosest)
+				continue; // closer entity already found
+
+			if (glm::length2(camera.getPosition() + rCenter*mouseRay - e->getPosition()) > br*br)
+				continue; // we're nowhere near e
+
+			// start from center location and spread forward/backward to check for hits
+			bool toggle = true;
+			for (float dr = step; dr < br; dr += (toggle) ? step : 0.0f)
 			{
-				// must be visible
-				if (!(e->shouldShow.body))
-					continue;
-
-				float rCenter = glm::length(e->getPosition() - camera.getPosition());
-				float br = e->getOuterBoundingRadius();
-				float step = e->getInnerBoundingRadius()/30.0f;
-
-				if (rCenter - br > rClosest)
-					continue; // closer entity already found
-
-				if (glm::length2(camera.getPosition() + rCenter*mouseRay - e->getPosition()) > br*br)
-					continue; // we're nowhere near e
-
-				// start from center location and spread forward/backward to check for hits
-				bool toggle = true;
-				for (float dr = step; dr < br; dr += (toggle)? step : 0.0f)
+				float r = (toggle) ? rCenter + dr : rCenter - dr;
+				if (e->containsPoint(camera.getPosition() + r*mouseRay, dr != step))
 				{
-					float r = (toggle) ? rCenter + dr : rCenter - dr;
-					if (e->containsPoint(camera.getPosition() + r*mouseRay, dr != step))
+					// now definitely hovering, but where's the front of the object?
+					// zigzag back and forth to find the edge
+
+					//step *= 10.0f;
+					//
+					//r -= step;
+					//while (e->containsPoint(camera.getPosition() + r*mouseRay))
+					//	r -= step;
+					//
+					//step /= 4.0f;
+					//r += step;
+					//while (!(e->containsPoint(camera.getPosition() + r*mouseRay)))
+					//	r += step;
+					//
+					//step /= 4.0f;
+					//r -= step;
+					//while (e->containsPoint(camera.getPosition() + r*mouseRay))
+					//	r -= step;
+					//
+					//step /= 4.0f;
+					//r += step;
+					//while (!(e->containsPoint(camera.getPosition() + r*mouseRay)))
+					//	r += step;
+
+					// condensed version of the above:
+					step *= 40.0f;
+					bool searchAway = false;
+					for (int i = 0; i < 4; ++i)
 					{
-						// now definitely hovering, but where's the front of the object?
-						// zigzag back and forth to find the edge
-
-						//step *= 10.0f;
-						//
-						//r -= step;
-						//while (e->containsPoint(camera.getPosition() + r*mouseRay))
-						//	r -= step;
-						//
-						//step /= 4.0f;
-						//r += step;
-						//while (!(e->containsPoint(camera.getPosition() + r*mouseRay)))
-						//	r += step;
-						//
-						//step /= 4.0f;
-						//r -= step;
-						//while (e->containsPoint(camera.getPosition() + r*mouseRay))
-						//	r -= step;
-						//
-						//step /= 4.0f;
-						//r += step;
-						//while (!(e->containsPoint(camera.getPosition() + r*mouseRay)))
-						//	r += step;
-
-						// condensed version of the above:
-						step *= 40.0f;
-						bool searchAway = false;
-						for (int i = 0; i < 4; ++i)
-						{
-							step /= 4.0f;
-							r += (searchAway)? step : -step;
-							while (searchAway != (e->containsPoint(camera.getPosition() + r*mouseRay, true)))
-								r += (searchAway) ? step : -step;
-							searchAway = !searchAway;
-						}
-						
-						// and see if it's the closest point on any entity thus far
-						r -= step;
-						if (r < rClosest)
-						{
-							rClosest = r;
-							closestE = e;
-						}
-						break;
+						step /= 4.0f;
+						r += (searchAway) ? step : -step;
+						while (searchAway != (e->containsPoint(camera.getPosition() + r*mouseRay, true)))
+							r += (searchAway) ? step : -step;
+						searchAway = !searchAway;
 					}
-					toggle = !toggle;
-				}
-			}
 
-			return closestE;
+					// and see if it's the closest point on any entity thus far
+					r -= step;
+					if (r < rClosest)
+					{
+						rClosest = r;
+						closestE = e;
+					}
+					break;
+				}
+				toggle = !toggle;
+			}
+		}
+
+		return closestE;
 
 	}
 
@@ -845,21 +838,36 @@ namespace core {
 		}
 	}
 
-	void Simulation::renderContactPoint(graphics::Renderer& renderer, const graphics::Camera& camera) const
+	void Simulation::renderContactPoints(graphics::Renderer& renderer, const graphics::Camera& camera) const
 	{
-		const Timestep& now = timeline[parameters.currentStep];
+		const eqn::Timestep& now = timeline[parameters.currentStep];
 
-		if (!now.hasContactPoint())
-			return;
+		for (auto& data : now.contactData)
+		{
+			glm::vec4 color = (glm::length2(data.a1 - data.a2) > 1e-12f) ?
+				graphics::COLOR_NO_CONTACT : graphics::COLOR_CONTACT;
 
-		glm::vec4 color = (std::abs(now.contactPoint.z) > 1e-6f) ? 
-			graphics::COLOR_NO_CONTACT : graphics::COLOR_CONTACT;
+			// draw and label a1
+			renderer.renderMarkerDot(data.a1, color);
+			std::string name1("Contact with ");
+			if (data.target2 != nullptr)
+				name1 += data.target2->getName();
+			else
+				name1 += "Floor";
+			name1 += fmt::sprintf("\n(%.3f, %.3f, %.3f)", data.a1.x, data.a1.y, data.a1.z);
+			camera.renderLabel(data.a1, true, name1, name1,	color);
 
-		renderer.renderMarkerDot(now.contactPoint, color);
-
-		camera.renderLabel(now.contactPoint, true, "PathSimContactPointLabel", 
-			fmt::sprintf("(%.3f, %.3f, %.3f)", now.contactPoint.x, now.contactPoint.y, now.contactPoint.z), 
-			color);
+			// draw and label a2
+			renderer.renderMarkerDot(data.a2, color);
+			std::string name2;
+			if (data.target2 != nullptr)
+				name2 = "Contact with";
+			else
+				name2 = "Floor contact with";
+			name2 += data.target1->getName() + fmt::sprintf("\n(%.3f, %.3f, %.3f)",
+				data.a2.x, data.a2.y, data.a2.z);
+			camera.renderLabel(data.a2, true, name2, name2, color);
+		}
 	}
 
 	void Simulation::renderAddEntityGUI(graphics::Renderer& renderer, const graphics::Camera& camera)
@@ -871,10 +879,10 @@ namespace core {
 			static entity::Entity* preview = nullptr;
 			float makeNewPreview = false;
 
-			static const char* typeNames[] = { "Box", "Cylinder" };
+			static const char* typeNames[] = { "Sphere" };
 			static int selectedType = 0;
 			ImGui::TextUnformatted("Select Entity Type:");
-			static char nameBuf[64] = "NewBox";
+			static char nameBuf[64] = "NewSphere";
 			std::string defaultName("New");
 			if (ImGui::Combo("##SelectType", &selectedType, typeNames, IM_ARRAYSIZE(typeNames)))
 			{
@@ -890,7 +898,7 @@ namespace core {
 
 			if (preview == nullptr && 0 <= selectedType && selectedType <= IM_ARRAYSIZE(typeNames))
 			{
-					makeNewPreview = true;
+				makeNewPreview = true;
 			}
 
 			static glm::vec3 oldPreviewPos(0.0f);
@@ -906,19 +914,25 @@ namespace core {
 			ImGui::TextUnformatted("Entity Name:");
 			ImGui::InputText("##InputName", nameBuf, 64);
 
-			static float boxDims[] = { 1.0f, 1.0f, 1.0f };
-			static float cylDims[] = { 1.0f, 1.0f };
+			//static float boxDims[] = { 1.0f, 1.0f, 1.0f };
+			//static float cylDims[] = { 1.0f, 1.0f };
+			static float sphereDims[] = { 1.0f };
 
 			switch (selectedType)
 			{
-			case 0: // box
-				ImGui::TextUnformatted("Length/Width/Height:");
-				if (ImGui::InputFloat3("m##InputBoxDims", boxDims))
-					makeNewPreview = true;
-				break;
-			case 1: // cylinder
-				ImGui::TextUnformatted("Height/Radius:");
-				if (ImGui::InputFloat2("m##InputCylDims", cylDims))
+			//case 0: // box
+			//	ImGui::TextUnformatted("Length/Width/Height:");
+			//	if (ImGui::InputFloat3("m##InputBoxDims", boxDims))
+			//		makeNewPreview = true;
+			//	break;
+			//case 1: // cylinder
+			//	ImGui::TextUnformatted("Height/Radius:");
+			//	if (ImGui::InputFloat2("m##InputCylDims", cylDims))
+			//		makeNewPreview = true;
+			//	break;
+			case 0: // sphere
+				ImGui::TextUnformatted("Radius:");
+				if (ImGui::InputFloat("m##InputSphereDims", sphereDims))
 					makeNewPreview = true;
 				break;
 			}
@@ -944,20 +958,28 @@ namespace core {
 					inertia[i][i] = momIn[i];
 				switch (selectedType)
 				{
-				case 0: // box
-					if (previewPos.z - boxDims[2]/2 < core::FLOOR_Z)
-						previewPos.z = core::FLOOR_Z + boxDims[2]/2;
-					preview = new entity::Box(std::string(nameBuf), 
-						previewPos, core::QUAT_IDENTITY, glm::vec3(0.0f), glm::vec3(0.0f), 
-						mass, inertia, boxDims[0], boxDims[1], boxDims[2]
-					);
-					break;
-				case 1: // cylinder
-					if (previewPos.z - cylDims[0]/2 < core::FLOOR_Z)
-						previewPos.z = core::FLOOR_Z + cylDims[0]/2;
-					preview = new entity::Cylinder(std::string(nameBuf),
+				//case 0: // box
+				//	if (previewPos.z - boxDims[2]/2 < core::FLOOR_Z)
+				//		previewPos.z = core::FLOOR_Z + boxDims[2]/2;
+				//	preview = new entity::Box(std::string(nameBuf), 
+				//		previewPos, core::QUAT_IDENTITY, glm::vec3(0.0f), glm::vec3(0.0f), 
+				//		mass, inertia, boxDims[0], boxDims[1], boxDims[2]
+				//	);
+				//	break;
+				//case 1: // cylinder
+				//	if (previewPos.z - cylDims[0]/2 < core::FLOOR_Z)
+				//		previewPos.z = core::FLOOR_Z + cylDims[0]/2;
+				//	preview = new entity::Cylinder(std::string(nameBuf),
+				//		previewPos, core::QUAT_IDENTITY, glm::vec3(0.0f), glm::vec3(0.0f),
+				//		mass, inertia, cylDims[0], cylDims[1]
+				//	);
+				//	break;
+				case 0: // sphere
+					if (previewPos.z - sphereDims[0]/2 < core::FLOOR_Z)
+						previewPos.z = core::FLOOR_Z + sphereDims[0]/2;
+					preview = new entity::Sphere(std::string(nameBuf),
 						previewPos, core::QUAT_IDENTITY, glm::vec3(0.0f), glm::vec3(0.0f),
-						mass, inertia, cylDims[0], cylDims[1]
+						mass, inertia, sphereDims[0]
 					);
 					break;
 				}
