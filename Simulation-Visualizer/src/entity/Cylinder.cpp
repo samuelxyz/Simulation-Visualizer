@@ -19,10 +19,10 @@ namespace entity {
 	{
 	}
 
-	core::PathSim * Cylinder::createPathSim() const
-	{
-		 return new core::PathSimCylinder;
-	}
+	//core::PathSim * Cylinder::createPathSim() const
+	//{
+	//	 return new core::PathSimCylinder;
+	//}
 
 	bool Cylinder::containsPoint(glm::vec3 worldPoint, bool useCachedOrientation) const
 	{

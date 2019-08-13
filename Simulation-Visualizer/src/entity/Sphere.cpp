@@ -23,7 +23,7 @@ namespace entity {
 		return new eqn::EntitySphere(this);
 	}
 
-	bool Sphere::containsPoint(glm::vec3 worldPoint) const
+	bool Sphere::containsPoint(glm::vec3 worldPoint, bool useCachedOrientation) const
 	{
 		return glm::length(worldPoint - position) <= radius;
 	}

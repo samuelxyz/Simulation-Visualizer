@@ -90,7 +90,7 @@ namespace eqn
 		int active = n-1; // active constraint is the floor
 
 		Eigen::VectorXdual f_a1 = e->aX_Geometry(a1);
-		autodiff::dual& g_a2 = a2.z;
+		autodiff::dual& g_a2 = a2(2);
 
 		Eigen::VectorXdual result(n);
 		result.head(m) = -f_a1;

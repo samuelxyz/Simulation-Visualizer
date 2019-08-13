@@ -59,10 +59,10 @@ namespace eqn {
 	{
 		q = q_o + v*h;
 		qu <<
-			-(2.0*((h*qu_o(1)*w(0))/2.0 - qu_o(0) + (h*qu_o(2)*w(1))/2.0 + (h*qu_o(3)*w(2))/2.0))/std::sqrt(h*h*w(0)*w(0) + h*h*w(1)*w(1) + h*h*w(2)*w(2) + 4.0),
-			(2.0*(qu_o(1) + (h*qu_o(0)*w(0))/2.0 + (h*qu_o(3)*w(1))/2.0 - (h*qu_o(2)*w(2))/2.0))/std::sqrt(h*h*w(0)*w(0) + h*h*w(1)*w(1) + h*h*w(2)*w(2) + 4.0),
-			(2.0*(qu_o(2) - (h*qu_o(3)*w(0))/2.0 + (h*qu_o(0)*w(1))/2.0 + (h*qu_o(1)*w(2))/2.0))/std::sqrt(h*h*w(0)*w(0) + h*h*w(1)*w(1) + h*h*w(2)*w(2) + 4.0),
-			(2.0*(qu_o(3) + (h*qu_o(2)*w(0))/2.0 - (h*qu_o(1)*w(1))/2.0 + (h*qu_o(0)*w(2))/2.0))/std::sqrt(h*h*w(0)*w(0) + h*h*w(1)*w(1) + h*h*w(2)*w(2) + 4.0);
+			-(2.0*((h*qu_o(1)*w(0))/2.0 - qu_o(0) + (h*qu_o(2)*w(1))/2.0 + (h*qu_o(3)*w(2))/2.0))/autodiff::forward::sqrt(h*h*w(0)*w(0) + h*h*w(1)*w(1) + h*h*w(2)*w(2) + 4.0),
+			(2.0*(qu_o(1) + (h*qu_o(0)*w(0))/2.0 + (h*qu_o(3)*w(1))/2.0 - (h*qu_o(2)*w(2))/2.0))/autodiff::forward::sqrt(h*h*w(0)*w(0) + h*h*w(1)*w(1) + h*h*w(2)*w(2) + 4.0),
+			(2.0*(qu_o(2) - (h*qu_o(3)*w(0))/2.0 + (h*qu_o(0)*w(1))/2.0 + (h*qu_o(1)*w(2))/2.0))/autodiff::forward::sqrt(h*h*w(0)*w(0) + h*h*w(1)*w(1) + h*h*w(2)*w(2) + 4.0),
+			(2.0*(qu_o(3) + (h*qu_o(2)*w(0))/2.0 - (h*qu_o(1)*w(1))/2.0 + (h*qu_o(0)*w(2))/2.0))/autodiff::forward::sqrt(h*h*w(0)*w(0) + h*h*w(1)*w(1) + h*h*w(2)*w(2) + 4.0);
 		R <<
 			qu(0)*qu(0) + qu(1)*qu(1) - qu(2)*qu(2) - qu(3)*qu(3), 2*qu(1)*qu(2) - 2*qu(0)*qu(3), 2*qu(0)*qu(2) + 2*qu(1)*qu(3),
 			2*qu(0)*qu(3) + 2*qu(1)*qu(2), qu(0)*qu(0) - qu(1)*qu(1) + qu(2)*qu(2) - qu(3)*qu(3), 2*qu(2)*qu(3) - 2*qu(0)*qu(1),

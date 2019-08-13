@@ -20,7 +20,7 @@ namespace entity {
 			float mass = 1.0f, glm::mat3 rotInertia = glm::mat3(1.0f), float height = 1.0f, float radius = 1.0f);
 		virtual ~Cylinder();
 
-		virtual core::PathSim* createPathSim() const override;
+		//virtual core::PathSim* createPathSim() const override;
 
 		virtual bool containsPoint(glm::vec3 worldPoint, bool useCachedOrientation = false) const;
 		virtual float getLowestPointZ() const override;

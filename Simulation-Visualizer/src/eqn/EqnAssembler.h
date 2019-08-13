@@ -3,6 +3,10 @@
 #include "Contact.h"
 #include "core/Definitions.h"
 
+namespace entity {
+	class Entity;
+}
+
 namespace eqn {
 
 	struct EntityE;
@@ -11,12 +15,14 @@ namespace eqn {
 
 	struct EquationAssembler 
 	{
+		EquationAssembler();
+
 		// -----------------------------------------------
 		// Setup functions, called only to set up system
 		// -----------------------------------------------
 
 		// main driver for the below functions
-		void setup();
+		void setup(bool logOutput = false);
 		// anticipates and sets up all combinations of contacts in the system
 		void assignContacts();
 		// calculates the sizes of z and F (total number of wrt variables)
@@ -25,7 +31,7 @@ namespace eqn {
 		void setBounds();
 		// allocates member arrays z and F on the heap
 		void allocateArrays();
-		// Loads data from EntityE's/contacts and sets up the initial guess
+		// Loads data from EntityE's/Entities/contacts and sets up the initial guess
 		// Order: Individual entities, then individual contacts
 		// - Entities: v, w
 		// - Contacts: a1, a2, p_t, p_o, p_r, p_n, sig, l
@@ -65,7 +71,7 @@ namespace eqn {
 		// - Entities: v, w
 		// - Contacts: a1, a2, p_t, p_o, p_r, p_n, sig, l
 		void loadVars();
-		void loadVars(Eigen::VectorXdual Z);
+		void loadVars(const Eigen::VectorXdual& Z);
 		// puts member array z into a dual vector
 		Eigen::VectorXdual exportZ();
 		
@@ -74,7 +80,10 @@ namespace eqn {
 		// Order: Individual entities, then individual contacts
 		// - Entities: a6_NewtonEuler
 		// - Contacts: a6_Contact, a3_Friction, c1_NonPenetration (p_n), c1_Friction (sig), cX_Contact (l)
-		Eigen::VectorXdual calculateFunctions(Eigen::VectorXdual Z);
+		Eigen::VectorXdual calculateFunctions(const Eigen::VectorXdual& Z);
+
+		// attempt to work around arcane template compilation errors in autodiff::forward::jacobian
+		Eigen::MatrixXd calculateJacobian(Eigen::VectorXdual& wrt, Eigen::VectorXdual& args, Eigen::VectorXdual& F);
 
 		// functions called by PATH
 		int funcEval(int n, double* z, double* F);
@@ -84,6 +93,7 @@ namespace eqn {
 		// -----------------------------------------------
 		// debug functions
 		// -----------------------------------------------
+		void printStatus() const;
 		void printZ() const;
 		void printF() const;
 		void printCache() const;

@@ -25,12 +25,29 @@ namespace eqn {
 		"Internal error"
 	};
 
-	void EquationAssembler::setup()
+	EquationAssembler::EquationAssembler()
+		: entities(), contacts(), structureNeedsRefresh(true), h(core::TIME_STEP)
 	{
+	}
+
+	void EquationAssembler::setup(bool logOutput)
+	{
+		assignContacts();
 		n = calculateN();
 		setBounds();
 		allocateArrays();
 		initializeZ();
+
+		if (logOutput)
+		{
+			std::cout << fmt::sprintf("EntityE list (total %i entities):\n", entities.size());
+			for (EntityE* e : entities)
+				std::cout << "\t" + e->target->getFullName() + "\n";
+			std::cout << fmt::sprintf("Contact list (total %i contacts):\n", contacts.size());
+			for (Contact* c : contacts)
+				std::cout << "\t" + c->getFullName() + "\n";
+			std::cout << fmt::sprintf("System of equations contains %i variables.\n", n);
+		}
 
 		structureNeedsRefresh = false;
 	}
@@ -72,6 +89,8 @@ namespace eqn {
 		{
 			n += c->getNumContactFuncs(); // cX_Contact
 		}
+
+		return n;
 	}
 
 	void EquationAssembler::setBounds()
@@ -134,9 +153,19 @@ namespace eqn {
 	int EquationAssembler::addSteps(TimelineE& timeline, int currentStep, int numSteps, 
 		bool logOutput, bool logCalcTime, bool breakOnConstantMotion)
 	{
+		if (logOutput)
+			if (breakOnConstantMotion)
+				std::cout << fmt::sprintf("Beginning addSteps() to fulfill auto-calculate request on timestep %i\n", currentStep);
+			else
+				std::cout << fmt::sprintf("Beginning addSteps() to fulfill request of %i steps on timestep %i\n", numSteps, currentStep);
+
+		bool zInitialized = false;
 		if (structureNeedsRefresh)
 		{
-			setup();
+			if (logOutput)
+				std::cout << "Structure needs refresh, calling setup()\n";
+			setup(logOutput);
+			zInitialized = true;
 			structureNeedsRefresh = false;
 		}
 
@@ -144,8 +173,11 @@ namespace eqn {
 
 		// start from current state, replacing any existing version of events
 		timeline.erase(timeline.begin() + currentStep, timeline.end());
+		if (!zInitialized)
+			initializeZ();
 		recordTimestep(timeline, false);
-		initializeZ();
+		if (logOutput)
+			std::cout << "Captured current situation to timeline. Beginning PATH steps\n";
 
 		int successes = 0;
 		int stepsWithAllConstantMotion = 0;
@@ -195,7 +227,7 @@ namespace eqn {
 					else
 					{
 						if (logOutput)
-							std::cout << "Step still failed, freefall failed previously, stopping calculations\n";
+							std::cout << "Step still failed, stopping calculations\n";
 						return -successes; // Return negative to indicate failure
 					}
 				}
@@ -299,6 +331,13 @@ namespace eqn {
 
 		bool success = (status == 1);
 
+		if (log)
+		{
+			printStatus();
+			printZ();
+			printF();
+		}
+
 		if (success)
 		{
 			loadVars();
@@ -319,7 +358,7 @@ namespace eqn {
 		loadVars(exportZ());
 	}
 
-	void EquationAssembler::loadVars(Eigen::VectorXdual Z)
+	void EquationAssembler::loadVars(const Eigen::VectorXdual& Z)
 	{
 		int i = 0;
 		for (EntityE* e : entities)
@@ -330,8 +369,8 @@ namespace eqn {
 		}
 		for (Contact* c : contacts)
 		{
-			int num = 11+c->getNumContactFuncs();
-			Eigen::VectorXdual v = Z.segment(num, i);
+			int num = c->getN();
+			Eigen::VectorXdual v = Z.segment(i, num);
 			c->loadVars(v);
 			i += num;
 		}
@@ -341,17 +380,17 @@ namespace eqn {
 	{
 		Eigen::VectorXdual Z(n);
 		for (int i = 0; i < n; ++i)
-			Z(n) = z[n];
+			Z(i) = z[i];
 		return Z;
 	}
 
-	Eigen::VectorXdual EquationAssembler::calculateFunctions(Eigen::VectorXdual Z)
+	Eigen::VectorXdual EquationAssembler::calculateFunctions(const Eigen::VectorXdual& Z)
 	{
 		// prepare entities and load variables etc
 		loadVars(Z);
 
 		// evaluate the functions
-		Eigen::VectorXdual F;
+		Eigen::VectorXdual F(n);
 		int i = 0;
 
 		for (EntityE* e : entities)
@@ -383,9 +422,38 @@ namespace eqn {
 		return F;
 	}
 
+	Eigen::MatrixXd EquationAssembler::calculateJacobian(Eigen::VectorXdual & wrt, Eigen::VectorXdual & args, Eigen::VectorXdual & F)
+	{
+		const int n = wrt.size();
+
+		wrt[0].grad = 1.0;
+		F = calculateFunctions(args);
+		wrt[0].grad = 0.0;
+
+		const int m = F.size();
+
+		Eigen::MatrixXd J(m, n);
+
+		for (int i = 0; i < m; ++i)
+			J(i, 0) = F[i].grad;
+
+		for (int j = 1; j < n; ++j)
+		{
+			wrt[j].grad = 1.0;
+			F = calculateFunctions(args);
+			wrt[j].grad = 0.0;
+
+			for (int i = 0; i < m; ++i)
+				J(i, j) = F[i].grad;
+		}
+
+		return J;
+	}
+
 	int EquationAssembler::funcEval(int n, double * z, double * F)
 	{
-		Eigen::VectorXdual fVec = calculateFunctions(exportZ());
+		Eigen::VectorXdual Z = exportZ();
+		Eigen::VectorXdual fVec = calculateFunctions(Z);
 		for (int i = 0; i< n; ++i)
 			F[i] = static_cast<double>(fVec(i));
 
@@ -398,8 +466,11 @@ namespace eqn {
 		for (int i = 0; i < n; ++i)
 			zVec(i) = z[i];
 
-		Eigen::MatrixXdual J_Dense = autodiff::forward::jacobian(&calculateFunctions, zVec, zVec);
-		Eigen::SparseMatrix<double> J = Eigen::SparseView<Eigen::MatrixXdual>(J_Dense, 1.0).cast<double>();
+		Eigen::VectorXdual F;
+		//Eigen::MatrixXd J_Dense = autodiff::forward::jacobian(
+		//	&EquationAssembler::calculateFunctions, autodiff::wrt(zVec), autodiff::forward::at(zVec), F);
+		Eigen::MatrixXd J_Dense = calculateJacobian(zVec, zVec, F);
+		Eigen::SparseMatrix<double> J = Eigen::SparseView<Eigen::MatrixXd>(J_Dense, 1.0);
 
 		J.makeCompressed();
 		int val_index = 0;
@@ -423,6 +494,11 @@ namespace eqn {
 		return 0;
 	}
 
+	void EquationAssembler::printStatus() const
+	{
+		std::cout << fmt::sprintf("Status: %i (%s)\n", status, statusCodes[status]);
+	}
+
 	void EquationAssembler::printZ() const
 	{
 		std::cout << "Z: \n";
@@ -440,7 +516,7 @@ namespace eqn {
 			std::cout << fmt::sprintf("z[%i-%i]:\ta1: (%f, %f, %f)\n", i, i+2, z[i], z[i+1], z[i+2]);
 			std::cout << fmt::sprintf("z[%i-%i]:\ta2: (%f, %f, %f)\n", i+3, i+5, z[i+3], z[i+4], z[i+5]);
 			std::cout << fmt::sprintf("z[%i-%i]:\tp_t, p_o, p_r, p_n: (%f, %f, %f, %f)\n", i+6, i+9, z[i+6], z[i+7], z[i+8], z[i+9]);
-			std::cout << fmt::sprintf("z[%i]:\tsig: %f", i+10, z[i+10]);
+			std::cout << fmt::sprintf("z[%i]:\tsig: %f\n", i+10, z[i+10]);
 
 			std::cout << fmt::sprintf("z[%i-%i]:\tl: (", i+11, i+11+c->getNumContactFuncs());
 			for (int j = 1; j < c->getNumContactFuncs(); ++j)

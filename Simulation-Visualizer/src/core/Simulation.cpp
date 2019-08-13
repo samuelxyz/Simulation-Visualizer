@@ -12,6 +12,7 @@ namespace core {
 		: eqnA(), entities(), environment(), 
 		parameters(), timeline(), showAddEntityWindow(false)
 	{
+		eqnA.recordTimestep(timeline, false);
 	}
 
 	Simulation::~Simulation()
@@ -560,7 +561,7 @@ namespace core {
 				{
 					ImGui::BeginChild("Entity Scroll Pane", ImVec2(0.0f, -26.0f));
 					ImGui::Indent();
-					for (int i = 0; i < entities.size(); ++i)
+					for (unsigned int i = 0; i < entities.size(); ++i)
 					{
 						entity::Entity* e = entities[i];
 
@@ -638,7 +639,7 @@ namespace core {
 		for (io::DragHandle& d : e->getDragHandles())
 			addDragHandle(&d);
 
-		// eqnA.add(e->makeEntityE());
+		eqnA.addEntityE(e->createEntityE());
 	}
 
 	void Simulation::remove(int entityIndex)

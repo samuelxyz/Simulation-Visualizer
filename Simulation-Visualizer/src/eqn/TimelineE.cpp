@@ -6,43 +6,44 @@
 
 namespace eqn {
 
-	EntityETimestepData & Timestep::getEntityData(entity::Entity * target)
+	EntityETimestepData* Timestep::getEntityData(const entity::Entity * target)
 	{
 		for (auto& data : entityData)
 			if (data.target == target)
-				return data;
+				return &data;
+		return nullptr;
 	}
 
-	ContactTimestepData & Timestep::getContactData(entity::Entity * target1, 
-		entity::Entity * target2)
+	ContactTimestepData* Timestep::getContactData(const entity::Entity * target1, 
+		const entity::Entity * target2)
 	{
 		if (target2 != nullptr)
 		{
 			for (auto& data : contactData)
 				if ((data.target1 == target1 && data.target2 == target2) ||
 					(data.target2 == target1 && data.target1 == target2))
-					return data;
+					return &data;
 		}
 		else
 		{
 			for (auto& data : contactData)
 				if (data.target1 == target1)
-					return data;
+					return &data;
 		}
-
+		return nullptr;
 	}
 
-	EntityETimestepData::EntityETimestepData(EntityE * e)
+	EntityETimestepData::EntityETimestepData(const EntityE * e)
 		: target(e->target),
 		q(glm_cast(e->q)), v(glm_cast(e->v)), w(glm_cast(e->w)), 
 		qu(glm_cast(e->qu))
 	{
 	}
 
-	ContactTimestepData::ContactTimestepData(Contact * c)
+	ContactTimestepData::ContactTimestepData(const Contact * c)
 		: a1(glm_cast(c->a1)), a2(glm_cast(c->a2))
 	{
-		ContactEntity* ce = dynamic_cast<ContactEntity*>(c);
+		const ContactEntity* ce = dynamic_cast<const ContactEntity*>(c);
 		if (ce != nullptr)
 		{
 			target1 = ce->e1->target;
@@ -50,7 +51,7 @@ namespace eqn {
 			return;
 		}
 		
-		ContactFloor* cf = dynamic_cast<ContactFloor*>(c);
+		const ContactFloor* cf = dynamic_cast<const ContactFloor*>(c);
 		if (cf != nullptr)
 		{
 			target1 = cf->e->target;

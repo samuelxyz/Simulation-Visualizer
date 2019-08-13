@@ -84,13 +84,13 @@ int main()
 
 int funcEval(int n, double* z, double* F)
 {
-	return globalSim->pathSim->funcEval(z, F);
+	return globalSim->eqnA.funcEval(n, z, F);
 }
 
 int jacEval(int n, int nnz, double* z, int* column_starting_indices,
 	int* len_of_each_column, int* row_index_of_each_value, double* values)
 {
-	return globalSim->pathSim->jacEval(z, column_starting_indices, len_of_each_column, row_index_of_each_value, values);
+	return globalSim->eqnA.jacEval(n, nnz, z, column_starting_indices, len_of_each_column, row_index_of_each_value, values);
 }
 
 #endif

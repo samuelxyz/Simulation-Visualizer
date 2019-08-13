@@ -16,19 +16,19 @@ namespace eqn {
 
 	struct EntityETimestepData
 	{
-		entity::Entity* target;
+		const entity::Entity* target;
 		glm::vec3 q, v, w;
 		glm::quat qu;
 
-		EntityETimestepData(EntityE* e);
+		EntityETimestepData(const EntityE* e);
 	};
 
 	struct ContactTimestepData
 	{
-		entity::Entity * target1, * target2;
+		const entity::Entity * target1, * target2;
 		glm::vec3 a1, a2;
 
-		ContactTimestepData(Contact* c);
+		ContactTimestepData(const Contact* c);
 	};
 
 	struct Timestep
@@ -38,9 +38,9 @@ namespace eqn {
 
 		Timestep(): entityData(), contactData() {};
 
-		EntityETimestepData& getEntityData(entity::Entity* target);
+		EntityETimestepData* getEntityData(const entity::Entity* target);
 
-		ContactTimestepData& getContactData(entity::Entity* target1, entity::Entity* target2 = nullptr);
+		ContactTimestepData* getContactData(const entity::Entity* target1, const entity::Entity* target2 = nullptr);
 	};
 
 	struct TimelineE : public std::vector<Timestep>

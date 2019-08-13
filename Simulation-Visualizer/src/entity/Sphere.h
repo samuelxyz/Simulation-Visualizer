@@ -22,7 +22,7 @@ namespace entity {
 		virtual eqn::EntityE* createEntityE() const override;
 
 		float getRadius() const { return radius; }
-		virtual bool containsPoint(glm::vec3 worldPoint) const;
+		virtual bool containsPoint(glm::vec3 worldPoint, bool useCachedOrientation = false) const override;
 		virtual float getLowestPointZ() const override;
 		virtual glm::vec3 guessECP() const override;
 		virtual void render(graphics::Renderer& renderer) const;

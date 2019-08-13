@@ -152,6 +152,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\eqn\AutodiffTypes.cpp" />
     <ClCompile Include="src\eqn\Contact.cpp" />
     <ClCompile Include="src\eqn\EntityE.cpp" />
     <ClCompile Include="src\eqn\ContactEntity.cpp" />

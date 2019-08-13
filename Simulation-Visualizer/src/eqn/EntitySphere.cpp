@@ -18,8 +18,6 @@ namespace eqn
 
 	Eigen::GeometryGradients EntitySphere::aX3_GeometryGradients(Eigen::Vector3dual& v)
 	{
-		Eigen::VectorXdual result(1, 3);
-		result = 2*(v-q).transpose();
-		return result;
+		return 2*(v-q).transpose();
 	}
 }
