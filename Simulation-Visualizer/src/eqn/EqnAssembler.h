@@ -74,6 +74,8 @@ namespace eqn {
 		void loadVars(const Eigen::VectorXdual& Z);
 		// puts member array z into a dual vector
 		Eigen::VectorXdual exportZ();
+		// puts the specified array into a dual vector
+		Eigen::VectorXdual exportZ(double* z);
 		
 		// Functions called by autodiff
 
@@ -107,6 +109,7 @@ namespace eqn {
 
 		bool structureNeedsRefresh;
 		double h;
+		double mu, e_t, e_o, e_r;
 
 		int n;
 		int status;

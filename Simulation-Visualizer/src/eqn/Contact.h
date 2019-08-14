@@ -9,6 +9,7 @@ namespace eqn {
 
 	struct Contact
 	{
+		Contact(double mu, double e_t, double e_o, double e_r);
 		virtual ~Contact() = default;
 
 		// Notes:
@@ -67,9 +68,9 @@ namespace eqn {
 
 		// the total number of f and g functions == total number of lagrange multipliers
 		// == the number of functions in cX_Contact
-		int getNumContactFuncs() const { return l.size(); }
+		unsigned int getNumContactFuncs() const { return l.size(); }
 		// the total number of functions/variables
-		int getN() const { return getNumContactFuncs() + 11; }
+		unsigned int getN() const { return getNumContactFuncs() + 11; }
 
 		// for debug printing and gui and etc
 		virtual std::string getTypeName() const = 0;

@@ -50,8 +50,8 @@ namespace graphics {
 		/* Initialize GLEW */
 		assert(glewInit() == GLEW_OK);
 
-		std::cout << "Running in debug mode with OpenGL version " <<
-			glGetString(GL_VERSION) << std::endl;
+		//std::cout << "Running in debug mode with OpenGL version " <<
+		//	glGetString(GL_VERSION) << std::endl;
 		glDebugMessageCallback(printGLDebug, nullptr);
 
 		glEnable(GL_BLEND);

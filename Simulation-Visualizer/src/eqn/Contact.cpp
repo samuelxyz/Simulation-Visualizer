@@ -3,6 +3,11 @@
 
 namespace eqn
 {
+	Contact::Contact(double mu, double e_t, double e_o, double e_r)
+		: mu(mu), e_t(e_t), e_o(e_o), e_r(e_r)
+	{
+	}
+
 	void Contact::loadVars(Eigen::VectorXdual & wrt)
 	{
 		assert(wrt.size() == getN() && 

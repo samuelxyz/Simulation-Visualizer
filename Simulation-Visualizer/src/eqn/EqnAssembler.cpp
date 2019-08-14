@@ -26,7 +26,8 @@ namespace eqn {
 	};
 
 	EquationAssembler::EquationAssembler()
-		: entities(), contacts(), structureNeedsRefresh(true), h(core::TIME_STEP)
+		: entities(), contacts(), structureNeedsRefresh(true), h(core::TIME_STEP),
+		mu(0.5), e_t(0.5), e_o(0.5), e_r(0.5)
 	{
 	}
 
@@ -71,7 +72,7 @@ namespace eqn {
 		// assign floor contacts
 		for (unsigned int i = 0; i < entities.size(); ++i)
 		{
-			ContactFloor* c = new ContactFloor(entities[i]);
+			ContactFloor* c = new ContactFloor(entities[i], mu, e_t, e_o, e_r);
 			contacts.push_back(c);
 			entities[i]->addContact(c);
 		}
@@ -111,18 +112,20 @@ namespace eqn {
 		}
 		for (Contact* c : contacts)
 		{
-			for (int j = 0; j < 9; ++j)
+			unsigned int j = 0;
+			for (; j < 9; ++j)
 			{
 				lower_bounds[i+j] = -core::PATH_INFINITY;
 				upper_bounds[i+j] = core::PATH_INFINITY;
 			}
-			for (int j = 0; j < c->getNumContactFuncs() + 2; ++j)
+			for (; j < c->getN(); ++j)
 			{
-				lower_bounds[i+j+9] = 0.0;
-				upper_bounds[i+j+9] = core::PATH_INFINITY;
+				lower_bounds[i+j] = 0.0;
+				upper_bounds[i+j] = core::PATH_INFINITY;
 			}
-			i += c->getN();
+			i += j;
 		}
+		assert(i == n && "Something goofed while setting bounds for PATH");
 	}
 
 	void EquationAssembler::allocateArrays()
@@ -198,9 +201,13 @@ namespace eqn {
 
 				if (step(timeline, logOutput))
 				{
-					if (logOutput)
-						std::cout << "Step success\n";
 					++successes;
+					if (logOutput)
+						if (breakOnConstantMotion)
+							std::cout << "Successful step " << successes << "\n";
+						else
+						std::cout << "Successful step " << successes << "/" << numSteps << "\n";
+
 				}
 				else
 				{
@@ -213,6 +220,13 @@ namespace eqn {
 					{
 						printZ();
 						printCache();
+
+						Eigen::VectorXdual Z = exportZ();
+						Eigen::VectorXdual F;
+						std::cout << "Initial Jacobian:\n" << calculateJacobian(Z, Z, F) << "\n";
+						for (int i = 0; i < n; ++i)
+							this->F[i] = F(i).val;
+						printF();
 					}
 
 					if (step(timeline, logOutput))
@@ -227,7 +241,10 @@ namespace eqn {
 					else
 					{
 						if (logOutput)
-							std::cout << "Step still failed, stopping calculations\n";
+							if (breakOnConstantMotion)
+								std::cout << "Step still failed, stopping calculations after " << successes << " steps\n";
+							else
+							std::cout << "Step still failed, stopping calculations after " << successes << "/" << numSteps << " requested steps\n";
 						return -successes; // Return negative to indicate failure
 					}
 				}
@@ -261,7 +278,7 @@ namespace eqn {
 					if (stepsWithAllConstantMotion > constantMotionThreshold)
 					{
 						if (logOutput)
-							std::cout << "Motion seems to have become constant, stopping calculations\n";
+							std::cout << "Motion seems to have become constant after " << successes << " steps, stopping calculations\n";
 						return successes; // everything stopped, we're done. Return positive
 					}
 				}
@@ -269,7 +286,7 @@ namespace eqn {
 
 			// reached the end
 			if (logOutput)
-				std::cout << "Finished request of " << numSteps << " steps, stopping calculations\n";
+				std::cout << "Finished " << successes << "/" << numSteps << " requested steps, stopping calculations\n";
 			return successes;
 		}(); // end lambda
 
@@ -378,6 +395,11 @@ namespace eqn {
 
 	Eigen::VectorXdual EquationAssembler::exportZ()
 	{
+		return exportZ(z);
+	}
+
+	Eigen::VectorXdual EquationAssembler::exportZ(double * z)
+	{
 		Eigen::VectorXdual Z(n);
 		for (int i = 0; i < n; ++i)
 			Z(i) = z[i];
@@ -452,7 +474,7 @@ namespace eqn {
 
 	int EquationAssembler::funcEval(int n, double * z, double * F)
 	{
-		Eigen::VectorXdual Z = exportZ();
+		Eigen::VectorXdual Z = exportZ(z);
 		Eigen::VectorXdual fVec = calculateFunctions(Z);
 		for (int i = 0; i< n; ++i)
 			F[i] = static_cast<double>(fVec(i));
@@ -462,14 +484,12 @@ namespace eqn {
 
 	int EquationAssembler::jacEval(int n, int nnz, double * z, int * column_starting_indices, int * len_of_each_column, int * row_index_of_each_value, double * values)
 	{
-		Eigen::VectorXdual zVec(n);
-		for (int i = 0; i < n; ++i)
-			zVec(i) = z[i];
+		Eigen::VectorXdual Z = exportZ(z);
 
 		Eigen::VectorXdual F;
 		//Eigen::MatrixXd J_Dense = autodiff::forward::jacobian(
-		//	&EquationAssembler::calculateFunctions, autodiff::wrt(zVec), autodiff::forward::at(zVec), F);
-		Eigen::MatrixXd J_Dense = calculateJacobian(zVec, zVec, F);
+		//	&EquationAssembler::calculateFunctions, autodiff::wrt(Z), autodiff::forward::at(Z), F);
+		Eigen::MatrixXd J_Dense = calculateJacobian(Z, Z, F);
 		Eigen::SparseMatrix<double> J = Eigen::SparseView<Eigen::MatrixXd>(J_Dense, 1.0);
 
 		J.makeCompressed();
@@ -502,26 +522,29 @@ namespace eqn {
 	void EquationAssembler::printZ() const
 	{
 		std::cout << "Z: \n";
-		int i = 0;
+		unsigned int i = 0;
 		for (EntityE* e : entities)
 		{
 			std::cout << fmt::sprintf("%s:\n", e->target->getFullName());
-			std::cout << fmt::sprintf("z[%i-%i]:\tv: (%f, %f, %f)\n", i, i+2, z[i], z[i+1], z[i+2]);
-			std::cout << fmt::sprintf("z[%i-%i]:\tw: (%f, %f, %f)\n", i+3, i+5, z[i+3], z[i+4], z[i+5]);
+			std::cout << fmt::sprintf("z[%2i-%2i]:\tv: (%f, %f, %f)\n", i, i+2, z[i], z[i+1], z[i+2]);
+			std::cout << fmt::sprintf("z[%2i-%2i]:\tw: (%f, %f, %f)\n", i+3, i+5, z[i+3], z[i+4], z[i+5]);
 			i += 6;
 		}
 		for (Contact* c : contacts)
 		{
-			std::cout << "Contact:\n";
-			std::cout << fmt::sprintf("z[%i-%i]:\ta1: (%f, %f, %f)\n", i, i+2, z[i], z[i+1], z[i+2]);
-			std::cout << fmt::sprintf("z[%i-%i]:\ta2: (%f, %f, %f)\n", i+3, i+5, z[i+3], z[i+4], z[i+5]);
-			std::cout << fmt::sprintf("z[%i-%i]:\tp_t, p_o, p_r, p_n: (%f, %f, %f, %f)\n", i+6, i+9, z[i+6], z[i+7], z[i+8], z[i+9]);
-			std::cout << fmt::sprintf("z[%i]:\tsig: %f\n", i+10, z[i+10]);
+			std::cout << fmt::sprintf("%s:\n", c->getFullName());
+			std::cout << fmt::sprintf("z[%2i-%2i]:\ta1: (%f, %f, %f)\n", i, i+2, z[i], z[i+1], z[i+2]);
+			std::cout << fmt::sprintf("z[%2i-%2i]:\ta2: (%f, %f, %f)\n", i+3, i+5, z[i+3], z[i+4], z[i+5]);
+			std::cout << fmt::sprintf("z[%2i-%2i]:\tp_t, p_o, p_r, p_n: (%f, %f, %f, %f)\n", i+6, i+9, z[i+6], z[i+7], z[i+8], z[i+9]);
+			std::cout << fmt::sprintf("z[%5i]:\tsig: %f\n", i+10, z[i+10]);
 
-			std::cout << fmt::sprintf("z[%i-%i]:\tl: (", i+11, i+11+c->getNumContactFuncs());
-			for (int j = 1; j < c->getNumContactFuncs(); ++j)
+			if (c->getNumContactFuncs() == 1)
+				std::cout << fmt::sprintf("z[%5i]:\tl: (%f", i+11, z[i+11]);
+			else
+				std::cout << fmt::sprintf("z[%2i-%2i]:\tl: (%f", i+11, i+11+c->getNumContactFuncs(), z[i+11]);
+			for (unsigned int j = 1; j < c->getNumContactFuncs(); ++j)
 				std::cout << ", " << z[i+11+j];
-			std::cout << ");\n";
+			std::cout << ")\n";
 
 			i += c->getN();
 		}
@@ -530,11 +553,51 @@ namespace eqn {
 
 	void EquationAssembler::printF() const
 	{
-		std::cout << "printF placeholder" << std::endl;
+		std::cout << "F:\n";
+		unsigned int i = 0;
+		for (EntityE* e : entities)
+		{
+			std::cout << fmt::sprintf("%s:\n", e->target->getFullName());
+			std::cout << fmt::sprintf("F[%2i-%2i]:\ta6_NewtonEuler: (%f, %f, %f, %f, %f, %f)\n",
+				i, i+5, F[i], F[i+1], F[i+2], F[i+3], F[i+4], F[i+5]);
+			i += 6;
+		}
+		for (Contact* c : contacts)
+		{
+			std::cout << fmt::sprintf("%s:\n", c->getFullName());
+			std::cout << fmt::sprintf("F[%2i-%2i]:\ta6_Contact: (%f, %f, %f, %f, %f, %f)\n",
+				i, i+5, F[i], F[i+1], F[i+2], F[i+3], F[i+4], F[i+5]);
+			std::cout << fmt::sprintf("F[%2i-%2i]:\ta3_Friction: (%f, %f, %f)\n",
+				i+6, i+8, F[i+6], F[i+7], F[i+8]);
+			std::cout << fmt::sprintf("F[%5i]:\tc1_NonPenetration: %f\n",
+				i+9, F[i+9]);
+			std::cout << fmt::sprintf("F[%5i]:\tc1_Friction: %f\n",
+				i+10, F[i+10]);
+
+			if (c->getNumContactFuncs() == 1)
+				std::cout << fmt::sprintf("F[%5i]:\tcX_Contact: (%f", i+11, F[i+11]);
+			else
+				std::cout << fmt::sprintf("F[%2i-%2i]:\tcX_Contact: (%f", i+11, i+11+c->getNumContactFuncs(), F[i+11]);
+			for (unsigned int j = 1; j < c->getNumContactFuncs(); ++j)
+				std::cout << ", " << F[i+11+j];
+			std::cout << ")\n";
+
+			i += c->getN();
+		}
+		std::cout << std::endl;
 	}
 
 	void EquationAssembler::printCache() const
 	{
-		std::cout << "printCache placeholder" << std::endl;
+		std::cout << "Cache:" << std::endl;
+		for (EntityE* e : entities)
+		{
+			std::cout << fmt::sprintf("%s:\n", e->target->getFullName());
+			std::cout << fmt::sprintf("q_o:\t(%f, %f, %f)\n", e->q_o(0), e->q_o(1), e->q_o(2));
+			std::cout << fmt::sprintf("qu_o:\t(%f, %f, %f, %f)\n", e->qu_o(0), e->qu_o(1), e->qu_o(2), e->qu_o(3));
+			std::cout << fmt::sprintf("v_o:\t(%f, %f, %f)\n", e->v_o(0), e->v_o(1), e->v_o(2));
+			std::cout << fmt::sprintf("w_o:\t(%f, %f, %f)\n", e->w_o(0), e->w_o(1), e->w_o(2));
+		}
+		std::cout << std::endl;
 	}
 }

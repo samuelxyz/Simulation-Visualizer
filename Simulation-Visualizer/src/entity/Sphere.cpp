@@ -36,7 +36,7 @@ namespace entity {
 	glm::vec3 Sphere::guessECP() const
 	{
 		glm::vec3 result = position;
-		result.z = core::FLOOR_Z;
+		result.z -= radius;
 		return result;
 	}
 

@@ -5,7 +5,7 @@ namespace eqn
 {
 	struct ContactFloor : public Contact
 	{
-		ContactFloor(EntityE* e);
+		ContactFloor(EntityE* e, double mu, double e_t, double e_o, double e_r);
 		virtual ~ContactFloor() = default;
 
 		EntityE* e;

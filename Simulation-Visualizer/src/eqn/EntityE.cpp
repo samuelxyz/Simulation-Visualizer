@@ -18,6 +18,8 @@ namespace eqn {
 		Ib(1, 1) = rot[1][1];
 		Ib(2, 2) = rot[2][2];
 
+		p_app.setZero();
+
 		captureTargetState();
 	}
 

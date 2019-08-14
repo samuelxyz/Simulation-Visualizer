@@ -5,8 +5,8 @@
 
 namespace eqn
 {
-	ContactFloor::ContactFloor(EntityE * e)
-		: e(e)
+	ContactFloor::ContactFloor(EntityE * e, double mu, double e_t, double e_o, double e_r)
+		: Contact(mu, e_t, e_o, e_r), e(e)
 	{
 		l.resize(e->getNumGeometryFuncs() + 1);
 	}
@@ -16,6 +16,12 @@ namespace eqn
 		glm::vec3 ecp = e->target->guessECP();
 		a1 << ecp.x, ecp.y, ecp.z;
 		a2 << ecp.x, ecp.y, 0;
+
+		p_t = p_o = p_r = p_n = 0;
+
+		// TODO maybe better estimates
+		sig = 0;
+		l.setZero();
 	}
 
 	Eigen::Vector3dual ContactFloor::a3_Friction()

@@ -55,6 +55,7 @@ namespace eqn {
 		if (cf != nullptr)
 		{
 			target1 = cf->e->target;
+			target2 = nullptr;
 			return;
 		}
 	}

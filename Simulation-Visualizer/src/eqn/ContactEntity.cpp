@@ -4,8 +4,8 @@
 
 namespace eqn
 {
-	ContactEntity::ContactEntity(EntityE * e1, EntityE * e2)
-		: e1(e1), e2(e2)
+	ContactEntity::ContactEntity(EntityE * e1, EntityE * e2, double mu, double e_t, double e_o, double e_r)
+		: Contact(mu, e_t, e_o, e_r), e1(e1), e2(e2)
 	{
 		// bind contact functions to entities
 
