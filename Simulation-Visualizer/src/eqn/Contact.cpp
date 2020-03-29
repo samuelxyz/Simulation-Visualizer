@@ -8,6 +8,11 @@ namespace eqn
 	{
 	}
 
+	autodiff::dual Contact::c1_Friction()
+	{
+		return mu*mu * p_n*p_n - (p_t*p_t)/(e_t*e_t) - (p_o*p_o)/(e_o*e_o) - (p_r*p_r)/(e_r*e_r);
+	}
+
 	void Contact::loadVars(Eigen::VectorXdual & wrt)
 	{
 		assert(wrt.size() == getN() && 
@@ -21,6 +26,8 @@ namespace eqn
 		p_n = wrt(9);
 		sig = wrt(10);
 		l = wrt.tail(getNumContactFuncs());
+
+		calculateIntermediates();
 	}
 
 	Eigen::VectorXdual Contact::getVars()

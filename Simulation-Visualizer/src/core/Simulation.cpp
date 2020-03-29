@@ -43,204 +43,22 @@ namespace core {
 	{
 	}
 
-	//int Simulation::addSteps(core::Timeline& timeline, int numStepsToAdd, bool breakOnConstantMotion)
-	//{
-	//	START_TIMING;
-	//
-	//	// start from current state, replacing any existing version of events
-	//	timeline.erase(timeline.begin() + parameters.currentStep, timeline.end());
-	//	recordTimestep(pathSim->target);
-	//
-	//	int successes = 0;
-	//	//bool usePath = false; // start with freefall since it's fast to compute
-	//	bool usePath = true; // maybe this will help things behave themselves
-	//	bool pathStreaking = false;
-	//	bool pathMightWork = true;
-	//	bool freefallMightWork = true;
-	//
-	//	[&]() { // if this lambda returns negative, indicates failure
-	//		while (successes < numStepsToAdd)
-	//		{
-	//			if (usePath)
-	//			{
-	//				// try a path step
-	//				pathSim->target->loadState(timeline.back());
-	//				pathSim->captureTargetState(!pathStreaking); // if we're in a streak then no need to update guesses
-	//
-	//				if (parameters.logOutput)
-	//				{
-	//					pathSim->printZ();
-	//					pathSim->printCache();
-	//				}
-	//
-	//				if (pathSim->addStep(timeline, parameters.logOutput))
-	//				{
-	//					pathStreaking = true;
-	//
-	//					// Alright this step is finished! Next step, anything might happen
-	//					pathMightWork = true;
-	//					freefallMightWork = true;
-	//
-	//					if (parameters.logOutput)
-	//						std::cout << "PATH step success\n";
-	//					++successes;
-	//				}
-	//				else
-	//				{
-	//					// path not successful
-	//					if (parameters.logOutput)
-	//						std::cout << "PATH failed, trying again with new guess\n";
-	//					pathSim->captureTargetState(true); // try again with fresh guess
-	//					if (parameters.logOutput)
-	//					{
-	//						pathSim->printZ();
-	//						pathSim->printCache();
-	//					}
-	//
-	//					if (pathSim->addStep(timeline, parameters.logOutput))
-	//					{
-	//						// success with new guess
-	//						if (parameters.logOutput)
-	//							std::cout << "Succeeded with new guess. Continuing\n";
-	//
-	//						continue;
-	//					}
-	//					else
-	//					{
-	//						pathStreaking = false; // there's gonna be a gap in PATH streak so new guesses next time
-	//						pathMightWork = false; // for next loop
-	//						if (freefallMightWork)
-	//						{
-	//							if (parameters.logOutput)
-	//								std::cout << "PATH still failed, switching to freefall\n";
-	//							usePath = false; // switch to freefall
-	//						}
-	//						else
-	//						{
-	//							if (parameters.logOutput)
-	//								std::cout << "PATH still failed, freefall failed previously, stopping calculations\n";
-	//							return -successes; // neither method is working. Return negative
-	//						}
-	//					}
-	//				}
-	//			}
-	//			else
-	//			{
-	//				// try a freefall step
-	//				if (addFreefallStep(pathSim->target))
-	//				{
-	//					// Alright this step is finished! Next step, anything might happen
-	//					pathMightWork = true;
-	//					freefallMightWork = true;
-	//
-	//					if (parameters.logOutput)
-	//						std::cout << "Freefall step success\n";
-	//					++successes;
-	//				}
-	//				else
-	//				{
-	//					// freefall not successful
-	//					freefallMightWork = false; // for next loop
-	//					if (pathMightWork)
-	//					{
-	//						if (parameters.logOutput)
-	//							std::cout << "Freefall step failed, switching to PATH\n";
-	//						usePath = true; // switch to path
-	//					}
-	//					else
-	//					{
-	//						if (parameters.logOutput)
-	//							std::cout << "Freefall step failed, PATH failed previously, stopping calculations\n";
-	//						return -successes; // neither method is working. Return negative
-	//					}
-	//				}
-	//			}
-	//
-	//			static constexpr int stop = 20; // 20 is arbitrary but probably pretty good for the purpose
-	//			if (breakOnConstantMotion && successes > stop)
-	//			{
-	//				int last = timeline.size() - 1;
-	//				bool constant = true;
-	//				for (int i = 0; i < stop; ++i)
-	//				{
-	//					if (glm::length2(timeline[last-i].velocity - timeline[last-1-i].velocity) > 1e-6f)
-	//					{
-	//						constant = false;
-	//						break;
-	//					}
-	//					if (glm::length2(timeline[last-i].angVelocity - timeline[last-1-i].angVelocity) > 1e-6f)
-	//					{
-	//						constant = false;
-	//						break;
-	//					}
-	//				}
-	//				if (constant)
-	//				{
-	//					if (parameters.logOutput)
-	//						std::cout << "Motion seems to have become constant, stopping calculations\n";
-	//					return successes; // everything stopped, we're done. Return positive
-	//				}
-	//			}
-	//		}
-	//		
-	//		// reached the end
-	//		if (parameters.logOutput)
-	//			std::cout << "Finished request of " << numStepsToAdd << " steps, stopping calculations\n";
-	//		return successes;
-	//	}(); // end lambda
-	//
-	//	if (parameters.logCalcTime)
-	//		std::cout << "Calculation time: " << STOP_TIMING_AND_GET_MICROSECONDS / 1e6f;
-	//	if (parameters.logCalcTime || parameters.logOutput)
-	//		std::cout << std::endl;
-	//	return successes;
-	//}
-
-	//// Does not record contact point
-	//void Simulation::recordTimestep(entity::Entity* e)
-	//{
-	//	timeline.emplace_back(
-	//		e->getPosition(),
-	//		e->getOrientation(),
-	//		e->getVelocity(),
-	//		e->getAngVelocity(),
-	//		e->getPosition()
-	//	);
-	//}
-
 	void Simulation::loadTimestep(int step)
 	{
-		// TODO
-		//for (entity::Entity* e : entities)
-		//{
-		//	e->loadState(timeline[step].entityData.get.....)
-		//}
+		for (entity::Entity* e : entities)
+		{
+			eqn::EntityETimestepData* data = timeline[step].getEntityData(e);
+			if (data != nullptr)
+			{
+				e->shouldShow.body = true;
+				e->loadState(*data);
+			}
+			else
+			{
+				e->shouldShow.body = false;
+			}
+		}
 	}
-
-	//// Starts from end of timeline
-	//// Adds result to end of timeline and returns true if successful
-	//// Updates target entity to end of timeline
-	//bool Simulation::addFreefallStep(entity::Entity* e)
-	//{
-	//	e->loadState(timeline.back());
-	//	recordTimestep(e);
-	//
-	//	e->update();
-	//	if (e->intersectsFloor())
-	//	{
-	//		// Not gonna work, undo
-	//		e->loadState(timeline.back());
-	//		timeline.pop_back();
-	//		return false;
-	//	}
-	//	else
-	//	{
-	//		// it's good
-	//		timeline.pop_back();
-	//		recordTimestep(e);
-	//		return true;
-	//	}
-	//}
 
 	void Simulation::scrollTimeline(int scr)
 	{
@@ -845,29 +663,36 @@ namespace core {
 
 		for (auto& data : now.contactData)
 		{
-			glm::vec4 color = (glm::length2(data.a1 - data.a2) > 1e-12f) ?
-				graphics::COLOR_NO_CONTACT : graphics::COLOR_CONTACT;
+			bool separate = glm::length2(data.a1 - data.a2) > 1e-12f;
 
-			// draw and label a1
-			renderer.renderMarkerDot(data.a1, color);
-			std::string name1("Contact with ");
+			std::string contactName;
 			if (data.target2 != nullptr)
-				name1 += data.target2->getName();
+				contactName = "Contact(" + data.target1->getName() + ", " + data.target2->getName() + ")";
 			else
-				name1 += "Floor";
-			name1 += fmt::sprintf("\n(%.3f, %.3f, %.3f)", data.a1.x, data.a1.y, data.a1.z);
-			camera.renderLabel(data.a1, true, name1, name1,	color);
+				contactName = "ContactFloor(" + data.target1->getName() + ")";
 
-			// draw and label a2
-			renderer.renderMarkerDot(data.a2, color);
-			std::string name2;
-			if (data.target2 != nullptr)
-				name2 = "Contact with";
-			else
-				name2 = "Floor contact with";
-			name2 += data.target1->getName() + fmt::sprintf("\n(%.3f, %.3f, %.3f)",
-				data.a2.x, data.a2.y, data.a2.z);
-			camera.renderLabel(data.a2, true, name2, name2, color);
+			if (separate)
+			{
+				// draw and label a1
+				renderer.renderMarkerDot(data.a1, graphics::COLOR_NO_CONTACT);
+				std::string id1 = contactName + "1";
+				std::string name1 = contactName + fmt::sprintf(": a1\n(%.3f, %.3f, %.3f)", data.a1.x, data.a1.y, data.a1.z);
+				camera.renderLabel(data.a1, true, id1, name1, graphics::COLOR_NO_CONTACT);
+
+				// draw and label a2
+				std::string id2 = contactName + "2";
+				renderer.renderMarkerDot(data.a2, graphics::COLOR_NO_CONTACT);
+				std::string name2 = contactName + fmt::sprintf(": a2\n(%.3f, %.3f, %.3f)", data.a2.x, data.a2.y, data.a2.z);
+				camera.renderLabel(data.a2, true, id2, name2, graphics::COLOR_NO_CONTACT);
+			}
+			else 
+			{
+				// draw and label a1 to represent both
+				renderer.renderMarkerDot(data.a1, graphics::COLOR_CONTACT);
+				std::string id1 = contactName + "1";
+				std::string name1 = contactName + fmt::sprintf("\n(%.3f, %.3f, %.3f)", data.a1.x, data.a1.y, data.a1.z);
+				camera.renderLabel(data.a1, true, id1, name1, graphics::COLOR_CONTACT);
+			}
 		}
 	}
 

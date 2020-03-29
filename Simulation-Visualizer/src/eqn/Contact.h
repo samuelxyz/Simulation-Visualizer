@@ -25,6 +25,11 @@ namespace eqn {
 		Eigen::VectorXdual l; // lagrange multipliers
 
 		// -----------------------------------------------
+		// "intermediates" - updated many times per step but are not directly solved for
+		// -----------------------------------------------
+		int active; // which constraint is active
+
+		// -----------------------------------------------
 		// "constant" variables - never updated
 		// -----------------------------------------------
 		autodiff::dual mu; // friction coefficient
@@ -36,7 +41,7 @@ namespace eqn {
 
 		// friction model
 		virtual Eigen::Vector3dual a3_Friction() = 0;
-		virtual autodiff::dual c1_Friction() = 0;
+		autodiff::dual c1_Friction();
 
 		// contact constraints
 		virtual Eigen::Vector6dual a6_Contact() = 0;
@@ -49,6 +54,8 @@ namespace eqn {
 
 		// input changed PATH solver variables into member variables
 		void loadVars(Eigen::VectorXdual& wrt);
+		// calculates intermediates like the contact frame
+		virtual void calculateIntermediates() = 0;
 		// Reverse of loadVars() - exports member "z" variables as a single vector
 		Eigen::VectorXdual getVars();
 		// assumes this contact's EntityE's are up-to-date
@@ -58,8 +65,6 @@ namespace eqn {
 		// Functions needed for/by entity calculations
 		// -----------------------------------------------
 
-		// whether the specified entity corresponds to a1 and the earlier function/lagrange multipliers
-		virtual bool isFirst(const EntityE* e) const { return true; }
 		virtual Eigen::Vector6dual getContactImpulses(const EntityE* e) const = 0;
 
 		// -----------------------------------------------

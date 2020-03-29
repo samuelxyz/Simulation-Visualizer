@@ -1,5 +1,3 @@
-// This file is named "Entity2.cpp" so as not to conflict with "entity/Entity.cpp"
-
 #include "core/stdafx.h"
 #include "core/Definitions.h"
 #include "EntityE.h"
@@ -84,7 +82,7 @@ namespace eqn {
 	{
 		Eigen::Vector6dual LHS;
 		LHS.head<3>() = M * (v-v_o);
-		LHS(3) += g*h*m;
+		LHS(2) += g*h*m;
 		LHS.tail<3>() = Iw*(w-w_o) + h * w.cross(Iw * w);
 
 		Eigen::Vector6dual RHS = p_app;

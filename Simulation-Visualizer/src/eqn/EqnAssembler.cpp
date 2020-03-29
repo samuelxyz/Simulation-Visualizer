@@ -58,16 +58,17 @@ namespace eqn {
 		contacts.clear();
 		//contacts.reserve(some amount)
 
-		//// assign contacts between entities
-		//for (unsigned int i = 0; i < entities.size()-1; ++i)
-		//{
-		//	for (unsigned int j = i+1; j < entities.size(); ++j)
-		//	{
-		//		contacts.push_back(new ContactEntity(entities[i], entities[j]));
-		//		entities[i]->addContact(contacts.back());
-		//		entities[j]->addContact(contacts.back());
-		//	}
-		//}
+		// assign contacts between entities
+		for (unsigned int i = 0; i < entities.size()-1; ++i)
+		{
+			for (unsigned int j = i+1; j < entities.size(); ++j)
+			{
+				ContactEntity* c = new ContactEntity(entities[i], entities[j], mu, e_t, e_o, e_r);
+				contacts.push_back(c);
+				entities[i]->addContact(c);
+				entities[j]->addContact(c);
+			}
+		}
 
 		// assign floor contacts
 		for (unsigned int i = 0; i < entities.size(); ++i)
@@ -286,7 +287,12 @@ namespace eqn {
 
 			// reached the end
 			if (logOutput)
-				std::cout << "Finished " << successes << "/" << numSteps << " requested steps, stopping calculations\n";
+			{
+				if (breakOnConstantMotion)
+					std::cout << "Reached cap of " << successes << "/" << numSteps << " steps, stopping calculations\n";
+				else
+					std::cout << "Finished " << successes << "/" << numSteps << " requested steps, stopping calculations\n";
+			}
 			return successes;
 		}(); // end lambda
 

@@ -17,31 +17,14 @@ namespace eqn
 		a1 << ecp.x, ecp.y, ecp.z;
 		a2 << ecp.x, ecp.y, 0;
 
-		p_t = p_o = p_r = p_n = 0;
-
 		// TODO maybe better estimates
+		p_t = p_o = p_r = p_n = 0;
 		sig = 0;
 		l.setZero();
 	}
 
 	Eigen::Vector3dual ContactFloor::a3_Friction()
 	{
-		Eigen::Vector3dual
-			n(0, 0, 1),
-			t(1, 0, 0),
-			o(0, 1, 0),
-			r(a1 - this->e->q);
-
-		Eigen::Vector6dual W_n, W_t, W_o, W_r;
-		W_n.head<3>() = n;
-		W_n.tail<3>() = r.cross(n);
-		W_t.head<3>() = t;
-		W_t.tail<3>() = r.cross(t);
-		W_o.head<3>() = o;
-		W_o.tail<3>() = r.cross(o);
-		W_r.head<3>().setZero();
-		W_r.tail<3>() = n;
-
 		Eigen::Vector6dual nu;
 		nu.head<3>() = e->v;
 		nu.tail<3>() = e->w;
@@ -53,11 +36,6 @@ namespace eqn
 		);
 	}
 
-	autodiff::dual ContactFloor::c1_Friction()
-	{
-		return mu*mu * p_n*p_n - (p_t*p_t)/(e_t*e_t) - (p_o*p_o)/(e_o*e_o) - (p_r*p_r)/(e_r*e_r);
-	}
-
 	Eigen::Vector6dual ContactFloor::a6_Contact()
 	{
 		// this version specialized for floor contact
@@ -66,7 +44,6 @@ namespace eqn
 
 		int m = e->getNumGeometryFuncs(); // number of geometry functions for entity e1
 		int n = getNumContactFuncs(); // number of functions == number of lagrange multipliers
-		int active = n-1; // active constraint is the floor
 
 		Eigen::GeometryGradients gradF_a1 = e->aX3_GeometryGradients(a1);
 		Eigen::Vector3dual gradG_a2(0, 0, 1);
@@ -81,7 +58,7 @@ namespace eqn
 		Eigen::Vector6dual result;
 
 		// equation 11
-		result.head<3>() = a2-a1 + l(active)*gradG_a2;
+		result.head<3>() = a2-a1 + l(active)*gradG_a2; 
 
 		// equation 12
 		result.tail<3>() = sumLF + gradG_a2;
@@ -110,15 +87,13 @@ namespace eqn
 		return a1(2);
 	}
 
-	Eigen::Vector6dual ContactFloor::getContactImpulses(const EntityE * e) const
+	void ContactFloor::calculateIntermediates()
 	{
-		Eigen::Vector3dual
-			n(0, 0, 1),
-			t(1, 0, 0),
-			o(0, 1, 0),
-			r(a1 - this->e->q);
+		n << 0, 0, 1;
+		t << 1, 0, 0;
+		o << 0, 1, 0;
+		r = a1 - this->e->q;
 
-		Eigen::Vector6dual W_n, W_t, W_o, W_r;
 		W_n.head<3>() = n;
 		W_n.tail<3>() = r.cross(n);
 		W_t.head<3>() = t;
@@ -128,7 +103,12 @@ namespace eqn
 		W_r.head<3>().setZero();
 		W_r.tail<3>() = n;
 
-		return W_n*p_n+W_t*p_t+W_o*p_o+W_r*p_r;
+		active = getNumContactFuncs()-1; // active constraint is the floor
+	}
+
+	Eigen::Vector6dual ContactFloor::getContactImpulses(const EntityE * e) const
+	{
+		return W_n*p_n + W_t*p_t + W_o*p_o + W_r*p_r;
 	}
 
 	std::string ContactFloor::getFullName() const
